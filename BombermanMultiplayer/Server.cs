@@ -212,7 +212,7 @@ namespace BombermanMultiplayer
                     catch (Exception)
                     {
 
-                        throw;
+                        //throw;
                     }
 
 

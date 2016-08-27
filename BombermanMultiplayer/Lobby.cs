@@ -596,45 +596,65 @@ namespace BombermanMultiplayer
             }
         }
 
-
-
         //Redraw everything each tick
         private void refreshGraphics_Tick(object sender, EventArgs e)
         {
             Draw();
         }
 
-
-
-
         //Close properly
         private void Lobby_FormClosing(object sender, FormClosingEventArgs e)
         {
 
-            ConnectionTimer.Stop();
-            //cancel server task
-            if (server != null)
+            if (this.DialogResult == DialogResult.Cancel)
             {
-                if (server.IsRunning)
+                //Stop trying to receive datas
+                ConnectionTimer.Stop();
+                //cancel server task
+
+                this.client.Disconnect();
+
+                if (server != null)
                 {
-                    cts.Cancel();
-
-                    try
+                    if (server.IsRunning)
                     {
-                        runServer.Wait();
+                        cts.Cancel();
+                        try
+                        {
+                            runServer.Wait();
+                        }
+                        catch (AggregateException ex) { }
+                        finally { cts.Dispose(); }
                     }
-                    catch (AggregateException ex)
-                    {
-                        
-                    }
-                    finally
-                    {
-                        cts.Dispose();
-                    }
-
                 }
-
             }
+
+            //Exited via game exit button
+            if (e.CloseReason == CloseReason.UserClosing)
+            { MessageBox.Show("Lobby exited."); }
+            else
+            {
+                //Stop trying to receive datas
+                ConnectionTimer.Stop();
+                //cancel server task
+
+                this.client.Disconnect();
+
+                if (server != null)
+                {
+                    if (server.IsRunning)
+                    {
+                        cts.Cancel();
+                        try
+                        {
+                            runServer.Wait();
+                        }
+                        catch (AggregateException ex){ }
+                        finally { cts.Dispose();}
+                    }
+                }
+            }
+                   
         }
 
         private void Lobby_KeyDown(object sender, KeyEventArgs e)
@@ -704,10 +724,6 @@ namespace BombermanMultiplayer
             }
         }
 
-        private void Lobby_Paint(object sender, PaintEventArgs e)
-        {
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dlg = new OpenFileDialog())
@@ -737,6 +753,37 @@ namespace BombermanMultiplayer
                 }
 
             }
+        }
+
+        private void tlsbExit_Click(object sender, EventArgs e)
+        {
+            //Stop trying to receive datas
+            ConnectionTimer.Stop();
+            //cancel server task
+
+            this.client.Disconnect();
+
+            if (server != null)
+            {
+                if (server.IsRunning)
+                {
+                    cts.Cancel();
+                    try
+                    {
+                        runServer.Wait();
+                    }
+                    catch (AggregateException ex)
+                    { }
+                    finally
+                    {
+                        cts.Dispose();
+                    }
+                }
+
+            }
+
+            this.Close();
+        
         }
     }
 }

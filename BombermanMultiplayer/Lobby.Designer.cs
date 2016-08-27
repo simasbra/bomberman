@@ -62,6 +62,7 @@
             this.refreshGraphics = new System.Windows.Forms.Timer(this.components);
             this.AllPanels = new System.Windows.Forms.SplitContainer();
             this.OptionsPanel = new System.Windows.Forms.Panel();
+            this.tlsbExit = new System.Windows.Forms.ToolStripButton();
             this.tslMenu.SuspendLayout();
             this.PanelConnections.SuspendLayout();
             this.panelServer.SuspendLayout();
@@ -110,7 +111,8 @@
             this.tslMenu.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.tslMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.tslMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsDropDownFile});
+            this.tsDropDownFile,
+            this.tlsbExit});
             this.tslMenu.Location = new System.Drawing.Point(0, 0);
             this.tslMenu.Name = "tslMenu";
             this.tslMenu.Size = new System.Drawing.Size(949, 53);
@@ -357,6 +359,16 @@
             this.OptionsPanel.Size = new System.Drawing.Size(949, 147);
             this.OptionsPanel.TabIndex = 3;
             // 
+            // tlsbExit
+            // 
+            this.tlsbExit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tlsbExit.Image = ((System.Drawing.Image)(resources.GetObject("tlsbExit.Image")));
+            this.tlsbExit.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tlsbExit.Name = "tlsbExit";
+            this.tlsbExit.Size = new System.Drawing.Size(77, 50);
+            this.tlsbExit.Text = "Exit";
+            this.tlsbExit.Click += new System.EventHandler(this.tlsbExit_Click);
+            // 
             // Lobby
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -366,10 +378,12 @@
             this.Controls.Add(this.AllPanels);
             this.Controls.Add(this.tslMenu);
             this.Controls.Add(this.lbServerOnline);
+            this.HelpButton = true;
             this.KeyPreview = true;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "Lobby";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Lobby_FormClosing);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.Lobby_Paint);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Lobby_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Lobby_KeyUp);
             this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.Lobby_PreviewKeyDown);
@@ -422,5 +436,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox tbGameToLoad;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ToolStripButton tlsbExit;
     }
 }

@@ -59,5 +59,10 @@ namespace BombermanMultiplayer
 
         }
 
+        public void Disconnect()
+        {
+            this.sender.Close();
+        }
+
     }
 }
