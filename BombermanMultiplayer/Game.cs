@@ -153,51 +153,74 @@ namespace BombermanMultiplayer
 
         public void Game_KeyDown(Keys key)
         {
-
             switch (key)
             {
                 case Keys.Z:
+                    if (player1.Dead)
+                        break;
                     player1.Orientation = Player.MovementDirection.UP;
                     player1.LoadSprite(Properties.Resources.AT_UP);
                     break;
                 case Keys.S:
+                    if (player1.Dead)
+                        break;
                     player1.Orientation = Player.MovementDirection.DOWN;
                     player1.LoadSprite(Properties.Resources.AT_DOWN);
                     break;
                 case Keys.Q:
+                    if (player1.Dead)
+                        break;
                     player1.Orientation = Player.MovementDirection.LEFT;
                     player1.LoadSprite(Properties.Resources.AT_LEFT);
                     break;
                 case Keys.D:
+                    if (player1.Dead)
+                        break;
                     player1.Orientation = Player.MovementDirection.RIGHT;
                     player1.LoadSprite(Properties.Resources.AT_RIGHT);
                     break;
                 case Keys.Space:
+                    if (player1.Dead)
+                        break;
                     player1.DropBomb(this.world.MapGrid, this.BombsOnTheMap, player2);
                     break;
                 case Keys.A:
+                    if (player1.Dead)
+                        break;
                     player1.Deactivate(this.world.MapGrid, BombsOnTheMap, player2);
                     break;
                 case Keys.Up:
+                    if (player2.Dead)
+                        break;
                     player2.Orientation = Player.MovementDirection.UP;
                     player2.LoadSprite(Properties.Resources.T_UP);
                     break;
                 case Keys.Down:
+                    if (player2.Dead)
+                        break;
                     player2.Orientation = Player.MovementDirection.DOWN;
                     player2.LoadSprite(Properties.Resources.T_DOWN);
                     break;
                 case Keys.Left:
+                    if (player2.Dead)
+                        break;
                     player2.Orientation = Player.MovementDirection.LEFT;
                     player2.LoadSprite(Properties.Resources.T_LEFT);
                     break;
                 case Keys.Right:
+                    if (player2.Dead)
+                        break;
                     player2.Orientation = Player.MovementDirection.RIGHT;
                     player2.LoadSprite(Properties.Resources.T_RIGHT);
                     break;
                 case Keys.ControlKey:
+                    if (player2.Dead)
+                        break;
                     player2.DropBomb(this.world.MapGrid, this.BombsOnTheMap, player1);
                     break;
                 case Keys.Shift:
+                    if (player2.Dead)
+                        break;
                     player2.Deactivate(this.world.MapGrid, BombsOnTheMap, player1);
                     break;
                 case Keys.Escape:

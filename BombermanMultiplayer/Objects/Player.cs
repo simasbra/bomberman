@@ -223,10 +223,9 @@ namespace BombermanMultiplayer
         {
             if (this.Sprite != null)
             {
-
                 if (this.Dead)
                 {
-                    gr.DrawImage(this.Sprite, Source, 1 * Source.Width, 0, Source.Width, Source.Height, GraphicsUnit.Pixel);
+                    gr.DrawImage(this.Sprite, Source,0 , 0, Source.Width, Source.Height, GraphicsUnit.Pixel);
                     gr.DrawString("DEAD", new Font("Arial", 16), new SolidBrush(Color.Red), this.Source.X + Source.Width / 2, this.Source.Y - Source.Height / 2);
                     return;
                 }

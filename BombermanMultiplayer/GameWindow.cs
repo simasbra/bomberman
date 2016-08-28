@@ -163,11 +163,11 @@ namespace BombermanMultiplayer
 
             if (game.Paused)
             {
-                toolStrip1.Visible = true;
+                tlsMenu.Visible = true;
             }
             else
             {
-                toolStrip1.Visible = false;
+                tlsMenu.Visible = false;
             }
         }
 
@@ -254,6 +254,11 @@ namespace BombermanMultiplayer
                 }
 
             }
+        }
+
+        private void tlsbExit_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

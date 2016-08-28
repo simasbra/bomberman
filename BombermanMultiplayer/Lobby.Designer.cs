@@ -39,8 +39,6 @@
             this.btnLaunchServer = new System.Windows.Forms.Button();
             this.btnClient = new System.Windows.Forms.Button();
             this.tslMenu = new System.Windows.Forms.ToolStrip();
-            this.tsDropDownFile = new System.Windows.Forms.ToolStripDropDownButton();
-            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lbLstPlayers = new System.Windows.Forms.Label();
             this.PanelConnections = new System.Windows.Forms.Panel();
             this.lbNamePlayer2 = new System.Windows.Forms.Label();
@@ -58,26 +56,28 @@
             this.tbNamePlayer = new System.Windows.Forms.TextBox();
             this.lbServerOnline = new System.Windows.Forms.Label();
             this.ConnectionTimer = new System.Windows.Forms.Timer(this.components);
-            this.pbGame = new System.Windows.Forms.PictureBox();
             this.refreshGraphics = new System.Windows.Forms.Timer(this.components);
             this.AllPanels = new System.Windows.Forms.SplitContainer();
             this.OptionsPanel = new System.Windows.Forms.Panel();
+            this.pbGame = new System.Windows.Forms.PictureBox();
+            this.tsDropDownFile = new System.Windows.Forms.ToolStripDropDownButton();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tlsbExit = new System.Windows.Forms.ToolStripButton();
             this.tslMenu.SuspendLayout();
             this.PanelConnections.SuspendLayout();
             this.panelServer.SuspendLayout();
             this.panelClient.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbGame)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.AllPanels)).BeginInit();
             this.AllPanels.Panel1.SuspendLayout();
             this.AllPanels.Panel2.SuspendLayout();
             this.AllPanels.SuspendLayout();
             this.OptionsPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pbGame)).BeginInit();
             this.SuspendLayout();
             // 
             // lbConnected
             // 
-            this.lbConnected.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lbConnected.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.lbConnected.FormattingEnabled = true;
             this.lbConnected.ItemHeight = 16;
             this.lbConnected.Location = new System.Drawing.Point(0, 17);
@@ -121,28 +121,10 @@
             this.tslMenu.Text = "toolStrip1";
             this.tslMenu.Visible = false;
             // 
-            // tsDropDownFile
-            // 
-            this.tsDropDownFile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsDropDownFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.saveToolStripMenuItem});
-            this.tsDropDownFile.Image = ((System.Drawing.Image)(resources.GetObject("tsDropDownFile.Image")));
-            this.tsDropDownFile.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDropDownFile.Name = "tsDropDownFile";
-            this.tsDropDownFile.Size = new System.Drawing.Size(85, 50);
-            this.tsDropDownFile.Text = "File";
-            // 
-            // saveToolStripMenuItem
-            // 
-            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(175, 50);
-            this.saveToolStripMenuItem.Text = "Save";
-            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
-            // 
             // lbLstPlayers
             // 
+            this.lbLstPlayers.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.lbLstPlayers.AutoSize = true;
-            this.lbLstPlayers.Dock = System.Windows.Forms.DockStyle.Top;
             this.lbLstPlayers.Location = new System.Drawing.Point(0, 0);
             this.lbLstPlayers.Name = "lbLstPlayers";
             this.lbLstPlayers.Size = new System.Drawing.Size(81, 17);
@@ -308,22 +290,6 @@
             this.ConnectionTimer.Interval = 150;
             this.ConnectionTimer.Tick += new System.EventHandler(this.ConnectionTimer_Tick);
             // 
-            // pbGame
-            // 
-            this.pbGame.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pbGame.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.pbGame.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.pbGame.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pbGame.Enabled = false;
-            this.pbGame.Location = new System.Drawing.Point(467, 439);
-            this.pbGame.Margin = new System.Windows.Forms.Padding(60);
-            this.pbGame.Name = "pbGame";
-            this.pbGame.Size = new System.Drawing.Size(528, 528);
-            this.pbGame.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.pbGame.TabIndex = 6;
-            this.pbGame.TabStop = false;
-            this.pbGame.Visible = false;
-            // 
             // refreshGraphics
             // 
             this.refreshGraphics.Interval = 80;
@@ -358,6 +324,40 @@
             this.OptionsPanel.Name = "OptionsPanel";
             this.OptionsPanel.Size = new System.Drawing.Size(949, 147);
             this.OptionsPanel.TabIndex = 3;
+            // 
+            // pbGame
+            // 
+            this.pbGame.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.pbGame.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.pbGame.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.pbGame.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.pbGame.Enabled = false;
+            this.pbGame.Location = new System.Drawing.Point(467, 439);
+            this.pbGame.Margin = new System.Windows.Forms.Padding(60);
+            this.pbGame.Name = "pbGame";
+            this.pbGame.Size = new System.Drawing.Size(528, 528);
+            this.pbGame.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.pbGame.TabIndex = 6;
+            this.pbGame.TabStop = false;
+            this.pbGame.Visible = false;
+            // 
+            // tsDropDownFile
+            // 
+            this.tsDropDownFile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsDropDownFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.saveToolStripMenuItem});
+            this.tsDropDownFile.Image = ((System.Drawing.Image)(resources.GetObject("tsDropDownFile.Image")));
+            this.tsDropDownFile.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDropDownFile.Name = "tsDropDownFile";
+            this.tsDropDownFile.Size = new System.Drawing.Size(85, 50);
+            this.tsDropDownFile.Text = "File";
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(181, 50);
+            this.saveToolStripMenuItem.Text = "Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // tlsbExit
             // 
@@ -395,13 +395,13 @@
             this.panelServer.PerformLayout();
             this.panelClient.ResumeLayout(false);
             this.panelClient.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbGame)).EndInit();
             this.AllPanels.Panel1.ResumeLayout(false);
             this.AllPanels.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.AllPanels)).EndInit();
             this.AllPanels.ResumeLayout(false);
             this.OptionsPanel.ResumeLayout(false);
             this.OptionsPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pbGame)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

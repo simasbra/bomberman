@@ -611,8 +611,8 @@ namespace BombermanMultiplayer
                 //Stop trying to receive datas
                 ConnectionTimer.Stop();
                 //cancel server task
-
-                this.client.Disconnect();
+                if(this.client.GetConnectionState())
+                    this.client.Disconnect();
 
                 if (server != null)
                 {
@@ -765,8 +765,8 @@ namespace BombermanMultiplayer
 
             if (server != null)
             {
-                if (server.IsRunning)
-                {
+                if (server.IsRunning && !cts.IsCancellationRequested)
+                {   
                     cts.Cancel();
                     try
                     {

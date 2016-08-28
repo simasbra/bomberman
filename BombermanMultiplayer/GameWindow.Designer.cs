@@ -32,12 +32,13 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GameWindow));
             this.pbGame = new System.Windows.Forms.PictureBox();
             this.refreshGraphics = new System.Windows.Forms.Timer(this.components);
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tlsMenu = new System.Windows.Forms.ToolStrip();
             this.tsDropDownFile = new System.Windows.Forms.ToolStripDropDownButton();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tlsbExit = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).BeginInit();
-            this.toolStrip1.SuspendLayout();
+            this.tlsMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // pbGame
@@ -59,17 +60,19 @@
             this.refreshGraphics.Interval = 50;
             this.refreshGraphics.Tick += new System.EventHandler(this.refreshGraphics_Tick);
             // 
-            // toolStrip1
+            // tlsMenu
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsDropDownFile});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(882, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
-            this.toolStrip1.Visible = false;
+            this.tlsMenu.Font = new System.Drawing.Font("Segoe UI", 19.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlsMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.tlsMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsDropDownFile,
+            this.tlsbExit});
+            this.tlsMenu.Location = new System.Drawing.Point(0, 0);
+            this.tlsMenu.Name = "tlsMenu";
+            this.tlsMenu.Size = new System.Drawing.Size(882, 53);
+            this.tlsMenu.TabIndex = 1;
+            this.tlsMenu.Text = "toolStrip1";
+            this.tlsMenu.Visible = false;
             // 
             // tsDropDownFile
             // 
@@ -80,29 +83,39 @@
             this.tsDropDownFile.Image = ((System.Drawing.Image)(resources.GetObject("tsDropDownFile.Image")));
             this.tsDropDownFile.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDropDownFile.Name = "tsDropDownFile";
-            this.tsDropDownFile.Size = new System.Drawing.Size(46, 24);
+            this.tsDropDownFile.Size = new System.Drawing.Size(85, 50);
             this.tsDropDownFile.Text = "File";
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(117, 26);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(179, 50);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // loadToolStripMenuItem
             // 
             this.loadToolStripMenuItem.Name = "loadToolStripMenuItem";
-            this.loadToolStripMenuItem.Size = new System.Drawing.Size(117, 26);
+            this.loadToolStripMenuItem.Size = new System.Drawing.Size(179, 50);
             this.loadToolStripMenuItem.Text = "Load";
             this.loadToolStripMenuItem.Click += new System.EventHandler(this.loadToolStripMenuItem_Click);
+            // 
+            // tlsbExit
+            // 
+            this.tlsbExit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tlsbExit.Image = ((System.Drawing.Image)(resources.GetObject("tlsbExit.Image")));
+            this.tlsbExit.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tlsbExit.Name = "tlsbExit";
+            this.tlsbExit.Size = new System.Drawing.Size(77, 50);
+            this.tlsbExit.Text = "Exit";
+            this.tlsbExit.Click += new System.EventHandler(this.tlsbExit_Click);
             // 
             // GameWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(882, 853);
-            this.Controls.Add(this.toolStrip1);
+            this.Controls.Add(this.tlsMenu);
             this.Controls.Add(this.pbGame);
             this.MinimumSize = new System.Drawing.Size(600, 600);
             this.Name = "GameWindow";
@@ -111,8 +124,8 @@
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Game_KeyUp);
             this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.Game_PreviewKeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).EndInit();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
+            this.tlsMenu.ResumeLayout(false);
+            this.tlsMenu.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -122,10 +135,11 @@
 
         private System.Windows.Forms.PictureBox pbGame;
         private System.Windows.Forms.Timer refreshGraphics;
-        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStrip tlsMenu;
         private System.Windows.Forms.ToolStripDropDownButton tsDropDownFile;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tlsbExit;
     }
 }
 

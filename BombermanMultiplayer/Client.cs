@@ -64,5 +64,10 @@ namespace BombermanMultiplayer
             this.sender.Close();
         }
 
+        public bool GetConnectionState()
+        {
+            return this.sender.Connected;
+        }
+
     }
 }
