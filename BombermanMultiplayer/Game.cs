@@ -10,8 +10,6 @@ using System.Windows.Forms;
 
 namespace BombermanMultiplayer
 {
-    //Graphics refresh of 200 ms = 30 FPS
-
     /// <summary>
     /// Game components 
     /// </summary>
@@ -25,49 +23,43 @@ namespace BombermanMultiplayer
         public List<Bomb> BombsOnTheMap;
         public System.Timers.Timer LogicTimer;
 
+        //ctor when picture box size is determined
         public Game(int hebergeurWidth, int hebergeurHeight)
         {
             this.world = new World(hebergeurWidth, hebergeurHeight, 48, 48, 1);
 
-
-
             player1 = new Player(1, 2, 33, 33, 1, 1, 48, 48, 80, 1);
-
             player2 = new Player(1, 2, 33, 33, this.world.MapGrid.GetLength(0) - 2, this.world.MapGrid.GetLength(0) - 2, 48, 48, 80, 2);
 
             this.BombsOnTheMap = new List<Bomb>();
-
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
         }
 
+        //ctor when loading a game
         public Game(int hebergeurWidth, int hebergeurHeight, SaveGameData save)
         {
             this.world = new World(hebergeurWidth, hebergeurHeight, save.MapGrid);
 
             player1 = save.player1;
-
             player2 = save.player2;
 
             this.BombsOnTheMap = save.bombsOnTheMap;
-
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
         }
-
+        //default ctor
         public Game()
         {
             this.world = new World();
-
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
         }
 
+        //Use a mask to represente the placement of different objects on the map
         public Byte[,] BuildMapMask()
         {
-
             Byte[,] mask = new Byte[world.MapGrid.GetLength(0), world.MapGrid.GetLength(1)];
-
 
             //0 = free tile
             //1 hard block
@@ -85,12 +77,10 @@ namespace BombermanMultiplayer
             //32 Desamorce and Fire 
             //33 Armor and Fire 
 
-
             for (int i = 0; i < world.MapGrid.GetLength(0); i++) //Ligne
             {
                 for (int j = 0; j < world.MapGrid.GetLength(1); j++) //Colonne
                 {
-
                     if (world.MapGrid[i, j].BonusHere != null)
                     {
                         switch (world.MapGrid[i, j].BonusHere.Type)
@@ -141,16 +131,12 @@ namespace BombermanMultiplayer
                             mask[i, j] = 3;
                         }
                     }
-
-
-
                 }
             }
             return mask;
         }
 
-
-
+        //Manage key pushed for local game
         public void Game_KeyDown(Keys key)
         {
             switch (key)
@@ -226,11 +212,10 @@ namespace BombermanMultiplayer
                 case Keys.Escape:
                     Pause();
                     break;
-
             }
-
         }
 
+        //Manage key push for server side
         public void Game_KeyDownWithoutSprite(Keys key, Sender Station)
         {
             Player sender = null;
@@ -277,12 +262,10 @@ namespace BombermanMultiplayer
                 case Keys.Escape:
                     Pause();
                     break;
-
-
             }
-
         }
 
+        //Manage release of key for server side
         public void Game_KeyUpWithoutSprite(Keys key, Sender Station)
         {
             Player sender = null;
@@ -312,13 +295,10 @@ namespace BombermanMultiplayer
                 case Keys.Right:
                     sender.Orientation = Player.MovementDirection.NONE;
                     break;
-
-
             }
-
         }
 
-
+        //Manage the release of the keys
         public void Game_KeyUp(Keys key)
         {
             switch (key)
@@ -347,10 +327,8 @@ namespace BombermanMultiplayer
                 case Keys.Right:
                     player2.Orientation = Player.MovementDirection.NONE;
                     break;
-
             }
         }
-
 
         //Manage interactions between worlds and objects
         private void InteractionLogic()
@@ -367,16 +345,13 @@ namespace BombermanMultiplayer
                         {
                             player1.Dead = true;
                             player1.LoadSprite(Properties.Resources.Blood);
-                            
                         }
-
                         if (player2.CasePosition[0] == i && player2.CasePosition[1] == j
                             && player2.BonusSlot[0] != Objects.BonusType.Armor && player2.BonusSlot[1] != Objects.BonusType.Armor)
                         {
                             player2.Dead = true;
                             player2.LoadSprite(Properties.Resources.Blood);
                         }
-
                         if (world.MapGrid[i, j].FireTime <= 0)
                         {
                             world.MapGrid[i, j].Fire = false;
@@ -413,18 +388,13 @@ namespace BombermanMultiplayer
                 {
                     BombsOnTheMap.RemoveAt(ToRemove[i]);
                 }
-                catch (Exception)
-                {
-                }
+                catch (Exception){}
             }
         }
 
         private void BonusLogic(Player player)
         {
-
             int freeSlot = -1;
-
-
             for (int i = 0; i < player.BonusSlot.Length; i++)
             {
                 if (player.BonusSlot[i] != Objects.BonusType.None)
@@ -449,17 +419,12 @@ namespace BombermanMultiplayer
                 }
             }
 
-
-
             if (this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere != null)
             {
-
                 //If Player already have the bonus
                 if (player.BonusSlot[0] == this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Type ||
                     player.BonusSlot[1] == this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Type)
-                {
                     return;
-                }
 
                 if (freeSlot != -1)
                 {
@@ -485,28 +450,18 @@ namespace BombermanMultiplayer
                         default:
                             break;
                     }
-
                     this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere = null;
-
                 }
-
             }
-
-
         }
-
 
         private void PlayersLogic()
         {
-
             player1.LocationCheck(48, 48);
             player2.LocationCheck(48, 48);
 
-
-
             BonusLogic(player1);
             BonusLogic(player2);
-
 
             if (player1.Orientation != Player.MovementDirection.NONE)
             {
@@ -520,14 +475,12 @@ namespace BombermanMultiplayer
             else
                 player1.frameindex = 1;
 
-
             if (player2.Orientation != Player.MovementDirection.NONE)
             {
                 if (CheckCollisionPlayer(player2, player1, world.MapGrid, player2.Orientation))
                 {
                     player2.Move();
                 }
-
                 player2.UpdateFrame((int)LogicTimer.Interval);
             }
             else
@@ -553,10 +506,6 @@ namespace BombermanMultiplayer
         {
             int lig = movingPlayer.CasePosition[0];
             int col = movingPlayer.CasePosition[1];
-
-            //Check if there's a collision between moving player and the other player
-
-
 
             //Check for environnement collision (map)
             switch (direction)
@@ -613,9 +562,7 @@ namespace BombermanMultiplayer
                 case Player.MovementDirection.LEFT:
                     {
                         //LEFT
-
                         Rectangle rect = new Rectangle(movingPlayer.Source.X - movingPlayer.Vitesse, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
-
                         if (!map[lig - 1, col - 1].Walkable || map[lig - 1, col - 1].Occupied)
                         {
                             if (CheckCollisionRectangle(rect, map[lig - 1, col - 1].Source))
@@ -638,7 +585,6 @@ namespace BombermanMultiplayer
                 case Player.MovementDirection.RIGHT:
                     {
                         Rectangle rect = new Rectangle(movingPlayer.Source.X + movingPlayer.Vitesse, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
-
                         //RIGHT
                         if (!map[lig - 1, col + 1].Walkable || map[lig - 1, col + 1].Occupied)
                         {
@@ -662,40 +608,29 @@ namespace BombermanMultiplayer
                 default:
                     break;
             }
-
-
-
             return true;
-
         }
         private void LogicTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-
             InteractionLogic();
             PlayersLogic();
             BombsLogic();
-
         }
 
         public void SaveGame(string fileName)
         {
-
          System.Runtime.Serialization.IFormatter formatter = new BinaryFormatter();
          System.IO.FileStream filestream = new System.IO.FileStream(fileName, System.IO.FileMode.Create);
             try
             {
                 formatter.Serialize(filestream, new SaveGameData(BombsOnTheMap, world.MapGrid, player1, player2));
-
             }
             catch (Exception ex)
             {
-
                 MessageBox.Show("An error has occured : " + ex.Message);
                 return;
             }
-
             MessageBox.Show("File " + fileName + " saved successfuly !");
-
         }
 
         public void LoadGame(string fileName)
@@ -711,12 +646,9 @@ namespace BombermanMultiplayer
             }
             catch (Exception ex)
             {
-
                 MessageBox.Show("An error has occured : " + ex.Message);
                 return;
             }
-
-
             this.BombsOnTheMap = save.bombsOnTheMap;
             this.world.MapGrid = save.MapGrid;
             this.player1 = save.player1;
@@ -724,7 +656,6 @@ namespace BombermanMultiplayer
 
             this.Paused = true;
             this.LogicTimer.Stop();
-
         }
         
         public void Pause()
@@ -740,7 +671,5 @@ namespace BombermanMultiplayer
                 Paused = true;
             }
         }
-
-
     }
 }
