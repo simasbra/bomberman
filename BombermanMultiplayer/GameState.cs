@@ -39,6 +39,9 @@ namespace BombermanMultiplayer
         public string NamePlayer1;
         public string NamePlayer2;
 
+        public byte Winner = 0;
+        public bool Over;
+
         //Bomb list
         public List<Bomb> bombsList;
 

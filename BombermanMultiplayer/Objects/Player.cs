@@ -18,7 +18,7 @@ namespace BombermanMultiplayer
     {
         byte PlayerNumero;
         public string Name = "Player";
-        private byte _Vitesse = 3;
+        private byte _Vitesse = 5;
         private bool _Dead = false;
         private byte _BombNumb = 2;
         private byte _Lifes = 1;

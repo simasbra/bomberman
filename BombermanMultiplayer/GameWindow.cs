@@ -90,9 +90,42 @@ namespace BombermanMultiplayer
 
         public void DrawInterface()
         {
-            if (game.Paused)
+
+            if (game.Paused && !game.Over)
             {
+                tlsMenu.Visible = true;
                 gr.DrawString("PAUSED", new System.Drawing.Font("Arial", 30), Brushes.White, pbGame.Width / 2, pbGame.Height / 2);
+
+            }
+            else if (!game.Paused && !game.Over)
+            {
+                tlsMenu.Visible = false;
+            }
+            else
+            {
+                tlsMenu.Visible = true;
+            }
+
+
+            if (game.Over)
+            {
+                gr.DrawString("GAME OVER", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
+                     new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8);
+                switch (game.Winner)
+                {
+                    case 1:
+                        gr.DrawString("Soldier wins", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
+                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
+                        break;
+                    case 2:
+                        gr.DrawString("Terrorist wins", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
+                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
+                        break;
+                    default:
+                        gr.DrawString("Draw", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
+                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
+                        break;
+                }
 
             }
 
@@ -161,14 +194,7 @@ namespace BombermanMultiplayer
         {
             game.Game_KeyDown(e.KeyCode);
 
-            if (game.Paused)
-            {
-                tlsMenu.Visible = true;
-            }
-            else
-            {
-                tlsMenu.Visible = false;
-            }
+           
         }
 
         
@@ -193,6 +219,12 @@ namespace BombermanMultiplayer
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (game.Over)
+            {
+                MessageBox.Show("You can't save the game now, the game is over !");
+                return;
+            }
+
             using (SaveFileDialog dlg = new SaveFileDialog())
             {
                 dlg.Filter = "Bomberman savegame | *.bmb";

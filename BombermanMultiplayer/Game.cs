@@ -16,6 +16,8 @@ namespace BombermanMultiplayer
     public class Game
     {
         public bool Paused = false;
+        public bool Over = false;
+        public byte Winner = 0;
 
         public World world;
         public Player player1, player2;
@@ -330,6 +332,21 @@ namespace BombermanMultiplayer
             }
         }
 
+        private void GameOver()
+        {
+            if (player1.Dead || player2.Dead)
+            {
+                this.Over = true;
+                this.Paused = true;
+                if (player1.Dead && player2.Dead)
+                    Winner = 0;
+                else if (player1.Dead)
+                    Winner = 2;
+                else if (player1.Dead)
+                    Winner = 1;
+            }
+        }
+
         //Manage interactions between worlds and objects
         private void InteractionLogic()
         {
@@ -615,6 +632,7 @@ namespace BombermanMultiplayer
             InteractionLogic();
             PlayersLogic();
             BombsLogic();
+            GameOver();
         }
 
         public void SaveGame(string fileName)
@@ -656,19 +674,29 @@ namespace BombermanMultiplayer
 
             this.Paused = true;
             this.LogicTimer.Stop();
+
+            if (this.Over)
+            {
+                this.Over = false;
+                this.Winner = 0;
+            }
         }
         
         public void Pause()
         {
-            if (Paused)
+            //If the game is already over, no need for pause
+            if (!Over)
             {
-                LogicTimer.Start();
-                Paused = false;
-            }
-            else
-            {
-                LogicTimer.Stop();
-                Paused = true;
+                if (Paused)
+                {
+                    LogicTimer.Start();
+                    Paused = false;
+                }
+                else
+                {
+                    LogicTimer.Stop();
+                    Paused = true;
+                }
             }
         }
     }

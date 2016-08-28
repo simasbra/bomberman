@@ -49,9 +49,8 @@ namespace BombermanMultiplayer
         {
             InitializeComponent();
 
-            //Center picture box
-            pbGame.Left = (this.ClientSize.Width - pbGame.Width) / 2;
-            pbGame.Top = (this.ClientSize.Height - pbGame.Height) / 2;
+
+
         }
 
         private void btnServer_Click(object sender, EventArgs e)
@@ -85,10 +84,9 @@ namespace BombermanMultiplayer
                 runServer = Task.Run(() => server.Launch(cts.Token), cts.Token);
             }
 
-            panelServer.Enabled = false;
             lbServerOnline.Visible = true;
-            panelClient.Enabled = false;
-            PanelConnections.Enabled = false;
+            PanelConnections.Visible = false;
+            
 
             //Make a local connection the server
             client = new Client("127.0.0.1", 3000);
@@ -168,12 +166,7 @@ namespace BombermanMultiplayer
                 lbConnected.Items.Add(PlayersInfos[i]);
 
             }
-
-            panelServer.Enabled = false;
-            lbServerOnline.Visible = true;
-            panelClient.Enabled = false;
-            PanelConnections.Enabled = false;
-
+            PanelConnections.Visible = false;
 
             Station = Sender.Player2;
 
@@ -199,10 +192,7 @@ namespace BombermanMultiplayer
                         if (RX_Packet.GetPacketType() == PacketType.Connection)
                         {
                             List<string> PlayersInfos = RX_Packet.GetPayload<List<string>>();
-
-
                             lbConnected.Items.Clear();
-
                             for (int i = 0; i < PlayersInfos.Count; i++)
                             {
                                 lbConnected.Items.Add(PlayersInfos[i]);
@@ -213,13 +203,20 @@ namespace BombermanMultiplayer
                         {
 
                             //transfering the random generated map
+                            this.pbGame.SizeMode = PictureBoxSizeMode.AutoSize;
+                            
+                            this.pbGame.Visible = this.panelGame.Visible = true;
 
-                            this.panelClient.Visible = this.panelServer.Visible = this.OptionsPanel.Enabled = false;
-
-
-                            this.WindowState = FormWindowState.Maximized;
                             this.pbGame.ClientSize = new Size(528, 528);
-                            this.pbGame.Visible = true;
+                            //this.panelGame.Size = new Size(3 * (this.pbGame.ClientSize.Width / 3), 3 * (this.pbGame.ClientSize.Width / 3));
+                            
+                            this.panelGame.Location = this.PanelConnections.Location;
+
+                            //Center picture box
+                            //pbGame.Left = (panelGame.Width - pbGame.Width) / 2;
+                            //pbGame.Top = (panelGame.Height - pbGame.Height) / 2;
+
+                            
 
                             //Initialize the game
                             game = new Game(this.pbGame.Width, this.pbGame.Height);
@@ -240,6 +237,9 @@ namespace BombermanMultiplayer
                             gamestate = RX_Packet.GetPayload<GameState>();
 
                             game.Paused = gamestate.Paused;
+
+                            game.Over = gamestate.Over;
+                            game.Winner = gamestate.Winner;
                             
 
                             game.player1.ChangeLocation(gamestate.XY_Position_Player1[0], gamestate.XY_Position_Player1[1]);
@@ -263,10 +263,7 @@ namespace BombermanMultiplayer
 
                             game.BombsOnTheMap = gamestate.bombsList;
 
-                            foreach (Bomb bomb in game.BombsOnTheMap)
-                            {
-                                bomb.LoadSprite(Properties.Resources.Bombe);
-                            }
+
 
                             //Map mask
 
@@ -301,7 +298,6 @@ namespace BombermanMultiplayer
                                         case 0:
                                             game.world.MapGrid[i, j].Walkable = true;
                                             game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
-                                            game.world.MapGrid[i, j].UnloadSprite();
                                             break;
                                         case 1:
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Destroyable = false;
@@ -312,7 +308,6 @@ namespace BombermanMultiplayer
                                         case 3:
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
-                                            game.world.MapGrid[i, j].LoadSprite(Properties.Resources.Fire);
                                             break;
 
                                             //Bonus
@@ -320,102 +315,120 @@ namespace BombermanMultiplayer
                                             game.world.MapGrid[i, j].BonusHere =
                                                 new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
                                                 game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.PowerBomb);
-                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.SuperBomb);
-                                            game.world.MapGrid[i, j].Destroyable = false;
-                                            game.world.MapGrid[i, j].UnloadSprite();
+                                            game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
                                         case 11:
                                             game.world.MapGrid[i, j].BonusHere =
                                                 new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
                                                 game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.SpeedBoost);
-                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.SpeedUp);
-                                            game.world.MapGrid[i, j].Destroyable = false;
-                                            game.world.MapGrid[i, j].UnloadSprite();
+                                            game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
                                         case 12:
                                             game.world.MapGrid[i, j].BonusHere =
                                                 new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
                                                 game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Desamorce);
-                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.Deactivate);
-                                            game.world.MapGrid[i, j].Destroyable = false;
-                                            game.world.MapGrid[i, j].UnloadSprite();
+                                            game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
                                         case 13:
                                             game.world.MapGrid[i, j].BonusHere =
                                                 new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
                                                 game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Armor);
-                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.Armor);
-                                            game.world.MapGrid[i, j].Destroyable = false;
-                                            game.world.MapGrid[i, j].UnloadSprite();
+                                            game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
 
                                         case 30:
                                             game.world.MapGrid[i, j].BonusHere =
                                                 new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
                                                 game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.PowerBomb);
-                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.SuperBomb);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
-                                            game.world.MapGrid[i, j].LoadSprite(Properties.Resources.Fire);
                                             break;
                                         case 31:
                                             game.world.MapGrid[i, j].BonusHere =
                                                 new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
                                                 game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.SpeedBoost);
-                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.SpeedUp);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
-                                            game.world.MapGrid[i, j].LoadSprite(Properties.Resources.Fire);
                                             break;
                                         case 32:
                                             game.world.MapGrid[i, j].BonusHere =
                                                 new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
                                                 game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Desamorce);
-                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.Deactivate);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
-                                            game.world.MapGrid[i, j].LoadSprite(Properties.Resources.Fire);
                                             break;
                                         case 33:
                                             game.world.MapGrid[i, j].BonusHere =
                                                 new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
                                                 game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Armor);
-                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.Armor);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
-                                            game.world.MapGrid[i, j].LoadSprite(Properties.Resources.Fire);
-                                            break;
-
-                                        default:
                                             break;
                                     }
                                 }
                             }
-
-                            if (game.Paused)
-                            {
-                                tslMenu.Visible = true;
-                            }
-                            else
-                            {
-                                tslMenu.Visible = false;
-                            }
                         }
                     }
-
-
-                    
                 }
             }
             catch (Exception ex)
             {
-
-                MessageBox.Show("An error has occured : {0}", ex.Message);
+                //MessageBox.Show("An error has occured : "+  ex.Message);
+                //ConnectionTimer.Stop();
                 //panelClient.Enabled = true;
-                
             }
             
         }
+
+        //Load all sprite 
+        public void LoadAllMapSprites()
+        {
+            for (int i = 0; i < game.world.MapGrid.GetLength(0); i++) //Ligne
+            {
+                for (int j = 0; j < game.world.MapGrid.GetLength(1); j++) //Colonne
+                {
+                    if (!game.world.MapGrid[i,j].Destroyable && game.world.MapGrid[i, j].Walkable)
+                    {
+                        game.world.MapGrid[i, j].UnloadSprite();
+                    }
+
+                    if (game.world.MapGrid[i, j].Fire)
+                        game.world.MapGrid[i, j].LoadSprite(Properties.Resources.Fire);
+                    else if (!game.world.MapGrid[i, j].Fire && game.world.MapGrid[i, j].Walkable && !game.world.MapGrid[i, j].Destroyable)
+                        game.world.MapGrid[i, j].UnloadSprite();
+
+                    if (game.world.MapGrid[i, j].BonusHere != null)
+                    {
+                        switch (game.world.MapGrid[i,j].BonusHere.Type)
+                        {
+                            case Objects.BonusType.None:
+                                break;
+                            case Objects.BonusType.PowerBomb:
+                                game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.SuperBomb);
+                                break;
+                            case Objects.BonusType.SpeedBoost:
+                                game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.SpeedUp);
+                                break;
+                            case Objects.BonusType.Desamorce:
+                                game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.Deactivate);
+                                break;
+                            case Objects.BonusType.Armor:
+                                game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.Armor);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                }
+            }
+            foreach (Bomb bomb in game.BombsOnTheMap)
+            {
+                if (bomb != null)
+                    bomb.LoadSprite(Properties.Resources.Bombe);
+            }
+        }
+
 
         private void LoadGameComponents()
         {
@@ -530,9 +543,41 @@ namespace BombermanMultiplayer
         public void DrawInterface()
         {
 
-            if (game.Paused)
+            if (game.Paused && !game.Over)
             {
+                tslMenu.Visible = true;
                 gr.DrawString("PAUSED", new System.Drawing.Font("Arial", 30), Brushes.White, pbGame.Width / 2, pbGame.Height / 2);
+
+            }
+            else if (!game.Paused && !game.Over)
+            {
+                tslMenu.Visible = false;
+            }
+            else
+            {
+                tslMenu.Visible = true;
+            }
+
+
+            if (game.Over)
+            {
+                gr.DrawString("GAME OVER", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
+                     new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8);
+                switch (game.Winner)
+                {
+                    case 1:
+                        gr.DrawString("Soldier wins", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
+                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
+                        break;
+                    case 2:
+                        gr.DrawString("Terrorist wins", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
+                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
+                        break;
+                    default:
+                        gr.DrawString("Draw", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
+                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
+                        break;
+                }
 
             }
 
@@ -599,6 +644,7 @@ namespace BombermanMultiplayer
         //Redraw everything each tick
         private void refreshGraphics_Tick(object sender, EventArgs e)
         {
+            LoadAllMapSprites();
             Draw();
         }
 
@@ -611,12 +657,13 @@ namespace BombermanMultiplayer
                 //Stop trying to receive datas
                 ConnectionTimer.Stop();
                 //cancel server task
-                if(this.client.GetConnectionState())
-                    this.client.Disconnect();
+                if (client != null)
+                    if(this.client.GetConnectionState())
+                        this.client.Disconnect();
 
                 if (server != null)
                 {
-                    if (server.IsRunning)
+                    if (server.IsRunning && !cts.IsCancellationRequested)
                     {
                         cts.Cancel();
                         try
@@ -642,7 +689,7 @@ namespace BombermanMultiplayer
 
                 if (server != null)
                 {
-                    if (server.IsRunning)
+                    if (server.IsRunning && !cts.IsCancellationRequested)
                     {
                         cts.Cancel();
                         try
@@ -697,6 +744,11 @@ namespace BombermanMultiplayer
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (game.Over)
+            {
+                MessageBox.Show("You can't save the game now, the game is over !");
+                return;
+            }
             using (SaveFileDialog dlg = new SaveFileDialog())
             {
                 dlg.Filter = "Bomberman savegame | *.bmb";

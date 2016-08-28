@@ -108,14 +108,9 @@ namespace BombermanMultiplayer
                 game = new Game(528, 528);
             }
 
-
-
-
-            gamestate = new GameState();
-
-            
+            gamestate = new GameState();            
             int PlayersReady = 0;
-            
+           
             System.Timers.Timer GameStateTime = new System.Timers.Timer(100);
             GameStateTime.Elapsed += GameStateTime_Elapsed;
             
@@ -237,6 +232,9 @@ namespace BombermanMultiplayer
         {
 
             gamestate.Paused = this.game.Paused;
+
+            gamestate.Over = this.game.Over;
+            gamestate.Winner = this.game.Winner;
 
             //Send game state to everyone
             gamestate.XY_Position_Player1 = new short[2] { (short)this.game.player1.Source.X, (short)this.game.player1.Source.Y };
