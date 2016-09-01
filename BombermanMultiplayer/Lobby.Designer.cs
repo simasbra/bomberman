@@ -402,6 +402,7 @@
             // 
             // ConnectionTimer
             // 
+            this.ConnectionTimer.Interval = 120;
             this.ConnectionTimer.Tick += new System.EventHandler(this.ConnectionTimer_Tick);
             // 
             // refreshGraphics

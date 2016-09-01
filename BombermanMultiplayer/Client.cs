@@ -34,7 +34,7 @@ namespace BombermanMultiplayer
             }
             catch (SocketException se)
             {
-                MessageBox.Show("A connection error occured, connection close, please restart the game");
+                MessageBox.Show("Unable to connect");
                 this.sender.Close();
             }
             catch (Exception) { }

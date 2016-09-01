@@ -54,7 +54,8 @@ namespace BombermanMultiplayer
         KeyUp,
         GameState,
         Pause,
-        LoadGame
+        LoadGame,
+        CloseConnection
     }
     public enum Sender
     {

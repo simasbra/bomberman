@@ -111,7 +111,7 @@ namespace BombermanMultiplayer
             gamestate = new GameState();            
             int PlayersReady = 0;
            
-            System.Timers.Timer GameStateTime = new System.Timers.Timer(100);
+            System.Timers.Timer GameStateTime = new System.Timers.Timer(120);
             GameStateTime.Elapsed += GameStateTime_Elapsed;
             
 
@@ -177,6 +177,9 @@ namespace BombermanMultiplayer
                         case PacketType.KeyUp:
                             game.Game_KeyUpWithoutSprite(RX_Packet.GetPayload<Keys>(), RX_Packet.GetSender());
                             break;
+                        case PacketType.CloseConnection:
+                            this.SendData(new Packet(Sender.Server, PacketType.CloseConnection, 1));
+                            break;
                         default:
                             break;
                     }
@@ -184,7 +187,7 @@ namespace BombermanMultiplayer
                 }
 
 
-                Thread.Sleep(2);
+                Thread.Sleep(1);
 
 
                 //Shutdown

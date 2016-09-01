@@ -55,6 +55,11 @@ namespace BombermanMultiplayer
 
         private void btnServer_Click(object sender, EventArgs e)
         {
+            if (GameRunning == true)
+            {
+                return;
+            }
+
             int port = 30000;
 
             try
@@ -124,12 +129,19 @@ namespace BombermanMultiplayer
 
         private void btnClient_Click(object sender, EventArgs e)
         {
+
+            if (GameRunning == true)
+            {
+                return;
+
+            }
+
             int port = 0;
 
             
             if (!ipParser.IsMatch(tbAddressConnect.Text))
             {
-                MessageBox.Show("Adresse IP entrée non valide", "Problème", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Non valid IP address", "Problem", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
 
@@ -144,7 +156,7 @@ namespace BombermanMultiplayer
             catch (Exception ex)
             {
 
-                MessageBox.Show("Erreur : " + ex.Message, "Problème", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
             }
 
 
@@ -198,23 +210,25 @@ namespace BombermanMultiplayer
                                 lbConnected.Items.Add(PlayersInfos[i]);
 
                             }
+                            
                         }
                         if (RX_Packet.GetPacketType() == PacketType.MapTransfer)
                         {
 
                             //transfering the random generated map
-                            this.pbGame.SizeMode = PictureBoxSizeMode.AutoSize;
+                            //this.pbGame.SizeMode = PictureBoxSizeMode.StretchImage;
                             
                             this.pbGame.Visible = this.panelGame.Visible = true;
 
-                            this.pbGame.ClientSize = new Size(528, 528);
+                            
                             //this.panelGame.Size = new Size(3 * (this.pbGame.ClientSize.Width / 3), 3 * (this.pbGame.ClientSize.Width / 3));
                             
                             this.panelGame.Location = this.PanelConnections.Location;
-                            this.ClientSize = new Size(this.ClientSize.Width + this.pbGame.ClientSize.Width, this.ClientSize.Height);
+                            this.ClientSize = new Size(this.ClientSize.Width , this.ClientSize.Height + 528);
 
+                            this.pbGame.ClientSize = new Size(528, 528);
                             //Center picture box
-                            //pbGame.Left = (panelGame.Width - pbGame.Width) / 2;
+                            pbGame.Left = (panelGame.Width - pbGame.Width) / 2;
                             //pbGame.Top = (panelGame.Height - pbGame.Height) / 2;
 
 
@@ -228,6 +242,7 @@ namespace BombermanMultiplayer
                             //Send the player name
                             TX_Packet = new Packet(Station, PacketType.Ready, tbNamePlayer.Text);
                             client.sendData(TX_Packet);
+                            
                         }
                     }
                     else
@@ -368,6 +383,35 @@ namespace BombermanMultiplayer
                                     }
                                 }
                             }
+                            return;
+                        }
+                        else if (RX_Packet.GetPacketType() == PacketType.CloseConnection)
+                        {
+                            this.ConnectionTimer.Stop();
+                            this.client.Disconnect();
+
+                            if (server != null)
+                            {
+                                if (server.IsRunning && !cts.IsCancellationRequested)
+                                {
+                                    cts.Cancel();
+                                    try
+                                    {
+                                        runServer.Wait();
+                                    }
+                                    catch (AggregateException ex)
+                                    { }
+                                    finally
+                                    {
+                                        cts.Dispose();
+                                    }
+                                }
+
+                            }
+
+                            MessageBox.Show("Other player left the game, back to menu...");
+                            this.Close();
+
                         }
                     }
                 }
@@ -659,9 +703,12 @@ namespace BombermanMultiplayer
                 ConnectionTimer.Stop();
                 //cancel server task
                 if (client != null)
-                    if(this.client.GetConnectionState())
+                    if (this.client.GetConnectionState())
+                    {
+                        this.client.sendData(new Packet(Sender.Server, PacketType.CloseConnection, 1));
+                        Thread.Sleep(50);
                         this.client.Disconnect();
-
+                    }
                 if (server != null)
                 {
                     if (server.IsRunning && !cts.IsCancellationRequested)
@@ -685,13 +732,16 @@ namespace BombermanMultiplayer
                 //Stop trying to receive datas
                 ConnectionTimer.Stop();
                 //cancel server task
+                this.client.sendData(new Packet(Station, PacketType.CloseConnection, 1));
 
+                Thread.Sleep(50);
                 this.client.Disconnect();
 
                 if (server != null)
                 {
                     if (server.IsRunning && !cts.IsCancellationRequested)
                     {
+                        this.server.SendData(new Packet(Sender.Server, PacketType.CloseConnection, 1));
                         cts.Cancel();
                         try
                         {
@@ -707,7 +757,7 @@ namespace BombermanMultiplayer
 
         private void Lobby_KeyDown(object sender, KeyEventArgs e)
         {          
-            if (GameRunning)
+            if (GameRunning && !game.Over)
             {
                 TX_Packet = new Packet(Station, PacketType.KeyDown, e.KeyCode);
                 client.sendData(TX_Packet);
@@ -721,7 +771,7 @@ namespace BombermanMultiplayer
 
         private void Lobby_KeyUp(object sender, KeyEventArgs e)
         {
-            if (GameRunning)
+            if (GameRunning && !game.Over)
             {
                 TX_Packet = new Packet(Station, PacketType.KeyUp, e.KeyCode);
                 client.sendData(TX_Packet);
@@ -813,13 +863,15 @@ namespace BombermanMultiplayer
             //Stop trying to receive datas
             ConnectionTimer.Stop();
             //cancel server task
-
+            this.client.sendData(new Packet(Station, PacketType.CloseConnection, 1));
             this.client.Disconnect();
 
             if (server != null)
             {
                 if (server.IsRunning && !cts.IsCancellationRequested)
-                {   
+                {
+
+                    server.SendData(new Packet(Sender.Server, PacketType.CloseConnection, 1));
                     cts.Cancel();
                     try
                     {
