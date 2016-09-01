@@ -340,7 +340,7 @@ namespace BombermanMultiplayer
                 this.Paused = true;
                 if (player1.Dead && player2.Dead)
                     Winner = 0;
-                else if (player1.Dead)
+                else if (player2.Dead)
                     Winner = 2;
                 else if (player1.Dead)
                     Winner = 1;

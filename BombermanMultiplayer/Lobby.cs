@@ -211,12 +211,13 @@ namespace BombermanMultiplayer
                             //this.panelGame.Size = new Size(3 * (this.pbGame.ClientSize.Width / 3), 3 * (this.pbGame.ClientSize.Width / 3));
                             
                             this.panelGame.Location = this.PanelConnections.Location;
+                            this.ClientSize = new Size(this.ClientSize.Width + this.pbGame.ClientSize.Width, this.ClientSize.Height);
 
                             //Center picture box
                             //pbGame.Left = (panelGame.Width - pbGame.Width) / 2;
                             //pbGame.Top = (panelGame.Height - pbGame.Height) / 2;
 
-                            
+
 
                             //Initialize the game
                             game = new Game(this.pbGame.Width, this.pbGame.Height);
