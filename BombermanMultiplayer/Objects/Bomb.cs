@@ -48,10 +48,10 @@ namespace BombermanMultiplayer
 
   
 
-        public Bomb(int caseLigne, int caseCol, int totalFrames, int frameWidth, int frameHeight, int detonationTime, int TileWidth, int TileHeight, short proprietary)
-            : base(caseCol * TileWidth, caseLigne * TileHeight, totalFrames, frameWidth, frameHeight)
+        public Bomb(int caseRow, int caseCol, int totalFrames, int frameWidth, int frameHeight, int detonationTime, int TileWidth, int TileHeight, short proprietary)
+            : base(caseCol * TileWidth, caseRow * TileHeight, totalFrames, frameWidth, frameHeight)
         {
-            CasePosition = new int[2] { caseLigne, caseCol };
+            CasePosition = new int[2] { caseRow, caseCol };
 
             //Charge the sprite
             this.LoadSprite(Properties.Resources.Bombe);
@@ -73,7 +73,7 @@ namespace BombermanMultiplayer
             DetonationTime -= elsapedTime;
         }
 
-        public void Explosion(Tile[,] MapGrid, Player player1, Player player2)
+        public void Explosion(Tile[,] MapGrid, List<Player> players)
         {
             int variablePosition = 0;
 
@@ -82,37 +82,28 @@ namespace BombermanMultiplayer
 
 
             //Give back a bomb to the proprietary 
-            if (Proprietary == 1)
+            foreach (Player player in players)
             {
-                player1.BombNumb++;
-
-                if (player1.BonusSlot[0] == Objects.BonusType.PowerBomb || player1.BonusSlot[1] == Objects.BonusType.PowerBomb)
+                if (player.PlayerNumber == this.Proprietary)
                 {
-                    this.bombPower++;
-                }
-            }
-            else if (Proprietary == 2)
-            {
-                player2.BombNumb++;
-
-                if (player2.BonusSlot[0] == Objects.BonusType.PowerBomb || player2.BonusSlot[1] == Objects.BonusType.PowerBomb)
-                {
-                    this.bombPower++;
+                    player.BombNumb++;
+                    if (player.BonusSlot[0] == Objects.BonusType.PowerBomb || player.BonusSlot[1] == Objects.BonusType.PowerBomb)
+                    {
+                        this.bombPower++;
+                    }
+                    break;
                 }
             }
 
-            //Check if player
-            if (this.CasePosition == player1.CasePosition
-                && player1.BonusSlot[0] != Objects.BonusType.Armor && player1.BonusSlot[1] != Objects.BonusType.Armor)
+            //Check if player is in explosion range
+            foreach (Player player in players)
             {
-                player1.Dead = true;
-                player1.LoadSprite(Properties.Resources.Blood);
-            }
-            if (this.CasePosition == player2.CasePosition
-                && player2.BonusSlot[0] != Objects.BonusType.Armor && player2.BonusSlot[1] != Objects.BonusType.Armor)
-            {
-                player2.Dead = true;
-                player2.LoadSprite(Properties.Resources.Blood);
+                if (this.CasePosition[0] == player.CasePosition[0] && this.CasePosition[1] == player.CasePosition[1]
+                    && player.BonusSlot[0] != Objects.BonusType.Armor && player.BonusSlot[1] != Objects.BonusType.Armor)
+                {
+                    player.Dead = true;
+                    player.LoadSprite(Properties.Resources.Blood);
+                }
             }
 
 

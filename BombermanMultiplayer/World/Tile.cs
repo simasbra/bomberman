@@ -58,7 +58,7 @@ namespace BombermanMultiplayer
             }
             else if (num == 2)
             {
-                this.BonusHere = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.Desamorce);
+                this.BonusHere = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.Deactivate);
                 this.BonusHere.LoadSprite(Properties.Resources.Deactivate);
             }
 

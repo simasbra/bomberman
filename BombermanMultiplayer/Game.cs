@@ -20,18 +20,20 @@ namespace BombermanMultiplayer
         public byte Winner = 0;
 
         public World world;
-        public Player player1, player2;
+        public List<Player> players = new List<Player>();
 
         public List<Bomb> BombsOnTheMap;
         public System.Timers.Timer LogicTimer;
 
         //ctor when picture box size is determined
-        public Game(int hebergeurWidth, int hebergeurHeight)
+        public Game(int hostWidth, int hostHeight)
         {
-            this.world = new World(hebergeurWidth, hebergeurHeight, 48, 48, 1);
+            this.world = new World(hostWidth, hostHeight, 48, 48, 1);
 
-            player1 = new Player(1, 2, 33, 33, 1, 1, 48, 48, 80, 1);
-            player2 = new Player(1, 2, 33, 33, this.world.MapGrid.GetLength(0) - 2, this.world.MapGrid.GetLength(0) - 2, 48, 48, 80, 2);
+            players.Add(new Player(1, 2, 33, 33, 1, 1, 48, 48, 80, 1));
+            players.Add(new Player(1, 2, 33, 33, this.world.MapGrid.GetLength(0) - 2, this.world.MapGrid.GetLength(0) - 2, 48, 48, 80, 2));
+            players.Add(new Player(1, 2, 33, 33, 1, this.world.MapGrid.GetLength(0) - 2, 48, 48, 80, 3));
+            players.Add(new Player(1, 2, 33, 33, this.world.MapGrid.GetLength(0) - 2, 1, 48, 48, 80, 4));
 
             this.BombsOnTheMap = new List<Bomb>();
             this.LogicTimer = new System.Timers.Timer(40);
@@ -39,12 +41,11 @@ namespace BombermanMultiplayer
         }
 
         //ctor when loading a game
-        public Game(int hebergeurWidth, int hebergeurHeight, SaveGameData save)
+        public Game(int hostWidth, int hostHeight, SaveGameData save)
         {
-            this.world = new World(hebergeurWidth, hebergeurHeight, save.MapGrid);
+            this.world = new World(hostWidth, hostHeight, save.MapGrid);
 
-            player1 = save.player1;
-            player2 = save.player2;
+            players = save.players;
 
             this.BombsOnTheMap = save.bombsOnTheMap;
             this.LogicTimer = new System.Timers.Timer(40);
@@ -71,17 +72,17 @@ namespace BombermanMultiplayer
             //Bonus
             //10 PowerBomb and empty 
             //11 SpeedBoost and empty 
-            //12 Desamorce and empty 
+            //12 Deactivate and empty 
             //13 Armor and empty 
 
             //30 PowerBomb and Fire 
             //31 SpeedBoost and Fire 
-            //32 Desamorce and Fire 
+            //32 Deactivate and Fire 
             //33 Armor and Fire 
 
-            for (int i = 0; i < world.MapGrid.GetLength(0); i++) //Ligne
+            for (int i = 0; i < world.MapGrid.GetLength(0); i++) //Row
             {
-                for (int j = 0; j < world.MapGrid.GetLength(1); j++) //Colonne
+                for (int j = 0; j < world.MapGrid.GetLength(1); j++) //Column
                 {
                     if (world.MapGrid[i, j].BonusHere != null)
                     {
@@ -97,7 +98,7 @@ namespace BombermanMultiplayer
                                     mask[i, j] = 31;
                                 else mask[i, j] = 11;
                                 break;
-                            case Objects.BonusType.Desamorce:
+                            case Objects.BonusType.Deactivate:
                                 if (world.MapGrid[i, j].Fire)
                                     mask[i, j] = 32;
                                 else mask[i, j] = 12;
@@ -138,108 +139,141 @@ namespace BombermanMultiplayer
             return mask;
         }
 
-        //Manage key pushed for local game
         public void Game_KeyDown(Keys key)
         {
-            switch (key)
+            // Player 1
+            if (!players[0].Dead)
             {
-                case Keys.Z:
-                    if (player1.Dead)
+                switch (key)
+                {
+                    case Keys.Z:
+                        players[0].Orientation = Player.MovementDirection.UP;
+                        players[0].LoadSprite(Properties.Resources.AT_UP);
                         break;
-                    player1.Orientation = Player.MovementDirection.UP;
-                    player1.LoadSprite(Properties.Resources.AT_UP);
-                    break;
-                case Keys.S:
-                    if (player1.Dead)
+                    case Keys.S:
+                        players[0].Orientation = Player.MovementDirection.DOWN;
+                        players[0].LoadSprite(Properties.Resources.AT_DOWN);
                         break;
-                    player1.Orientation = Player.MovementDirection.DOWN;
-                    player1.LoadSprite(Properties.Resources.AT_DOWN);
-                    break;
-                case Keys.Q:
-                    if (player1.Dead)
+                    case Keys.Q:
+                        players[0].Orientation = Player.MovementDirection.LEFT;
+                        players[0].LoadSprite(Properties.Resources.AT_LEFT);
                         break;
-                    player1.Orientation = Player.MovementDirection.LEFT;
-                    player1.LoadSprite(Properties.Resources.AT_LEFT);
-                    break;
-                case Keys.D:
-                    if (player1.Dead)
+                    case Keys.D:
+                        players[0].Orientation = Player.MovementDirection.RIGHT;
+                        players[0].LoadSprite(Properties.Resources.AT_RIGHT);
                         break;
-                    player1.Orientation = Player.MovementDirection.RIGHT;
-                    player1.LoadSprite(Properties.Resources.AT_RIGHT);
-                    break;
-                case Keys.Space:
-                    if (player1.Dead)
+                    case Keys.Space:
+                        players[0].DropBomb(this.world.MapGrid, this.BombsOnTheMap, players);
                         break;
-                    player1.DropBomb(this.world.MapGrid, this.BombsOnTheMap, player2);
-                    break;
-                case Keys.A:
-                    if (player1.Dead)
+                    case Keys.A:
+                        players[0].Deactivate(this.world.MapGrid, BombsOnTheMap, players);
                         break;
-                    player1.Deactivate(this.world.MapGrid, BombsOnTheMap, player2);
-                    break;
-                case Keys.Up:
-                    if (player2.Dead)
+                }
+            }
+
+            // Player 2
+            if (!players[1].Dead)
+            {
+                switch (key)
+                {
+                    case Keys.Up:
+                        players[1].Orientation = Player.MovementDirection.UP;
+                        players[1].LoadSprite(Properties.Resources.T_UP);
                         break;
-                    player2.Orientation = Player.MovementDirection.UP;
-                    player2.LoadSprite(Properties.Resources.T_UP);
-                    break;
-                case Keys.Down:
-                    if (player2.Dead)
+                    case Keys.Down:
+                        players[1].Orientation = Player.MovementDirection.DOWN;
+                        players[1].LoadSprite(Properties.Resources.T_DOWN);
                         break;
-                    player2.Orientation = Player.MovementDirection.DOWN;
-                    player2.LoadSprite(Properties.Resources.T_DOWN);
-                    break;
-                case Keys.Left:
-                    if (player2.Dead)
+                    case Keys.Left:
+                        players[1].Orientation = Player.MovementDirection.LEFT;
+                        players[1].LoadSprite(Properties.Resources.T_LEFT);
                         break;
-                    player2.Orientation = Player.MovementDirection.LEFT;
-                    player2.LoadSprite(Properties.Resources.T_LEFT);
-                    break;
-                case Keys.Right:
-                    if (player2.Dead)
+                    case Keys.Right:
+                        players[1].Orientation = Player.MovementDirection.RIGHT;
+                        players[1].LoadSprite(Properties.Resources.T_RIGHT);
                         break;
-                    player2.Orientation = Player.MovementDirection.RIGHT;
-                    player2.LoadSprite(Properties.Resources.T_RIGHT);
-                    break;
-                case Keys.ControlKey:
-                    if (player2.Dead)
+                    case Keys.ControlKey:
+                        players[1].DropBomb(this.world.MapGrid, this.BombsOnTheMap, players);
                         break;
-                    player2.DropBomb(this.world.MapGrid, this.BombsOnTheMap, player1);
-                    break;
-                case Keys.Shift:
-                    if (player2.Dead)
+                    case Keys.Shift:
+                        players[1].Deactivate(this.world.MapGrid, BombsOnTheMap, players);
                         break;
-                    player2.Deactivate(this.world.MapGrid, BombsOnTheMap, player1);
-                    break;
-                case Keys.Escape:
-                    Pause();
-                    break;
+                }
+            }
+
+            // Player 3
+            if (players.Count > 2 && !players[2].Dead)
+            {
+                switch (key)
+                {
+                    case Keys.I:
+                        players[2].Orientation = Player.MovementDirection.UP;
+                        players[2].LoadSprite(Properties.Resources.T_UP);
+                        break;
+                    case Keys.K:
+                        players[2].Orientation = Player.MovementDirection.DOWN;
+                        players[2].LoadSprite(Properties.Resources.T_DOWN);
+                        break;
+                    case Keys.J:
+                        players[2].Orientation = Player.MovementDirection.LEFT;
+                        players[2].LoadSprite(Properties.Resources.T_LEFT);
+                        break;
+                    case Keys.L:
+                        players[2].Orientation = Player.MovementDirection.RIGHT;
+                        players[2].LoadSprite(Properties.Resources.T_RIGHT);
+                        break;
+                    case Keys.NumPad0:
+                        players[2].DropBomb(this.world.MapGrid, this.BombsOnTheMap, players);
+                        break;
+                    case Keys.NumPad1:
+                        players[2].Deactivate(this.world.MapGrid, BombsOnTheMap, players);
+                        break;
+                }
+            }
+
+            // Player 4
+            if (players.Count > 3 && !players[3].Dead)
+            {
+                switch (key)
+                {
+                    case Keys.T:
+                        players[3].Orientation = Player.MovementDirection.UP;
+                        players[3].LoadSprite(Properties.Resources.T_UP);
+                        break;
+                    case Keys.G:
+                        players[3].Orientation = Player.MovementDirection.DOWN;
+                        players[3].LoadSprite(Properties.Resources.T_DOWN);
+                        break;
+                    case Keys.F:
+                        players[3].Orientation = Player.MovementDirection.LEFT;
+                        players[3].LoadSprite(Properties.Resources.T_LEFT);
+                        break;
+                    case Keys.H:
+                        players[3].Orientation = Player.MovementDirection.RIGHT;
+                        players[3].LoadSprite(Properties.Resources.T_RIGHT);
+                        break;
+                    case Keys.PageUp:
+                        players[3].DropBomb(this.world.MapGrid, this.BombsOnTheMap, players);
+                        break;
+                    case Keys.PageDown:
+                        players[3].Deactivate(this.world.MapGrid, BombsOnTheMap, players);
+                        break;
+                }
+            }
+
+            if (key == Keys.Escape)
+            {
+                Pause();
             }
         }
 
         //Manage key push for server side
         public void Game_KeyDownWithoutSprite(Keys key, Sender Station)
         {
-            Player sender = null;
-            Player otherPlayer = null;
+            Player sender = players[(int)Station - 1];
 
-            switch (Station)
-            {
-                case Sender.Player1:
-                    sender = player1;
-                    otherPlayer = player2;
-                    if (sender.Dead)
-                        return;
-                    break;
-                case Sender.Player2:
-                    sender = player2;
-                    otherPlayer = player1;
-                    if (sender.Dead)
-                        return;
-                    break;
-                default:
-                    break;
-            }
+            if (sender.Dead)
+                return;
 
             switch (key)
             {
@@ -256,10 +290,10 @@ namespace BombermanMultiplayer
                     sender.Orientation = Player.MovementDirection.RIGHT;
                     break;
                 case Keys.Space:
-                    sender.DropBomb(this.world.MapGrid, this.BombsOnTheMap, otherPlayer);
+                    sender.DropBomb(this.world.MapGrid, this.BombsOnTheMap, players);
                     break;
                 case Keys.ControlKey:
-                    sender.Deactivate(this.world.MapGrid, BombsOnTheMap, otherPlayer);
+                    sender.Deactivate(this.world.MapGrid, BombsOnTheMap, players);
                     break;
                 case Keys.Escape:
                     Pause();
@@ -270,19 +304,8 @@ namespace BombermanMultiplayer
         //Manage release of key for server side
         public void Game_KeyUpWithoutSprite(Keys key, Sender Station)
         {
-            Player sender = null;
+            Player sender = players[(int)Station - 1];
 
-            switch (Station)
-            {
-                case Sender.Player1:
-                    sender = player1;
-                    break;
-                case Sender.Player2:
-                    sender = player2;
-                    break;
-                default:
-                    break;
-            }
             switch (key)
             {
                 case Keys.Up:
@@ -300,75 +323,90 @@ namespace BombermanMultiplayer
             }
         }
 
-        //Manage the release of the keys
         public void Game_KeyUp(Keys key)
         {
             switch (key)
             {
                 case Keys.Z:
-                    player1.Orientation = Player.MovementDirection.NONE;
-                    break;
                 case Keys.S:
-                    player1.Orientation = Player.MovementDirection.NONE;
-                    break;
                 case Keys.Q:
-                    player1.Orientation = Player.MovementDirection.NONE;
-                    break;
                 case Keys.D:
-                    player1.Orientation = Player.MovementDirection.NONE;
+                    players[0].Orientation = Player.MovementDirection.NONE;
                     break;
                 case Keys.Up:
-                    player2.Orientation = Player.MovementDirection.NONE;
-                    break;
                 case Keys.Down:
-                    player2.Orientation = Player.MovementDirection.NONE;
-                    break;
                 case Keys.Left:
-                    player2.Orientation = Player.MovementDirection.NONE;
-                    break;
                 case Keys.Right:
-                    player2.Orientation = Player.MovementDirection.NONE;
+                    players[1].Orientation = Player.MovementDirection.NONE;
+                    break;
+                case Keys.I:
+                case Keys.K:
+                case Keys.J:
+                case Keys.L:
+                    if (players.Count > 2)
+                        players[2].Orientation = Player.MovementDirection.NONE;
+                    break;
+                case Keys.T:
+                case Keys.G:
+                case Keys.F:
+                case Keys.H:
+                    if (players.Count > 3)
+                        players[3].Orientation = Player.MovementDirection.NONE;
                     break;
             }
         }
 
         private void GameOver()
         {
-            if (player1.Dead || player2.Dead)
+            int deadPlayers = 0;
+            Player alivePlayer = null;
+            foreach (Player player in players)
+            {
+                if (player.Dead)
+                {
+                    deadPlayers++;
+                }
+                else
+                {
+                    alivePlayer = player;
+                }
+            }
+
+            if (deadPlayers >= 3)
             {
                 this.Over = true;
                 this.Paused = true;
-                if (player1.Dead && player2.Dead)
-                    Winner = 0;
-                else if (player2.Dead)
-                    Winner = 2;
-                else if (player1.Dead)
-                    Winner = 1;
+                if (deadPlayers == 4)
+                {
+                    Winner = 0; // Draw
+                }
+                else
+                {
+                    Winner = (byte)alivePlayer.PlayerNumber;
+                }
             }
         }
 
         //Manage interactions between worlds and objects
         private void InteractionLogic()
         {
-            for (int i = 0; i < world.MapGrid.GetLength(0); i++) //Ligne
+            for (int i = 0; i < world.MapGrid.GetLength(0); i++) //Row
             {
-                for (int j = 0; j < world.MapGrid.GetLength(1); j++) //Colonne
+                for (int j = 0; j < world.MapGrid.GetLength(1); j++) //Column
                 {
 
                     if (world.MapGrid[i, j].Fire)
                     {
-                        if (player1.CasePosition[0] == i && player1.CasePosition[1] == j
-                            && player1.BonusSlot[0] != Objects.BonusType.Armor && player1.BonusSlot[1] != Objects.BonusType.Armor)
+                        foreach (Player player in players)
                         {
-                            player1.Dead = true;
-                            player1.LoadSprite(Properties.Resources.Blood);
+                            if (player.CasePosition[0] == i && player.CasePosition[1] == j
+                                && player.BonusSlot[0] != Objects.BonusType.Armor && player.BonusSlot[1] != Objects.BonusType.Armor)
+                            {
+                                player.Dead = true;
+                                player.LoadSprite(Properties.Resources.Blood);
+                            }
                         }
-                        if (player2.CasePosition[0] == i && player2.CasePosition[1] == j
-                            && player2.BonusSlot[0] != Objects.BonusType.Armor && player2.BonusSlot[1] != Objects.BonusType.Armor)
-                        {
-                            player2.Dead = true;
-                            player2.LoadSprite(Properties.Resources.Blood);
-                        }
+
                         if (world.MapGrid[i, j].FireTime <= 0)
                         {
                             world.MapGrid[i, j].Fire = false;
@@ -393,7 +431,7 @@ namespace BombermanMultiplayer
                 BombsOnTheMap[i].TimingExplosion((int)LogicTimer.Interval);
                 if (BombsOnTheMap[i].Explosing == true)
                 {
-                    BombsOnTheMap[i].Explosion(this.world.MapGrid, player1, player2);
+                    BombsOnTheMap[i].Explosion(this.world.MapGrid, players);
                     ToRemove.Add(i);
                 }
             }
@@ -420,7 +458,7 @@ namespace BombermanMultiplayer
                     {
                         if (player.BonusSlot[i] == Objects.BonusType.SpeedBoost)
                         {
-                            player.Vitesse /= 2;
+                            player.Speed /= 2;
                         }
 
                         player.BonusSlot[i] = Objects.BonusType.None;
@@ -453,11 +491,11 @@ namespace BombermanMultiplayer
                             break;
                         case Objects.BonusType.SpeedBoost:
                             player.BonusSlot[freeSlot] = Objects.BonusType.SpeedBoost;
-                            player.Vitesse *= 2;
+                            player.Speed *= 2;
                             player.BonusTimer[freeSlot] = 5000;
                             break;
-                        case Objects.BonusType.Desamorce:
-                            player.BonusSlot[freeSlot] = Objects.BonusType.Desamorce;
+                        case Objects.BonusType.Deactivate:
+                            player.BonusSlot[freeSlot] = Objects.BonusType.Deactivate;
                             player.BonusTimer[freeSlot] = 10000;
                             break;
                         case Objects.BonusType.Armor:
@@ -474,34 +512,22 @@ namespace BombermanMultiplayer
 
         private void PlayersLogic()
         {
-            player1.LocationCheck(48, 48);
-            player2.LocationCheck(48, 48);
-
-            BonusLogic(player1);
-            BonusLogic(player2);
-
-            if (player1.Orientation != Player.MovementDirection.NONE)
+            foreach (Player player in players)
             {
-                if (CheckCollisionPlayer(player1, player2, world.MapGrid, player1.Orientation))
-                {
-                    player1.Move();
+                player.LocationCheck(48, 48);
+                BonusLogic(player);
 
-                }
-                player1.UpdateFrame((int)LogicTimer.Interval);
-            }
-            else
-                player1.frameindex = 1;
-
-            if (player2.Orientation != Player.MovementDirection.NONE)
-            {
-                if (CheckCollisionPlayer(player2, player1, world.MapGrid, player2.Orientation))
+                if (player.Orientation != Player.MovementDirection.NONE)
                 {
-                    player2.Move();
+                    if (CheckCollisionPlayer(player, players, world.MapGrid, player.Orientation))
+                    {
+                        player.Move();
+                    }
+                    player.UpdateFrame((int)LogicTimer.Interval);
                 }
-                player2.UpdateFrame((int)LogicTimer.Interval);
+                else
+                    player.frameindex = 1;
             }
-            else
-                player2.frameindex = 1;
         }
         //Collision management
 
@@ -519,7 +545,7 @@ namespace BombermanMultiplayer
             //True if there's a collision
 
         }
-        public bool CheckCollisionPlayer(Player movingPlayer, Player player2, Tile[,] map, Player.MovementDirection direction)
+        public bool CheckCollisionPlayer(Player movingPlayer, List<Player> otherPlayers, Tile[,] map, Player.MovementDirection direction)
         {
             int lig = movingPlayer.CasePosition[0];
             int col = movingPlayer.CasePosition[1];
@@ -531,7 +557,7 @@ namespace BombermanMultiplayer
                     {
                         //UP
                         //Temporary version of player collision box with expected position after deplacement
-                        Rectangle rect = new Rectangle(movingPlayer.Source.X, movingPlayer.Source.Y - movingPlayer.Vitesse, movingPlayer.Source.Width, movingPlayer.Source.Height);
+                        Rectangle rect = new Rectangle(movingPlayer.Source.X, movingPlayer.Source.Y - movingPlayer.Speed, movingPlayer.Source.Width, movingPlayer.Source.Height);
 
                         if (!map[lig - 1, col - 1].Walkable || map[lig - 1, col - 1].Occupied)
                         {
@@ -548,14 +574,17 @@ namespace BombermanMultiplayer
                             if (CheckCollisionRectangle(rect, map[lig - 1, col + 1].Source))
                                 return false;
                         }
-                        if (CheckCollisionRectangle(rect, player2.Source))
-                            return false;
+                        foreach (Player otherPlayer in otherPlayers)
+                        {
+                            if (movingPlayer != otherPlayer && CheckCollisionRectangle(rect, otherPlayer.Source))
+                                return false;
+                        }
                     }
                     break;
                 case Player.MovementDirection.DOWN:
                     {
                         //DOWN
-                        Rectangle rect = new Rectangle(movingPlayer.Source.X, movingPlayer.Source.Y + movingPlayer.Vitesse, movingPlayer.Source.Width, movingPlayer.Source.Height);
+                        Rectangle rect = new Rectangle(movingPlayer.Source.X, movingPlayer.Source.Y + movingPlayer.Speed, movingPlayer.Source.Width, movingPlayer.Source.Height);
 
                         if (!map[lig + 1, col - 1].Walkable || map[lig + 1, col - 1].Occupied)
                         {
@@ -572,14 +601,17 @@ namespace BombermanMultiplayer
                             if (CheckCollisionRectangle(rect, map[lig + 1, col + 1].Source))
                                 return false;
                         }
-                        if (CheckCollisionRectangle(rect, player2.Source))
-                            return false;
+                        foreach (Player otherPlayer in otherPlayers)
+                        {
+                            if (movingPlayer != otherPlayer && CheckCollisionRectangle(rect, otherPlayer.Source))
+                                return false;
+                        }
                     }
                     break;
                 case Player.MovementDirection.LEFT:
                     {
                         //LEFT
-                        Rectangle rect = new Rectangle(movingPlayer.Source.X - movingPlayer.Vitesse, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
+                        Rectangle rect = new Rectangle(movingPlayer.Source.X - movingPlayer.Speed, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
                         if (!map[lig - 1, col - 1].Walkable || map[lig - 1, col - 1].Occupied)
                         {
                             if (CheckCollisionRectangle(rect, map[lig - 1, col - 1].Source))
@@ -595,13 +627,16 @@ namespace BombermanMultiplayer
                             if (CheckCollisionRectangle(rect, map[lig + 1, col - 1].Source))
                                 return false;
                         }
-                        if (CheckCollisionRectangle(rect, player2.Source))
-                            return false;
+                        foreach (Player otherPlayer in otherPlayers)
+                        {
+                            if (movingPlayer != otherPlayer && CheckCollisionRectangle(rect, otherPlayer.Source))
+                                return false;
+                        }
                     }
                     break;
                 case Player.MovementDirection.RIGHT:
                     {
-                        Rectangle rect = new Rectangle(movingPlayer.Source.X + movingPlayer.Vitesse, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
+                        Rectangle rect = new Rectangle(movingPlayer.Source.X + movingPlayer.Speed, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
                         //RIGHT
                         if (!map[lig - 1, col + 1].Walkable || map[lig - 1, col + 1].Occupied)
                         {
@@ -618,8 +653,11 @@ namespace BombermanMultiplayer
                             if (CheckCollisionRectangle(rect, map[lig + 1, col + 1].Source))
                                 return false;
                         }
-                        if (CheckCollisionRectangle(rect, player2.Source))
-                            return false;
+                        foreach (Player otherPlayer in otherPlayers)
+                        {
+                            if (movingPlayer != otherPlayer && CheckCollisionRectangle(rect, otherPlayer.Source))
+                                return false;
+                        }
                     }
                     break;
                 default:
@@ -641,7 +679,7 @@ namespace BombermanMultiplayer
          System.IO.FileStream filestream = new System.IO.FileStream(fileName, System.IO.FileMode.Create);
             try
             {
-                formatter.Serialize(filestream, new SaveGameData(BombsOnTheMap, world.MapGrid, player1, player2));
+                formatter.Serialize(filestream, new SaveGameData(BombsOnTheMap, world.MapGrid, players));
             }
             catch (Exception ex)
             {
@@ -669,8 +707,7 @@ namespace BombermanMultiplayer
             }
             this.BombsOnTheMap = save.bombsOnTheMap;
             this.world.MapGrid = save.MapGrid;
-            this.player1 = save.player1;
-            this.player2 = save.player2;
+            this.players = save.players;
 
             this.Paused = true;
             this.LogicTimer.Stop();

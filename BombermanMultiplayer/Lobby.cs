@@ -69,7 +69,7 @@ namespace BombermanMultiplayer
             catch (Exception ex)
             {
 
-                MessageBox.Show("Erreur : " + ex.Message, "Problème", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Error: " + ex.Message, "Problem", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
 
 
@@ -141,7 +141,7 @@ namespace BombermanMultiplayer
             
             if (!ipParser.IsMatch(tbAddressConnect.Text))
             {
-                MessageBox.Show("Non valid IP address", "Problem", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Invalid IP address", "Problem", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
 
@@ -180,7 +180,7 @@ namespace BombermanMultiplayer
             }
             PanelConnections.Visible = false;
 
-            Station = Sender.Player2;
+
 
             ConnectionTimer.Start();
             TimerDelayKeyDown.Elapsed += TimerDelayKeyDown_Elapsed;
@@ -258,23 +258,7 @@ namespace BombermanMultiplayer
                             game.Winner = gamestate.Winner;
                             
 
-                            game.player1.ChangeLocation(gamestate.XY_Position_Player1[0], gamestate.XY_Position_Player1[1]);
-                            game.player2.ChangeLocation(gamestate.XY_Position_Player2[0], gamestate.XY_Position_Player2[1]);
-
-                            game.player1.frameindex = gamestate.framePlayer1;
-                            game.player2.frameindex = gamestate.framePlayer2;
-
-                            game.player1.Orientation = gamestate.orientationPlayer1;
-                            game.player2.Orientation = gamestate.orientationPlayer2;
-
-                            game.player1.BonusSlot = gamestate.BonusSlotPlayer1;
-                            game.player1.BonusTimer = gamestate.BonusTimerPlayer1;
-
-                            game.player2.BonusSlot = gamestate.BonusSlotPlayer2;
-                            game.player2.BonusTimer = gamestate.BonusTimerPlayer2;
-
-                            game.player1.Name = gamestate.NamePlayer1;
-                            game.player2.Name = gamestate.NamePlayer2;
+                            game.players = gamestate.players;
 
 
                             game.BombsOnTheMap = gamestate.bombsList;
@@ -291,18 +275,18 @@ namespace BombermanMultiplayer
                             //Bonus
                             //10 PowerBomb and empty 
                             //11 SpeedBoost and empty 
-                            //12 Desamorce and empty 
+                            //12 Deactivate and empty 
                             //13 Armor and empty 
 
                             //30 PowerBomb and Fire 
                             //31 SpeedBoost and Fire 
-                            //32 Desamorce and Fire 
+                            //32 Deactivate and Fire 
                             //33 Armor and Fire 
 
                             //Map
-                            for (int i = 0; i < gamestate.map.GetLength(0); i++) //Ligne
+                            for (int i = 0; i < gamestate.map.GetLength(0); i++) //Row
                             {
-                                for (int j = 0; j < gamestate.map.GetLength(1); j++) //Colonne
+                                for (int j = 0; j < gamestate.map.GetLength(1); j++) //Column
                                 {
                                     if (gamestate.map[i, j] < 10 && game.world.MapGrid[i, j].BonusHere != null)
                                     {
@@ -342,7 +326,7 @@ namespace BombermanMultiplayer
                                         case 12:
                                             game.world.MapGrid[i, j].BonusHere =
                                                 new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
-                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Desamorce);
+                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Deactivate);
                                             game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
                                         case 13:
@@ -369,7 +353,7 @@ namespace BombermanMultiplayer
                                         case 32:
                                             game.world.MapGrid[i, j].BonusHere =
                                                 new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
-                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Desamorce);
+                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Deactivate);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
                                             break;
@@ -428,9 +412,9 @@ namespace BombermanMultiplayer
         //Load all sprite 
         public void LoadAllMapSprites()
         {
-            for (int i = 0; i < game.world.MapGrid.GetLength(0); i++) //Ligne
+            for (int i = 0; i < game.world.MapGrid.GetLength(0); i++) //Row
             {
-                for (int j = 0; j < game.world.MapGrid.GetLength(1); j++) //Colonne
+                for (int j = 0; j < game.world.MapGrid.GetLength(1); j++) //Column
                 {
                     if (!game.world.MapGrid[i,j].Destroyable && game.world.MapGrid[i, j].Walkable)
                     {
@@ -454,7 +438,7 @@ namespace BombermanMultiplayer
                             case Objects.BonusType.SpeedBoost:
                                 game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.SpeedUp);
                                 break;
-                            case Objects.BonusType.Desamorce:
+                            case Objects.BonusType.Deactivate:
                                 game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.Deactivate);
                                 break;
                             case Objects.BonusType.Armor:
@@ -478,26 +462,39 @@ namespace BombermanMultiplayer
         private void LoadGameComponents()
         {
 
-            BonusSlot = new Rectangle[4];
+            BonusSlot = new Rectangle[8];
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 8; i++)
             {
-                BonusSlot[i] = new Rectangle(i * pbGame.Width / 18, pbGame.Height / 25, pbGame.Width / 20, pbGame.Height / 20);
-                if (i > 1)
+                if (i < 2)
                 {
-                    BonusSlot[i] = new Rectangle(3 * pbGame.Width / 4 + i * pbGame.Width / 18, pbGame.Height / 25, pbGame.Width / 20, pbGame.Height / 20);
+                    BonusSlot[i] = new Rectangle(i * pbGame.Width / 18, pbGame.Height / 25, pbGame.Width / 20, pbGame.Height / 20);
+                }
+                else if (i < 4)
+                {
+                    BonusSlot[i] = new Rectangle(3 * pbGame.Width / 4 + (i - 2) * pbGame.Width / 18, pbGame.Height / 25, pbGame.Width / 20, pbGame.Height / 20);
+                }
+                else if (i < 6)
+                {
+                    BonusSlot[i] = new Rectangle((i - 4) * pbGame.Width / 18, pbGame.Height - 50, pbGame.Width / 20, pbGame.Height / 20);
+                }
+                else
+                {
+                    BonusSlot[i] = new Rectangle(3 * pbGame.Width / 4 + (i - 6) * pbGame.Width / 18, pbGame.Height - 50, pbGame.Width / 20, pbGame.Height / 20);
                 }
             }
 
             //game.world.loadBackground(Properties.Resources.World);
             game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
-            game.player1.LoadSprite(Properties.Resources.AT_DOWN);
-            game.player2.LoadSprite(Properties.Resources.T_UP);
+            foreach (Player player in game.players)
+            {
+                player.LoadSprite(Properties.Resources.AT_DOWN);
+            }
 
 
             bufferG = BufferedGraphicsManager.Current.Allocate(pbGame.CreateGraphics(), pbGame.DisplayRectangle);
             gr = bufferG.Graphics;
-            
+
 
             this.refreshGraphics.Start();
 
@@ -505,66 +502,43 @@ namespace BombermanMultiplayer
 
         public void Draw()
         {
-
-            if (!game.player1.Dead)
+            foreach (Player player in game.players)
             {
-                switch (game.player1.Orientation)
+                if (!player.Dead)
                 {
-                    case Player.MovementDirection.UP:
-                        game.player1.LoadSprite(Properties.Resources.AT_UP);
-                        break;
-                    case Player.MovementDirection.DOWN:
-                        game.player1.LoadSprite(Properties.Resources.AT_DOWN);
-                        break;
-                    case Player.MovementDirection.LEFT:
-                        game.player1.LoadSprite(Properties.Resources.AT_LEFT);
-                        break;
-                    case Player.MovementDirection.RIGHT:
-                        game.player1.LoadSprite(Properties.Resources.AT_RIGHT);
-                        break;
-                    case Player.MovementDirection.NONE:
-                        break;
-                    default:
-                        break;
+                    switch (player.Orientation)
+                    {
+                        case Player.MovementDirection.UP:
+                            player.LoadSprite(Properties.Resources.AT_UP);
+                            break;
+                        case Player.MovementDirection.DOWN:
+                            player.LoadSprite(Properties.Resources.AT_DOWN);
+                            break;
+                        case Player.MovementDirection.LEFT:
+                            player.LoadSprite(Properties.Resources.AT_LEFT);
+                            break;
+                        case Player.MovementDirection.RIGHT:
+                            player.LoadSprite(Properties.Resources.AT_RIGHT);
+                            break;
+                        case Player.MovementDirection.NONE:
+                            break;
+                        default:
+                            break;
+                    }
                 }
+                else
+                    player.LoadSprite(Properties.Resources.Blood);
             }
-            else
-                game.player1.LoadSprite(Properties.Resources.Blood);
-
-            if (!game.player2.Dead)
-            {
-                switch (game.player2.Orientation)
-                {
-                    case Player.MovementDirection.UP:
-                        game.player2.LoadSprite(Properties.Resources.T_UP);
-                        break;
-                    case Player.MovementDirection.DOWN:
-                        game.player2.LoadSprite(Properties.Resources.T_DOWN);
-                        break;
-                    case Player.MovementDirection.LEFT:
-                        game.player2.LoadSprite(Properties.Resources.T_LEFT);
-                        break;
-                    case Player.MovementDirection.RIGHT:
-                        game.player2.LoadSprite(Properties.Resources.T_RIGHT);
-                        break;
-                    case Player.MovementDirection.NONE:
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else
-                game.player2.LoadSprite(Properties.Resources.Blood);
 
             gr.Clear(pbGame.BackColor);
 
             game.world.Draw(gr);
 
-            game.player1.Draw(gr);
-            game.player1.DrawPosition(gr);
-
-            game.player2.Draw(gr);
-            game.player2.DrawPosition(gr);
+            foreach (Player player in game.players)
+            {
+                player.Draw(gr);
+                player.DrawPosition(gr);
+            }
 
             foreach (Bomb bomb in game.BombsOnTheMap)
             {
@@ -608,81 +582,50 @@ namespace BombermanMultiplayer
             {
                 gr.DrawString("GAME OVER", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
                      new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8);
-                switch (game.Winner)
+                if (game.Winner != 0)
                 {
-                    case 1:
-                        gr.DrawString("Soldier wins", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
-                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
-                        break;
-                    case 2:
-                        gr.DrawString("Terrorist wins", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
-                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
-                        break;
-                    default:
-                        gr.DrawString("Draw", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
-                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
-                        break;
+                    gr.DrawString("Player " + game.Winner + " wins", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
+                        new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
+                }
+                else
+                {
+                    gr.DrawString("Draw", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
+                        new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
                 }
 
             }
 
-            for (int j = 0; j < 2; j++)
+            for (int j = 0; j < game.players.Count; j++)
             {
 
                 //Bonus
-                gr.DrawString("Player " + (int)(j + 1) + " : ", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[j * 2].X, BonusSlot[j * 2].Y - BonusSlot[j + 1].Width / 2);
-                for (int i = 0; i < game.player1.BonusSlot.Length; i++)
+                gr.DrawString("Player " + (j + 1) + " : ", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[j * 2].X, BonusSlot[j * 2].Y - BonusSlot[j * 2].Height / 2);
+                for (int i = 0; i < game.players[j].BonusSlot.Length; i++)
                 {
-                    switch (game.player1.BonusSlot[i])
+                    switch (game.players[j].BonusSlot[i])
                     {
                         case Objects.BonusType.PowerBomb:
-                            gr.DrawImage(Properties.Resources.SuperBomb, BonusSlot[i]);
-                            gr.DrawString((game.player1.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i].X, BonusSlot[i].Y + BonusSlot[i].Height);
+                            gr.DrawImage(Properties.Resources.SuperBomb, BonusSlot[i + j * 2]);
+                            gr.DrawString((game.players[j].BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + j * 2].X, BonusSlot[i + j * 2].Y + BonusSlot[i + j * 2].Height);
                             break;
                         case Objects.BonusType.SpeedBoost:
-                            gr.DrawImage(Properties.Resources.SpeedUp, BonusSlot[i]);
-                            gr.DrawString((game.player1.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i].X, BonusSlot[i].Y + BonusSlot[i].Height);
+                            gr.DrawImage(Properties.Resources.SpeedUp, BonusSlot[i + j * 2]);
+                            gr.DrawString((game.players[j].BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + j * 2].X, BonusSlot[i + j * 2].Y + BonusSlot[i + j * 2].Height);
                             break;
-                        case Objects.BonusType.Desamorce:
-                            gr.DrawImage(Properties.Resources.Deactivate, BonusSlot[i]);
-                            gr.DrawString((game.player1.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i].X, BonusSlot[i].Y + BonusSlot[i].Height);
+                        case Objects.BonusType.Deactivate:
+                            gr.DrawImage(Properties.Resources.Deactivate, BonusSlot[i + j * 2]);
+                            gr.DrawString((game.players[j].BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + j * 2].X, BonusSlot[i + j * 2].Y + BonusSlot[i + j * 2].Height);
                             break;
                         case Objects.BonusType.Armor:
-                            gr.DrawImage(Properties.Resources.Armor, BonusSlot[i]);
-                            gr.DrawString((game.player1.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i].X, BonusSlot[i].Y + BonusSlot[i].Height);
+                            gr.DrawImage(Properties.Resources.Armor, BonusSlot[i + j * 2]);
+                            gr.DrawString((game.players[j].BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + j * 2].X, BonusSlot[i + j * 2].Y + BonusSlot[i + j * 2].Height);
                             break;
                         case Objects.BonusType.None:
                             break;
                         default:
                             break;
                     }
-                    switch (game.player2.BonusSlot[i])
-                    {
-                        case Objects.BonusType.PowerBomb:
-                            gr.DrawImage(Properties.Resources.SuperBomb, BonusSlot[i + 2]);
-                            gr.DrawString((game.player2.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + 2].X, BonusSlot[i + 2].Y + BonusSlot[i + 2].Height);
-                            break;
-                        case Objects.BonusType.SpeedBoost:
-                            gr.DrawImage(Properties.Resources.SpeedUp, BonusSlot[i + 2]);
-                            gr.DrawString((game.player2.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + 2].X, BonusSlot[i + 2].Y + BonusSlot[i + 2].Height);
-                            break;
-                        case Objects.BonusType.Desamorce:
-                            gr.DrawImage(Properties.Resources.Deactivate, BonusSlot[i + 2]);
-                            gr.DrawString((game.player2.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + 2].X, BonusSlot[i + 2].Y + BonusSlot[i + 2].Height);
-                            break;
-                        case Objects.BonusType.Armor:
-                            gr.DrawImage(Properties.Resources.Armor, BonusSlot[i + 2]);
-                            gr.DrawString((game.player2.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + 2].X, BonusSlot[i + 2].Y + BonusSlot[i + 2].Height);
-                            break;
-                        case Objects.BonusType.None:
-                            break;
-                        default:
-                            break;
-                    }
-
                 }
-
-
             }
         }
 

@@ -11,15 +11,14 @@ namespace BombermanMultiplayer
     {
         public List<Bomb> bombsOnTheMap;
         public Tile[,] MapGrid;
-        public Player player1, player2;
+        public List<Player> players;
 
 
-        public SaveGameData(List<Bomb> bombsOnTheMap_, Tile[,] MapGrid_, Player player1_, Player player2_)
+        public SaveGameData(List<Bomb> bombsOnTheMap_, Tile[,] MapGrid_, List<Player> players_)
         {
             this.bombsOnTheMap = bombsOnTheMap_;
             this.MapGrid = MapGrid_;
-            this.player1 = player1_;
-            this.player2 = player2_;
+            this.players = players_;
         }
 
 

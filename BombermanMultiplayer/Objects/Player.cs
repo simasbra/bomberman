@@ -16,9 +16,15 @@ namespace BombermanMultiplayer
     [Serializable]
     public class Player : GameObject
     {
-        byte PlayerNumero;
+        private byte _PlayerNumber;
+
+        public byte PlayerNumber
+        {
+            get { return _PlayerNumber; }
+            set { _PlayerNumber = value; }
+        }
         public string Name = "Player";
-        private byte _Vitesse = 5;
+        private byte _Speed = 5;
         private bool _Dead = false;
         private byte _BombNumb = 2;
         private byte _Lifes = 1;
@@ -64,16 +70,15 @@ namespace BombermanMultiplayer
             set { _BombNumb = value; }
         }
 
-        public byte Vitesse
+        public byte Speed
         {
-            get { return _Vitesse; }
+            get { return _Speed; }
             set
             {
                 if (value > 0)
-                    _Vitesse = value;
-                else _Vitesse = 2;
+                    _Speed = value;
+                else _Speed = 2;
             }
-
         }
 
         
@@ -104,12 +109,12 @@ namespace BombermanMultiplayer
             CasePosition = new int[2] { caseligne, casecolonne };
             Lifes = lifes;
             Wait = 0;
-            PlayerNumero = playerNumero;
+            PlayerNumber = playerNumero;
 
 
         }
 
-        #region Deplacements
+        #region Movement
 
 
         //Check the player's location
@@ -117,8 +122,8 @@ namespace BombermanMultiplayer
         {
             //Player is considerate to be on a case when at least half of his sprite is on it
             //Hauteur
-            this.CasePosition[0] = (this.Source.Y + this.Source.Height / 2) / tileHeight; //Ligne
-            this.CasePosition[1] = (this.Source.X + this.Source.Width / 2) / tileWidth; //Colonne
+            this.CasePosition[0] = (this.Source.Y + this.Source.Height / 2) / tileHeight; //Row
+            this.CasePosition[1] = (this.Source.X + this.Source.Width / 2) / tileWidth; //Column
 
 
         }
@@ -128,16 +133,16 @@ namespace BombermanMultiplayer
             switch (this.Orientation)
             {
                 case MovementDirection.UP:
-                    DeplHaut();
+                    MoveUp();
                     break;
                 case MovementDirection.DOWN:
-                    DeplBas();
+                    MoveDown();
                     break;
                 case MovementDirection.LEFT:
-                    DeplGauche();
+                    MoveLeft();
                     break;
                 case MovementDirection.RIGHT:
-                    DeplDroite();
+                    MoveRight();
                     break;
                 default:
                     this.frameindex = 0;
@@ -147,48 +152,48 @@ namespace BombermanMultiplayer
         }
 
 
-        public void DeplHaut()
+        public void MoveUp()
         {
-                base.Bouger(0, -Vitesse);
+                base.Move(0, -Speed);
         }
 
-        public void DeplBas()
+        public void MoveDown()
         {
-                base.Bouger(0, Vitesse);
+                base.Move(0, Speed);
         }
 
-        public void DeplGauche()
+        public void MoveLeft()
         {
-                base.Bouger(-Vitesse, 0);
+                base.Move(-Speed, 0);
         }
 
-        public void DeplDroite()
+        public void MoveRight()
         {
-                base.Bouger(Vitesse, 0);
+                base.Move(Speed, 0);
         }
 
-        public void NO()
+        public void MoveNorthWest()
         {
-            base.Bouger(-Vitesse / 2, 0);
-            base.Bouger(0, Vitesse / 2);
+            base.Move(-Speed / 2, 0);
+            base.Move(0, Speed / 2);
         }
-        public void NE()
+        public void MoveNorthEast()
         {
             
-            base.Bouger(Vitesse / 2, 0);
-            base.Bouger(0, Vitesse / 2);
+            base.Move(Speed / 2, 0);
+            base.Move(0, Speed / 2);
         }
-        public void SO()
+        public void MoveSouthWest()
         {
 
-            base.Bouger(-Vitesse / 2, 0);
-            base.Bouger(0, -Vitesse / 2);
+            base.Move(-Speed / 2, 0);
+            base.Move(0, -Speed / 2);
         }
-        public void SE()
+        public void MoveSouthEast()
         {
 
-            base.Bouger(Vitesse / 2, 0);
-            base.Bouger(0, -Vitesse / 2);
+            base.Move(Speed / 2, 0);
+            base.Move(0, -Speed / 2);
         }
 
 
@@ -198,15 +203,15 @@ namespace BombermanMultiplayer
 
         #region Actions
         
-        public void DropBomb(Tile[,] MapGrid, List<Bomb> BombsOnTheMap, Player otherplayer)
+        public void DropBomb(Tile[,] MapGrid, List<Bomb> BombsOnTheMap, List<Player> players)
         {
             if (this.BombNumb > 0) //If player still has bombs
             {
                 if (!MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied)
                 {
-                    BombsOnTheMap.Add(new Bomb(this.CasePosition[0], this.CasePosition[1], 8, 48, 48, 2000, 48, 48, this.PlayerNumero));
+                    BombsOnTheMap.Add(new Bomb(this.CasePosition[0], this.CasePosition[1], 8, 48, 48, 2000, 48, 48, this.PlayerNumber));
                     //Case obtain a reference to the bomb dropped on
-                    MapGrid[this.CasePosition[0], this.CasePosition[1]].bomb = BombsOnTheMap[BombsOnTheMap.Count-1];
+                    MapGrid[this.CasePosition[0], this.CasePosition[1]].bomb = BombsOnTheMap[BombsOnTheMap.Count - 1];
                     MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied = true;
                     this.BombNumb--;
                 }
@@ -240,7 +245,7 @@ namespace BombermanMultiplayer
                         case BonusType.SpeedBoost:
                             gr.DrawLine(new Pen(Color.Yellow, 6), this.Source.X, this.Source.Y + this.Source.Height, this.Source.X + this.Source.Width, this.Source.Y + this.Source.Height);
                             break;
-                        case BonusType.Desamorce:
+                        case BonusType.Deactivate:
                             break;
                         case BonusType.Armor:
                             gr.DrawEllipse(new Pen(Color.Blue, 5), this.Source);
@@ -290,32 +295,32 @@ namespace BombermanMultiplayer
             }
         }
 
-        public void Deactivate(Tile[,] MapGrid, List<Bomb> bombsOnTheMap,  Player otherPlayer)
+        public void Deactivate(Tile[,] MapGrid, List<Bomb> bombsOnTheMap, List<Player> players)
         {
-            Bomb toDesamorce = null;
+            Bomb toDeactivate = null;
 
             //Check if player has the bonus
-            if (this.BonusSlot[0]!= BonusType.Desamorce && this.BonusSlot[1] != BonusType.Desamorce)
+            if (this.BonusSlot[0] != BonusType.Deactivate && this.BonusSlot[1] != BonusType.Deactivate)
             {
                 return;
             }
 
             if (MapGrid[this.CasePosition[0], this.CasePosition[1]].bomb != null)
             {
-                toDesamorce = MapGrid[this.CasePosition[0], this.CasePosition[1]].bomb;
+                toDeactivate = MapGrid[this.CasePosition[0], this.CasePosition[1]].bomb;
 
-                if (toDesamorce.Proprietary == this.PlayerNumero)
+                foreach (Player p in players)
                 {
-                    this.BombNumb++;
-                }
-                else
-                {
-                    otherPlayer.BombNumb++;
+                    if (p.PlayerNumber == toDeactivate.Proprietary)
+                    {
+                        p.BombNumb++;
+                        break;
+                    }
                 }
 
-                bombsOnTheMap.Remove(toDesamorce);
-                toDesamorce.Dispose();
-                toDesamorce = null;
+                bombsOnTheMap.Remove(toDeactivate);
+                toDeactivate.Dispose();
+                toDeactivate = null;
 
                 MapGrid[this.CasePosition[0], this.CasePosition[1]].bomb = null;
                 MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied = false;
@@ -326,56 +331,46 @@ namespace BombermanMultiplayer
                 {
                     if (MapGrid[this.CasePosition[0] + i, this.CasePosition[1]].bomb != null)
                     {
-                        toDesamorce = MapGrid[this.CasePosition[0] + i, this.CasePosition[1]].bomb;
+                        toDeactivate = MapGrid[this.CasePosition[0] + i, this.CasePosition[1]].bomb;
 
-                        if (toDesamorce.Proprietary == this.PlayerNumero)
+                        foreach (Player p in players)
                         {
-                            this.BombNumb++;
-                        }
-                        else
-                        {
-                            otherPlayer.BombNumb++;
+                            if (p.PlayerNumber == toDeactivate.Proprietary)
+                            {
+                                p.BombNumb++;
+                                break;
+                            }
                         }
 
-                        bombsOnTheMap.Remove(toDesamorce);
-                        toDesamorce.Dispose();
-                        toDesamorce = null;
+                        bombsOnTheMap.Remove(toDeactivate);
+                        toDeactivate.Dispose();
+                        toDeactivate = null;
 
                         MapGrid[this.CasePosition[0] + i, this.CasePosition[1]].bomb = null;
                         MapGrid[this.CasePosition[0] + i, this.CasePosition[1]].Occupied = false;
-
-
                     }
                     if (MapGrid[this.CasePosition[0], this.CasePosition[1] + i].bomb != null)
                     {
-                        toDesamorce = MapGrid[this.CasePosition[0], this.CasePosition[1] + i].bomb;
+                        toDeactivate = MapGrid[this.CasePosition[0], this.CasePosition[1] + i].bomb;
 
-                        if (toDesamorce.Proprietary == this.PlayerNumero)
+                        foreach (Player p in players)
                         {
-                            this.BombNumb++;
-                        }
-                        else
-                        {
-                            otherPlayer.BombNumb++;
+                            if (p.PlayerNumber == toDeactivate.Proprietary)
+                            {
+                                p.BombNumb++;
+                                break;
+                            }
                         }
 
-                        bombsOnTheMap.Remove(toDesamorce);
-                        toDesamorce.Dispose();
-                       
-                        toDesamorce = null;
+                        bombsOnTheMap.Remove(toDeactivate);
+                        toDeactivate.Dispose();
+                        toDeactivate = null;
 
                         MapGrid[this.CasePosition[0], this.CasePosition[1] + i].bomb = null;
-
                         MapGrid[this.CasePosition[0], this.CasePosition[1] + i].Occupied = false;
                     }
                 }
-
-
             }
-
-
-
-
         }
 
 

@@ -21,8 +21,8 @@ namespace BombermanMultiplayer.Objects
 
         public void CheckCasePosition(int TileWidth, int TileHeight)
         {
-            this.CasePosition[0] = this.Source.Y / TileWidth; //Ligne
-            this.CasePosition[1] = this.Source.X / TileWidth; //Colonne
+            this.CasePosition[0] = this.Source.Y / TileWidth; //Row
+            this.CasePosition[1] = this.Source.X / TileWidth; //Column
         }
 
     }
@@ -32,7 +32,7 @@ namespace BombermanMultiplayer.Objects
         None,
         PowerBomb,
         SpeedBoost,
-        Desamorce,
+        Deactivate,
         Armor
 
     }

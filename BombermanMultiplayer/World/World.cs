@@ -40,9 +40,9 @@ namespace BombermanMultiplayer
                 gr.DrawImage(Background, gr.VisibleClipBounds.X, gr.VisibleClipBounds.Y, gr.VisibleClipBounds.Width, gr.VisibleClipBounds.Height);
              }
 
-            for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
+            for (int i = 0; i < MapGrid.GetLength(0); i++) //Row
             {
-                for (int j = 0; j < MapGrid.GetLength(1); j++) //Colonne
+                for (int j = 0; j < MapGrid.GetLength(1); j++) //Column
                 {
                     MapGrid[i, j].Draw(gr);
                 }
@@ -57,9 +57,9 @@ namespace BombermanMultiplayer
         
         public void loadSpriteTile(Image spriteDestroyableTile, Image spriteUndestroyableTile)
         {
-            for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
+            for (int i = 0; i < MapGrid.GetLength(0); i++) //Row
             {
-                for (int j = 0; j < MapGrid.GetLength(1); j++) //Colonne
+                for (int j = 0; j < MapGrid.GetLength(1); j++) //Column
                 {
                     if (MapGrid[i, j].Destroyable)
                     {
@@ -76,9 +76,9 @@ namespace BombermanMultiplayer
 
         public void refreshTileSprites()
         {
-            for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
+            for (int i = 0; i < MapGrid.GetLength(0); i++) //Row
             {
-                for (int j = 0; j < MapGrid.GetLength(1); j++) //Colonne
+                for (int j = 0; j < MapGrid.GetLength(1); j++) //Column
                 {
                     if (MapGrid[i, j].Walkable && !MapGrid[i, j].Destroyable)
                     {
@@ -99,12 +99,12 @@ namespace BombermanMultiplayer
         }
 
 
-        public World(int hebergeurWidth, int hebergeurHeight, int TILE_WIDTH, int TILE_HEIGHT, int totalFrameTile)
+        public World(int hostWidth, int hostHeight, int TILE_WIDTH, int TILE_HEIGHT, int totalFrameTile)
         {
-            CreateWorldGrid(hebergeurWidth, hebergeurHeight, TILE_WIDTH, TILE_HEIGHT, totalFrameTile);
+            CreateWorldGrid(hostWidth, hostHeight, TILE_WIDTH, TILE_HEIGHT, totalFrameTile);
         }
 
-        public World(int hebergeurWidth, int hebergeurHeight, Tile[,] map)
+        public World(int hostWidth, int hostHeight, Tile[,] map)
         {
             this.MapGrid = map;
         }
@@ -114,16 +114,16 @@ namespace BombermanMultiplayer
 
         }
 
-        public void CreateWorldGrid(int hebergeurWidth, int hebergeurHeight, int TILE_WIDTH, int TILE_HEIGHT, int totalFrameTile)
+        public void CreateWorldGrid(int hostWidth, int hostHeight, int TILE_WIDTH, int TILE_HEIGHT, int totalFrameTile)
         {
             Random r = new Random();
             int rand = 0;
-            //Génération grille du terrain
-            MapGrid = new Tile[hebergeurWidth / TILE_WIDTH, hebergeurHeight / TILE_HEIGHT];
+            //Terrain grid generation
+            MapGrid = new Tile[hostWidth / TILE_WIDTH, hostHeight / TILE_HEIGHT];
 
-            for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
+            for (int i = 0; i < MapGrid.GetLength(0); i++) //Row
             {
-                for (int j = 0; j < MapGrid.GetLength(1); j++) //Colonne
+                for (int j = 0; j < MapGrid.GetLength(1); j++) //Column
                 {
 
                     rand = r.Next(0,10);

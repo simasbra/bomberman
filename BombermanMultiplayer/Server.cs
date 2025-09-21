@@ -69,8 +69,8 @@ namespace BombermanMultiplayer
             {
                 AcceptConnections();
 
-                //When there's two players, no need to wait anymore
-                if(connections.Count == 2)
+                //When there's four players, no need to wait anymore
+                if(connections.Count == 4)
                 {
                     WaitingPlayers = false;
                     Thread.Sleep(1000);
@@ -122,7 +122,7 @@ namespace BombermanMultiplayer
             RX_Packet = new Packet();
 
             //Wait till all players have received the map
-            while (PlayersReady < 2)
+            while (PlayersReady < 4)
             {
                 
                 //Try to get a packet
@@ -132,15 +132,7 @@ namespace BombermanMultiplayer
                 if (RX_Packet.GetPacketType() == PacketType.Ready)
                 {
                     PlayersReady++;
-                    switch (RX_Packet.GetSender())
-                    {
-                        case Sender.Player1:
-                            game.player1.Name = RX_Packet.GetPayload<string>();
-                            break;
-                        case Sender.Player2:
-                            game.player2.Name = RX_Packet.GetPayload<string>();
-                            break;
-                    }
+                    game.players[PlayersReady - 1].Name = RX_Packet.GetPayload<string>();
 
                     RX_Packet = new Packet();
 
@@ -239,24 +231,7 @@ namespace BombermanMultiplayer
             gamestate.Over = this.game.Over;
             gamestate.Winner = this.game.Winner;
 
-            //Send game state to everyone
-            gamestate.XY_Position_Player1 = new short[2] { (short)this.game.player1.Source.X, (short)this.game.player1.Source.Y };
-            gamestate.XY_Position_Player2 = new short[2] { (short)this.game.player2.Source.X, (short)this.game.player2.Source.Y };
-
-            gamestate.framePlayer1 = (short)game.player1.frameindex;
-            gamestate.framePlayer2 = (short)game.player2.frameindex;
-
-            gamestate.orientationPlayer1 = game.player1.Orientation;
-            gamestate.orientationPlayer2 = game.player2.Orientation;
-
-            gamestate.BonusSlotPlayer1 = game.player1.BonusSlot;
-            gamestate.BonusTimerPlayer1 = game.player1.BonusTimer;
-
-            gamestate.BonusSlotPlayer2 = game.player2.BonusSlot;
-            gamestate.BonusTimerPlayer2 = game.player2.BonusTimer;
-
-            gamestate.NamePlayer1 = game.player1.Name;
-            gamestate.NamePlayer2 = game.player2.Name;
+            gamestate.players = this.game.players;
 
 
             gamestate.bombsList = game.BombsOnTheMap;

@@ -14,26 +14,26 @@ namespace BombermanMultiplayer
     [Serializable]
     public abstract class GameObject
     {
-        //Rectangle permettant de 'matérialiser' le sprite
+        //Rectangle allowing to 'materialize' the sprite
         protected Rectangle _Source;
 
         [NonSerialized]
         protected Image Sprite;
 
-        //Frame actuelle de l'objet
+        //Current frame of the object
         protected int _frameindex;
-        //Durée depuis l'affichage d'une frame
+        //Duration since displaying a frame
 
-        //Durée d'une frame
+        //Duration of a frame
         protected float _frameTime = 125;
 
 
         protected int _totalElapsedTime = 0;
 
-        //Nombre de frame de l'animation
+        //Number of frames in the animation
         protected int _totalFrames;
 
-        //Position de l'objet au niveau case
+        //Position of the object at tile level
         protected int[] _CasePosition;
 
         #region Accessors
@@ -62,7 +62,7 @@ namespace BombermanMultiplayer
             get { return this._frameTime; }
             set
             {
-                if (value <= 0) this._frameTime = 1; //Pas de temps négatif
+                if (value <= 0) this._frameTime = 1; //No negative time
                 else this._frameTime = value;
             }
         }
@@ -80,7 +80,7 @@ namespace BombermanMultiplayer
 
         #endregion
 
-        //Constructeur
+        //Constructor
         public GameObject()
         { }
 
@@ -151,7 +151,7 @@ namespace BombermanMultiplayer
 
                 if (frameindex > _totalFrames)
                 {
-                    frameindex = 0; // retourne au premier sprite une fois la série finie
+                    frameindex = 0; // return to first sprite once series is finished
 
                 }
             }
@@ -161,10 +161,10 @@ namespace BombermanMultiplayer
 
 
 
-        public void Bouger(int deplX, int deplY) // Ajoute juste le montant du déplacement à la postion de l'objet.
+        public void Move(int moveX, int moveY) // Just adds the movement amount to the object's position.
         {
-            _Source.X += deplX;
-            _Source.Y += deplY;
+            _Source.X += moveX;
+            _Source.Y += moveY;
             
         }
 
