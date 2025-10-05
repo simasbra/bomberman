@@ -20,7 +20,7 @@ namespace BombermanMultiplayer
         public byte Winner = 0;
 
         public World world;
-        public Player player1, player2;
+        public Player[] players;
 
         public List<Bomb> BombsOnTheMap;
         public System.Timers.Timer LogicTimer;
@@ -30,12 +30,25 @@ namespace BombermanMultiplayer
         {
             this.world = new World(hebergeurWidth, hebergeurHeight, 48, 48, 1);
 
-            player1 = new Player(1, 2, 33, 33, 1, 1, 48, 48, 80, 1);
-            player2 = new Player(1, 2, 33, 33, this.world.MapGrid.GetLength(0) - 2, this.world.MapGrid.GetLength(0) - 2, 48, 48, 80, 2);
+            players = new Player[4];
+            players[0] = new Player(1, 2, 33, 33, 1, 1, 48, 48, 80, 1);
+            players[1] = new Player(1, 2, 33, 33, world.MapGrid.GetLength(0) - 2, world.MapGrid.GetLength(0) - 2, 48, 48, 80, 2);
+            players[2] = new Player(1, 2, 33, 33, 1, world.MapGrid.GetLength(1) - 2, 48, 48, 80, 3);
+            players[3] = new Player(1, 2, 33, 33, world.MapGrid.GetLength(0) - 2, 1, 48, 48, 80, 4);
 
             this.BombsOnTheMap = new List<Bomb>();
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
+            int rows = world.MapGrid.GetLength(0);
+            int cols = world.MapGrid.GetLength(1);
+
+            // Top-right corner
+            world.MapGrid[1, cols - 2].Walkable = true;
+            world.MapGrid[1, cols - 2].Destroyable = false;
+
+            // Bottom-left corner
+            world.MapGrid[rows - 2, 1].Walkable = true;
+            world.MapGrid[rows - 2, 1].Destroyable = false;
         }
 
         //ctor when loading a game
@@ -43,8 +56,10 @@ namespace BombermanMultiplayer
         {
             this.world = new World(hebergeurWidth, hebergeurHeight, save.MapGrid);
 
-            player1 = save.player1;
-            player2 = save.player2;
+            // Inicializuojam žaidėjų masyvą iš save struktūros
+            this.players = new Player[4];
+            for (int i = 0; i < 4; i++)
+                this.players[i] = save.players[i];
 
             this.BombsOnTheMap = save.bombsOnTheMap;
             this.LogicTimer = new System.Timers.Timer(40);
@@ -138,108 +153,56 @@ namespace BombermanMultiplayer
             return mask;
         }
 
-        //Manage key pushed for local game
         public void Game_KeyDown(Keys key)
         {
-            switch (key)
-            {
-                case Keys.Z:
-                    if (player1.Dead)
-                        break;
-                    player1.Orientation = Player.MovementDirection.UP;
-                    player1.LoadSprite(Properties.Resources.AT_UP);
-                    break;
-                case Keys.S:
-                    if (player1.Dead)
-                        break;
-                    player1.Orientation = Player.MovementDirection.DOWN;
-                    player1.LoadSprite(Properties.Resources.AT_DOWN);
-                    break;
-                case Keys.Q:
-                    if (player1.Dead)
-                        break;
-                    player1.Orientation = Player.MovementDirection.LEFT;
-                    player1.LoadSprite(Properties.Resources.AT_LEFT);
-                    break;
-                case Keys.D:
-                    if (player1.Dead)
-                        break;
-                    player1.Orientation = Player.MovementDirection.RIGHT;
-                    player1.LoadSprite(Properties.Resources.AT_RIGHT);
-                    break;
-                case Keys.Space:
-                    if (player1.Dead)
-                        break;
-                    player1.DropBomb(this.world.MapGrid, this.BombsOnTheMap, player2);
-                    break;
-                case Keys.A:
-                    if (player1.Dead)
-                        break;
-                    player1.Deactivate(this.world.MapGrid, BombsOnTheMap, player2);
-                    break;
-                case Keys.Up:
-                    if (player2.Dead)
-                        break;
-                    player2.Orientation = Player.MovementDirection.UP;
-                    player2.LoadSprite(Properties.Resources.T_UP);
-                    break;
-                case Keys.Down:
-                    if (player2.Dead)
-                        break;
-                    player2.Orientation = Player.MovementDirection.DOWN;
-                    player2.LoadSprite(Properties.Resources.T_DOWN);
-                    break;
-                case Keys.Left:
-                    if (player2.Dead)
-                        break;
-                    player2.Orientation = Player.MovementDirection.LEFT;
-                    player2.LoadSprite(Properties.Resources.T_LEFT);
-                    break;
-                case Keys.Right:
-                    if (player2.Dead)
-                        break;
-                    player2.Orientation = Player.MovementDirection.RIGHT;
-                    player2.LoadSprite(Properties.Resources.T_RIGHT);
-                    break;
-                case Keys.ControlKey:
-                    if (player2.Dead)
-                        break;
-                    player2.DropBomb(this.world.MapGrid, this.BombsOnTheMap, player1);
-                    break;
-                case Keys.Shift:
-                    if (player2.Dead)
-                        break;
-                    player2.Deactivate(this.world.MapGrid, BombsOnTheMap, player1);
-                    break;
-                case Keys.Escape:
-                    Pause();
-                    break;
-            }
+            if (key == Keys.W) { if (!players[0].Dead) { players[0].Orientation = Player.MovementDirection.UP; players[0].LoadSprite(Properties.Resources.AT_UP); } }
+            else if (key == Keys.S) { if (!players[0].Dead) { players[0].Orientation = Player.MovementDirection.DOWN; players[0].LoadSprite(Properties.Resources.AT_DOWN); } }
+            else if (key == Keys.A) { if (!players[0].Dead) { players[0].Orientation = Player.MovementDirection.LEFT; players[0].LoadSprite(Properties.Resources.AT_LEFT); } }
+            else if (key == Keys.D) { if (!players[0].Dead) { players[0].Orientation = Player.MovementDirection.RIGHT; players[0].LoadSprite(Properties.Resources.AT_RIGHT); } }
+            else if (key == Keys.Space) { if (!players[0].Dead) players[0].DropBomb(world.MapGrid, BombsOnTheMap, players[1]); }
+
+            else if (key == Keys.Up) { if (!players[1].Dead) { players[1].Orientation = Player.MovementDirection.UP; players[1].LoadSprite(Properties.Resources.T_UP); } }
+            else if (key == Keys.Down) { if (!players[1].Dead) { players[1].Orientation = Player.MovementDirection.DOWN; players[1].LoadSprite(Properties.Resources.T_DOWN); } }
+            else if (key == Keys.Left) { if (!players[1].Dead) { players[1].Orientation = Player.MovementDirection.LEFT; players[1].LoadSprite(Properties.Resources.T_LEFT); } }
+            else if (key == Keys.Right) { if (!players[1].Dead) { players[1].Orientation = Player.MovementDirection.RIGHT; players[1].LoadSprite(Properties.Resources.T_RIGHT); } }
+            else if (key == Keys.Enter) { if (!players[1].Dead) players[1].DropBomb(world.MapGrid, BombsOnTheMap, players[0]); }
+
+            else if (key == Keys.I) { if (!players[2].Dead) { players[2].Orientation = Player.MovementDirection.UP; players[2].LoadSprite(Properties.Resources.AT_UP); } }
+            else if (key == Keys.K) { if (!players[2].Dead) { players[2].Orientation = Player.MovementDirection.DOWN; players[2].LoadSprite(Properties.Resources.AT_DOWN); } }
+            else if (key == Keys.J) { if (!players[2].Dead) { players[2].Orientation = Player.MovementDirection.LEFT; players[2].LoadSprite(Properties.Resources.AT_LEFT); } }
+            else if (key == Keys.L) { if (!players[2].Dead) { players[2].Orientation = Player.MovementDirection.RIGHT; players[2].LoadSprite(Properties.Resources.AT_RIGHT); } }
+            else if (key == Keys.U) { if (!players[2].Dead) players[2].DropBomb(world.MapGrid, BombsOnTheMap, players[3]); }
+
+            else if (key == Keys.NumPad8) { if (!players[3].Dead) { players[3].Orientation = Player.MovementDirection.UP; players[3].LoadSprite(Properties.Resources.T_UP); } }
+            else if (key == Keys.NumPad5) { if (!players[3].Dead) { players[3].Orientation = Player.MovementDirection.DOWN; players[3].LoadSprite(Properties.Resources.T_DOWN); } }
+            else if (key == Keys.NumPad4) { if (!players[3].Dead) { players[3].Orientation = Player.MovementDirection.LEFT; players[3].LoadSprite(Properties.Resources.T_LEFT); } }
+            else if (key == Keys.NumPad6) { if (!players[3].Dead) { players[3].Orientation = Player.MovementDirection.RIGHT; players[3].LoadSprite(Properties.Resources.T_RIGHT); } }
+            else if (key == Keys.NumPad0) { if (!players[3].Dead) players[3].DropBomb(world.MapGrid, BombsOnTheMap, players[2]); }
+
+            else if (key == Keys.Escape) Pause();
         }
 
         //Manage key push for server side
-        public void Game_KeyDownWithoutSprite(Keys key, Sender Station)
+        public void Game_KeyDownWithoutSprite(Keys key, Sender station)
         {
-            Player sender = null;
-            Player otherPlayer = null;
-
-            switch (Station)
+            // Surandam žaidėją pagal Sender
+            int senderIndex = -1;
+            switch (station)
             {
-                case Sender.Player1:
-                    sender = player1;
-                    otherPlayer = player2;
-                    if (sender.Dead)
-                        return;
-                    break;
-                case Sender.Player2:
-                    sender = player2;
-                    otherPlayer = player1;
-                    if (sender.Dead)
-                        return;
-                    break;
-                default:
-                    break;
+                case Sender.Player1: senderIndex = 0; break;
+                case Sender.Player2: senderIndex = 1; break;
+                // Jei turi daugiau Sender reikšmių, pridėk Player3, Player4
+                case Sender.Player3: senderIndex = 2; break;
+                case Sender.Player4: senderIndex = 3; break;
+                default: return;
             }
+
+            Player sender = players[senderIndex];
+            if (sender.Dead) return;
+
+            // Kitas žaidėjas (galima keisti pagal poreikį, pvz. kitą žaidėją rasti pagal index)
+            int otherIndex = (senderIndex + 1) % players.Length;
+            Player otherPlayer = players[otherIndex];
 
             switch (key)
             {
@@ -275,10 +238,16 @@ namespace BombermanMultiplayer
             switch (Station)
             {
                 case Sender.Player1:
-                    sender = player1;
+                    sender = players[0];
                     break;
                 case Sender.Player2:
-                    sender = player2;
+                    sender = players[1];
+                    break;
+                case Sender.Player3:
+                    sender = players[2];
+                    break;
+                case Sender.Player4:
+                    sender = players[3];
                     break;
                 default:
                     break;
@@ -303,71 +272,60 @@ namespace BombermanMultiplayer
         //Manage the release of the keys
         public void Game_KeyUp(Keys key)
         {
-            switch (key)
-            {
-                case Keys.Z:
-                    player1.Orientation = Player.MovementDirection.NONE;
-                    break;
-                case Keys.S:
-                    player1.Orientation = Player.MovementDirection.NONE;
-                    break;
-                case Keys.Q:
-                    player1.Orientation = Player.MovementDirection.NONE;
-                    break;
-                case Keys.D:
-                    player1.Orientation = Player.MovementDirection.NONE;
-                    break;
-                case Keys.Up:
-                    player2.Orientation = Player.MovementDirection.NONE;
-                    break;
-                case Keys.Down:
-                    player2.Orientation = Player.MovementDirection.NONE;
-                    break;
-                case Keys.Left:
-                    player2.Orientation = Player.MovementDirection.NONE;
-                    break;
-                case Keys.Right:
-                    player2.Orientation = Player.MovementDirection.NONE;
-                    break;
-            }
+            // Žaidėjas 1: WASD
+            if (key == Keys.W || key == Keys.S || key == Keys.A || key == Keys.D)
+                players[0].Orientation = Player.MovementDirection.NONE;
+            // Žaidėjas 2: Rodyklės
+            else if (key == Keys.Up || key == Keys.Down || key == Keys.Left || key == Keys.Right)
+                players[1].Orientation = Player.MovementDirection.NONE;
+            // Žaidėjas 3: IJKL
+            else if (key == Keys.I || key == Keys.K || key == Keys.J || key == Keys.L)
+                players[2].Orientation = Player.MovementDirection.NONE;
+            // Žaidėjas 4: NumPad
+            else if (key == Keys.NumPad8 || key == Keys.NumPad5 || key == Keys.NumPad4 || key == Keys.NumPad6)
+                players[3].Orientation = Player.MovementDirection.NONE;
         }
 
         private void GameOver()
         {
-            if (player1.Dead || player2.Dead)
+            int deadCount = 0;
+            int lastAlive = -1;
+            for (int i = 0; i < players.Length; i++)
+            {
+                if (players[i].Dead)
+                    deadCount++;
+                else
+                    lastAlive = i;
+            }
+
+            if (deadCount >= players.Length - 1)
             {
                 this.Over = true;
                 this.Paused = true;
-                if (player1.Dead && player2.Dead)
-                    Winner = 0;
-                else if (player2.Dead)
-                    Winner = 2;
-                else if (player1.Dead)
-                    Winner = 1;
+                if (deadCount == players.Length)
+                    Winner = 0; // Lygiosios
+                else
+                    Winner = (byte)(lastAlive + 1); // Laimėtojo indeksas +1
             }
         }
 
         //Manage interactions between worlds and objects
         private void InteractionLogic()
         {
-            for (int i = 0; i < world.MapGrid.GetLength(0); i++) //Ligne
+            for (int i = 0; i < world.MapGrid.GetLength(0); i++) // Row
             {
-                for (int j = 0; j < world.MapGrid.GetLength(1); j++) //Colonne
+                for (int j = 0; j < world.MapGrid.GetLength(1); j++) // Column
                 {
-
                     if (world.MapGrid[i, j].Fire)
                     {
-                        if (player1.CasePosition[0] == i && player1.CasePosition[1] == j
-                            && player1.BonusSlot[0] != Objects.BonusType.Armor && player1.BonusSlot[1] != Objects.BonusType.Armor)
+                        for (int p = 0; p < players.Length; p++)
                         {
-                            player1.Dead = true;
-                            player1.LoadSprite(Properties.Resources.Blood);
-                        }
-                        if (player2.CasePosition[0] == i && player2.CasePosition[1] == j
-                            && player2.BonusSlot[0] != Objects.BonusType.Armor && player2.BonusSlot[1] != Objects.BonusType.Armor)
-                        {
-                            player2.Dead = true;
-                            player2.LoadSprite(Properties.Resources.Blood);
+                            if (players[p].CasePosition[0] == i && players[p].CasePosition[1] == j
+                                && players[p].BonusSlot[0] != Objects.BonusType.Armor && players[p].BonusSlot[1] != Objects.BonusType.Armor)
+                            {
+                                players[p].Dead = true;
+                                players[p].LoadSprite(Properties.Resources.Blood);
+                            }
                         }
                         if (world.MapGrid[i, j].FireTime <= 0)
                         {
@@ -382,30 +340,24 @@ namespace BombermanMultiplayer
                 }
             }
         }
+
         private void BombsLogic()
         {
             List<int> ToRemove = new List<int>();
-
-            //Check for bomb explosion
             for (int i = 0; i < BombsOnTheMap.Count; i++)
             {
                 BombsOnTheMap[i].UpdateFrame((int)LogicTimer.Interval);
                 BombsOnTheMap[i].TimingExplosion((int)LogicTimer.Interval);
                 if (BombsOnTheMap[i].Explosing == true)
                 {
-                    BombsOnTheMap[i].Explosion(this.world.MapGrid, player1, player2);
+                    // Paduok visus žaidėjus
+                    BombsOnTheMap[i].Explosion(world.MapGrid, players);
                     ToRemove.Add(i);
                 }
             }
-
-            //Remove exploded bombs
             for (int i = 0; i < ToRemove.Count; i++)
             {
-                try
-                {
-                    BombsOnTheMap.RemoveAt(ToRemove[i]);
-                }
-                catch (Exception){}
+                try { BombsOnTheMap.RemoveAt(ToRemove[i]); } catch (Exception) { }
             }
         }
 
@@ -474,34 +426,31 @@ namespace BombermanMultiplayer
 
         private void PlayersLogic()
         {
-            player1.LocationCheck(48, 48);
-            player2.LocationCheck(48, 48);
-
-            BonusLogic(player1);
-            BonusLogic(player2);
-
-            if (player1.Orientation != Player.MovementDirection.NONE)
+            for (int i = 0; i < players.Length; i++)
             {
-                if (CheckCollisionPlayer(player1, player2, world.MapGrid, player1.Orientation))
-                {
-                    player1.Move();
-
-                }
-                player1.UpdateFrame((int)LogicTimer.Interval);
+                players[i].LocationCheck(48, 48);
+                BonusLogic(players[i]);
             }
-            else
-                player1.frameindex = 1;
 
-            if (player2.Orientation != Player.MovementDirection.NONE)
+            for (int i = 0; i < players.Length; i++)
             {
-                if (CheckCollisionPlayer(player2, player1, world.MapGrid, player2.Orientation))
+                if (players[i].Orientation != Player.MovementDirection.NONE)
                 {
-                    player2.Move();
+                    bool canMove = true;
+                    for (int j = 0; j < players.Length; j++)
+                    {
+                        if (i != j && !CheckCollisionPlayer(players[i], players[j], world.MapGrid, players[i].Orientation))
+                        {
+                            canMove = false;
+                            break;
+                        }
+                    }
+                    if (canMove) players[i].Move();
+                    players[i].UpdateFrame((int)LogicTimer.Interval);
                 }
-                player2.UpdateFrame((int)LogicTimer.Interval);
+                else
+                    players[i].frameindex = 1;
             }
-            else
-                player2.frameindex = 1;
         }
         //Collision management
 
@@ -641,7 +590,7 @@ namespace BombermanMultiplayer
          System.IO.FileStream filestream = new System.IO.FileStream(fileName, System.IO.FileMode.Create);
             try
             {
-                formatter.Serialize(filestream, new SaveGameData(BombsOnTheMap, world.MapGrid, player1, player2));
+                formatter.Serialize(filestream, new SaveGameData(BombsOnTheMap, world.MapGrid, players));
             }
             catch (Exception ex)
             {
@@ -669,8 +618,7 @@ namespace BombermanMultiplayer
             }
             this.BombsOnTheMap = save.bombsOnTheMap;
             this.world.MapGrid = save.MapGrid;
-            this.player1 = save.player1;
-            this.player2 = save.player2;
+            this.players = save.players;
 
             this.Paused = true;
             this.LogicTimer.Stop();

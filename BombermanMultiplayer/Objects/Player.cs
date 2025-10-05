@@ -16,7 +16,7 @@ namespace BombermanMultiplayer
     [Serializable]
     public class Player : GameObject
     {
-        byte PlayerNumero;
+        public byte PlayerNumero;
         public string Name = "Player";
         private byte _Vitesse = 5;
         private bool _Dead = false;

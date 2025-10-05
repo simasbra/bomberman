@@ -29,7 +29,7 @@ namespace BombermanMultiplayer
             for (int i = 0; i < 4; i++)
             {
                 BonusSlot[i] = new Rectangle(i * pbGame.Width / 18, pbGame.Height / 25, pbGame.Width / 20, pbGame.Height / 20);
-                if (i  > 1 )
+                if (i > 1)
                 {
                     BonusSlot[i] = new Rectangle(3 * pbGame.Width / 4 + i * pbGame.Width / 18, pbGame.Height / 25, pbGame.Width / 20, pbGame.Height / 20);
                 }
@@ -37,16 +37,17 @@ namespace BombermanMultiplayer
 
             game.world.loadBackground(Properties.Resources.World);
             game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
-            game.player1.LoadSprite(Properties.Resources.AT_DOWN);
-            game.player2.LoadSprite(Properties.Resources.T_UP);
+
+            // Inicializuojam visų žaidėjų pradines sprites
+            if (game.players.Length > 0) game.players[0].LoadSprite(Properties.Resources.AT_DOWN);
+            if (game.players.Length > 1) game.players[1].LoadSprite(Properties.Resources.T_UP);
+            if (game.players.Length > 2) game.players[2].LoadSprite(Properties.Resources.AT_DOWN);
+            if (game.players.Length > 3) game.players[3].LoadSprite(Properties.Resources.T_UP);
 
             bufferG = BufferedGraphicsManager.Current.Allocate(pbGame.CreateGraphics(), pbGame.DisplayRectangle);
             gr = bufferG.Graphics;
 
             this.game.LogicTimer.Start();
-
-
-
             this.refreshGraphics.Start();
         }
 
@@ -58,34 +59,25 @@ namespace BombermanMultiplayer
 
             game.world.Draw(gr);
 
-            game.player1.Draw(gr);
-            game.player1.DrawPosition(gr);
-
-            game.player2.Draw(gr);
-            game.player2.DrawPosition(gr);
+            // Piešiame visus žaidėjus
+            for (int i = 0; i < game.players.Length; i++)
+            {
+                game.players[i].Draw(gr);
+                game.players[i].DrawPosition(gr);
+            }
 
             try
             {
-
                 foreach (Bomb bomb in game.BombsOnTheMap)
                 {
-
-                bomb.Draw(gr);
-
+                    bomb.Draw(gr);
                 }
-
             }
-            catch (Exception)
-            {}
-
+            catch (Exception) {}
 
             DrawInterface();
 
-
-
-
             bufferG.Render();
-
         }
 
         public void DrawInterface()
@@ -95,7 +87,6 @@ namespace BombermanMultiplayer
             {
                 tlsMenu.Visible = true;
                 gr.DrawString("PAUSED", new System.Drawing.Font("Arial", 30), Brushes.White, pbGame.Width / 2, pbGame.Height / 2);
-
             }
             else if (!game.Paused && !game.Over)
             {
@@ -106,86 +97,53 @@ namespace BombermanMultiplayer
                 tlsMenu.Visible = true;
             }
 
-
             if (game.Over)
             {
                 gr.DrawString("GAME OVER", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
-                     new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8);
-                switch (game.Winner)
-                {
-                    case 1:
-                        gr.DrawString("Soldier wins", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
-                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
-                        break;
-                    case 2:
-                        gr.DrawString("Terrorist wins", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
-                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
-                        break;
-                    default:
-                        gr.DrawString("Draw", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
-                            new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
-                        break;
-                }
+                    new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8);
 
+                if (game.Winner > 0 && game.Winner <= game.players.Length)
+                {
+                    gr.DrawString("Player " + game.Winner + " wins", new Font("Stencil", (float)(this.pbGame.Height / 10), FontStyle.Bold),
+                        new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
+                }
+                else
+                {
+                    gr.DrawString("Draw", new Font("Stencil", (float)(this.pbGame.Height / 10), FontStyle.Bold),
+                        new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
+                }
             }
 
-            for (int j = 0; j < 2; j++)
+            // Bonusų atvaizdavimas visiems žaidėjams
+            for (int p = 0; p < game.players.Length; p++)
             {
-
-                //Bonus
-                gr.DrawString("Player " + (int)(j + 1) + " : ", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[j * 2].X, BonusSlot[j * 2].Y - BonusSlot[j + 1].Width / 2);
-                for (int i = 0; i < game.player1.BonusSlot.Length; i++)
+                gr.DrawString("Player " + (p + 1) + " : ", new Font("Arial", 10), Brushes.White, BonusSlot[p].X, BonusSlot[p].Y - BonusSlot[p].Width / 2);
+                for (int i = 0; i < game.players[p].BonusSlot.Length; i++)
                 {
-                    switch (game.player1.BonusSlot[i])
+                    switch (game.players[p].BonusSlot[i])
                     {
                         case Objects.BonusType.PowerBomb:
-                            gr.DrawImage(Properties.Resources.SuperBomb, BonusSlot[i]);
-                            gr.DrawString((game.player1.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i].X, BonusSlot[i].Y + BonusSlot[i].Height);
+                            gr.DrawImage(Properties.Resources.SuperBomb, BonusSlot[p]);
+                            gr.DrawString((game.players[p].BonusTimer[i] / 1000).ToString() + "s", new Font("Arial", 10), Brushes.White, BonusSlot[p].X, BonusSlot[p].Y + BonusSlot[p].Height);
                             break;
                         case Objects.BonusType.SpeedBoost:
-                            gr.DrawImage(Properties.Resources.SpeedUp, BonusSlot[i]);
-                            gr.DrawString((game.player1.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i].X, BonusSlot[i].Y + BonusSlot[i].Height);
+                            gr.DrawImage(Properties.Resources.SpeedUp, BonusSlot[p]);
+                            gr.DrawString((game.players[p].BonusTimer[i] / 1000).ToString() + "s", new Font("Arial", 10), Brushes.White, BonusSlot[p].X, BonusSlot[p].Y + BonusSlot[p].Height);
                             break;
                         case Objects.BonusType.Desamorce:
-                            gr.DrawImage(Properties.Resources.Deactivate, BonusSlot[i]);
-                            gr.DrawString((game.player1.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i].X, BonusSlot[i].Y + BonusSlot[i].Height);
+                            gr.DrawImage(Properties.Resources.Deactivate, BonusSlot[p]);
+                            gr.DrawString((game.players[p].BonusTimer[i] / 1000).ToString() + "s", new Font("Arial", 10), Brushes.White, BonusSlot[p].X, BonusSlot[p].Y + BonusSlot[p].Height);
                             break;
                         case Objects.BonusType.Armor:
-                            gr.DrawImage(Properties.Resources.Armor, BonusSlot[i]);
-                            gr.DrawString((game.player1.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i].X, BonusSlot[i].Y + BonusSlot[i].Height);
+                            gr.DrawImage(Properties.Resources.Armor, BonusSlot[p]);
+                            gr.DrawString((game.players[p].BonusTimer[i] / 1000).ToString() + "s", new Font("Arial", 10), Brushes.White, BonusSlot[p].X, BonusSlot[p].Y + BonusSlot[p].Height);
                             break;
                         case Objects.BonusType.None:
                             break;
                         default:
                             break;
                     }
-                    switch (game.player2.BonusSlot[i])
-                    {
-                        case Objects.BonusType.PowerBomb:
-                            gr.DrawImage(Properties.Resources.SuperBomb, BonusSlot[i + 2]);
-                            gr.DrawString((game.player2.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + 2].X, BonusSlot[i + 2].Y + BonusSlot[i + 2].Height);
-                            break;
-                        case Objects.BonusType.SpeedBoost:
-                            gr.DrawImage(Properties.Resources.SpeedUp, BonusSlot[i + 2]);
-                            gr.DrawString((game.player2.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + 2].X, BonusSlot[i + 2].Y + BonusSlot[i + 2].Height);
-                            break;
-                        case Objects.BonusType.Desamorce:
-                            gr.DrawImage(Properties.Resources.Deactivate, BonusSlot[i + 2]);
-                            gr.DrawString((game.player2.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + 2].X, BonusSlot[i + 2].Y + BonusSlot[i + 2].Height);
-                            break;
-                        case Objects.BonusType.Armor:
-                            gr.DrawImage(Properties.Resources.Armor, BonusSlot[i + 2]);
-                            gr.DrawString((game.player2.BonusTimer[i] / 1000).ToString() + "s", new System.Drawing.Font("Arial", 10), Brushes.White, BonusSlot[i + 2].X, BonusSlot[i + 2].Y + BonusSlot[i + 2].Height);
-                            break;
-                        case Objects.BonusType.None:
-                            break;
-                        default:
-                            break;
-                    }
-
                 }
-
-
             }
         }
 
@@ -272,19 +230,20 @@ namespace BombermanMultiplayer
                         game.LoadGame(dlg.FileName);
                         game.world.loadBackground(Properties.Resources.World);
                         game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
-                        game.player1.LoadSprite(Properties.Resources.AT_DOWN);
-                        game.player2.LoadSprite(Properties.Resources.T_UP);
-                        Draw();
 
+                        // Inicializuojam visų žaidėjų sprites po užkrovimo
+                        if (game.players.Length > 0) game.players[0].LoadSprite(Properties.Resources.AT_DOWN);
+                        if (game.players.Length > 1) game.players[1].LoadSprite(Properties.Resources.T_UP);
+                        if (game.players.Length > 2) game.players[2].LoadSprite(Properties.Resources.AT_DOWN);
+                        if (game.players.Length > 3) game.players[3].LoadSprite(Properties.Resources.T_UP);
+
+                        Draw();
                     }
                     catch (Exception ex)
                     {
-
                         MessageBox.Show("An error has occured : " + ex.Message + " \n please try again");
                     }
-
                 }
-
             }
         }
 

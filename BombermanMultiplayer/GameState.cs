@@ -10,34 +10,18 @@ namespace BombermanMultiplayer
     [Serializable]
     public class GameState
     {
-
         //If the game is paused
         public bool Paused = false;
 
-        //Player
-        public short[] XY_Position_Player1 = new short[2];
-        public short[] XY_Position_Player2 = new short[2];
-
-        public short framePlayer1;
-        public short framePlayer2;
-
-        public Player.MovementDirection orientationPlayer1;
-        public Player.MovementDirection orientationPlayer2;
-
-        public short NbBomb_Player1;
-        public short NbBomb_Player2;
-
-        public bool deadPlayer1;
-        public bool deadPlayer2;
-
-        public BonusType[] BonusSlotPlayer1;
-        public BonusType[] BonusSlotPlayer2;
-
-        public short[] BonusTimerPlayer1;
-        public short[] BonusTimerPlayer2;
-
-        public string NamePlayer1;
-        public string NamePlayer2;
+        // Support for up to 4 players using arrays
+        public short[][] XY_Position_Players = new short[4][];
+        public short[] framePlayers = new short[4];
+        public Player.MovementDirection[] orientationPlayers = new Player.MovementDirection[4];
+        public short[] NbBomb_Players = new short[4];
+        public bool[] deadPlayers = new bool[4];
+        public BonusType[][] BonusSlotPlayers = new BonusType[4][];
+        public short[][] BonusTimerPlayers = new short[4][];
+        public string[] NamePlayers = new string[4];
 
         public byte Winner = 0;
         public bool Over;
@@ -47,5 +31,15 @@ namespace BombermanMultiplayer
 
         public Byte[,] map;
 
+        public GameState()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                XY_Position_Players[i] = new short[2];
+                BonusSlotPlayers[i] = new BonusType[2];
+                BonusTimerPlayers[i] = new short[2];
+                NamePlayers[i] = "";
+            }
+        }
     }
 }
