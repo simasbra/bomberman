@@ -73,172 +73,139 @@ namespace BombermanMultiplayer
             DetonationTime -= elsapedTime;
         }
 
-        public void Explosion(Tile[,] MapGrid, Player player1, Player player2)
+        public void Explosion(Tile[,] MapGrid, Player[] players)
         {
             int variablePosition = 0;
 
-            bool PropagationUP, PropagationDOWN, PropagationLEFT, PropagationRIGHT;
-            PropagationUP = PropagationDOWN = PropagationLEFT = PropagationRIGHT = true;
+            bool PropagationUP = true, PropagationDOWN = true, PropagationLEFT = true, PropagationRIGHT = true;
 
-
-            //Give back a bomb to the proprietary 
-            if (Proprietary == 1)
+            // Grąžinti bombą savininkui ir patikrinti bonusą
+            for (int i = 0; i < players.Length; i++)
             {
-                player1.BombNumb++;
-
-                if (player1.BonusSlot[0] == Objects.BonusType.PowerBomb || player1.BonusSlot[1] == Objects.BonusType.PowerBomb)
+                if (Proprietary == players[i].PlayerNumero)
                 {
-                    this.bombPower++;
-                }
-            }
-            else if (Proprietary == 2)
-            {
-                player2.BombNumb++;
-
-                if (player2.BonusSlot[0] == Objects.BonusType.PowerBomb || player2.BonusSlot[1] == Objects.BonusType.PowerBomb)
-                {
-                    this.bombPower++;
+                    players[i].BombNumb++;
+                    if (players[i].BonusSlot[0] == Objects.BonusType.PowerBomb || players[i].BonusSlot[1] == Objects.BonusType.PowerBomb)
+                    {
+                        this.bombPower++;
+                    }
                 }
             }
 
-            //Check if player
-            if (this.CasePosition == player1.CasePosition
-                && player1.BonusSlot[0] != Objects.BonusType.Armor && player1.BonusSlot[1] != Objects.BonusType.Armor)
+            // Patikrinti ar žaidėjas stovi ant bombos
+            for (int i = 0; i < players.Length; i++)
             {
-                player1.Dead = true;
-                player1.LoadSprite(Properties.Resources.Blood);
+                if (this.CasePosition[0] == players[i].CasePosition[0] && this.CasePosition[1] == players[i].CasePosition[1]
+                    && players[i].BonusSlot[0] != Objects.BonusType.Armor && players[i].BonusSlot[1] != Objects.BonusType.Armor)
+                {
+                    players[i].Dead = true;
+                    players[i].LoadSprite(Properties.Resources.Blood);
+                }
             }
-            if (this.CasePosition == player2.CasePosition
-                && player2.BonusSlot[0] != Objects.BonusType.Armor && player2.BonusSlot[1] != Objects.BonusType.Armor)
-            {
-                player2.Dead = true;
-                player2.LoadSprite(Properties.Resources.Blood);
-            }
-
 
             for (int i = 0; i < this.bombPower; i++)
             {
-
-                //UP
-                //If there's nothing undestroyable obstruing the path of the explosion
+                // UP
                 if (PropagationUP)
                 {
-
-                    //If not out of bounds
-                    if ((variablePosition = this.CasePosition[0] - i) <= MapGrid.GetLength(0) - 1)
+                    if ((variablePosition = this.CasePosition[0] - i) >= 0)
                     {
-                        //if destroyable block
-                        if (MapGrid[variablePosition, this.CasePosition[1]].Destroyable == true)
+                        if (variablePosition <= MapGrid.GetLength(0) - 1)
                         {
-                            MapGrid[variablePosition, this.CasePosition[1]].Destroyable = false;
-                            MapGrid[variablePosition, this.CasePosition[1]].Walkable = true;
-                            MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
-                            MapGrid[variablePosition, this.CasePosition[1]].SpawnBonus();
-
-                        }
-                        else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && MapGrid[variablePosition, this.CasePosition[1]].Walkable)
-                        {
-                            //If free case 
-                            MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
-
-
-                        }
-                        else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && !MapGrid[variablePosition, this.CasePosition[1]].Walkable)
-                        {
-                            PropagationUP = false;
+                            if (MapGrid[variablePosition, this.CasePosition[1]].Destroyable)
+                            {
+                                MapGrid[variablePosition, this.CasePosition[1]].Destroyable = false;
+                                MapGrid[variablePosition, this.CasePosition[1]].Walkable = true;
+                                MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
+                                MapGrid[variablePosition, this.CasePosition[1]].SpawnBonus();
+                            }
+                            else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && MapGrid[variablePosition, this.CasePosition[1]].Walkable)
+                            {
+                                MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
+                            }
+                            else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && !MapGrid[variablePosition, this.CasePosition[1]].Walkable)
+                            {
+                                PropagationUP = false;
+                            }
                         }
                     }
-
                 }
 
-
-                //DOWN
+                // DOWN
                 if (PropagationDOWN)
                 {
-
-                    //If not out of bounds
-                    if ((variablePosition = this.CasePosition[0] + i) >= 0)
+                    if ((variablePosition = this.CasePosition[0] + i) < MapGrid.GetLength(0))
                     {
-                        //if destroyable block
-                        if (MapGrid[variablePosition, this.CasePosition[1]].Destroyable == true)
+                        if (variablePosition >= 0)
                         {
-                            MapGrid[variablePosition, this.CasePosition[1]].Destroyable = false;
-                            MapGrid[variablePosition, this.CasePosition[1]].Walkable = true;
-                            MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
-                            MapGrid[variablePosition, this.CasePosition[1]].SpawnBonus();
-
+                            if (MapGrid[variablePosition, this.CasePosition[1]].Destroyable)
+                            {
+                                MapGrid[variablePosition, this.CasePosition[1]].Destroyable = false;
+                                MapGrid[variablePosition, this.CasePosition[1]].Walkable = true;
+                                MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
+                                MapGrid[variablePosition, this.CasePosition[1]].SpawnBonus();
+                            }
+                            else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && MapGrid[variablePosition, this.CasePosition[1]].Walkable)
+                            {
+                                MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
+                            }
+                            else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && !MapGrid[variablePosition, this.CasePosition[1]].Walkable)
+                            {
+                                PropagationDOWN = false;
+                            }
                         }
-                        else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && MapGrid[variablePosition, this.CasePosition[1]].Walkable)
-                        {
-                            //If free case 
-                            MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
-
-
-                        }
-                        else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && !MapGrid[variablePosition, this.CasePosition[1]].Walkable)
-                        {
-                            PropagationDOWN = false;
-                        }
-
                     }
-
                 }
 
-                //LEFT
+                // LEFT
                 if (PropagationLEFT)
                 {
-                    //If not out of bounds
                     if ((variablePosition = this.CasePosition[1] - i) >= 0)
                     {
-                        //if destroyable block
-                        if (MapGrid[this.CasePosition[0], variablePosition].Destroyable == true)
+                        if (variablePosition <= MapGrid.GetLength(1) - 1)
                         {
-                            MapGrid[this.CasePosition[0], variablePosition].Destroyable = false;
-                            MapGrid[this.CasePosition[0], variablePosition].Walkable = true;
-                            MapGrid[this.CasePosition[0], variablePosition].Fire = true;
-                            MapGrid[this.CasePosition[0], variablePosition].SpawnBonus();
-
+                            if (MapGrid[this.CasePosition[0], variablePosition].Destroyable)
+                            {
+                                MapGrid[this.CasePosition[0], variablePosition].Destroyable = false;
+                                MapGrid[this.CasePosition[0], variablePosition].Walkable = true;
+                                MapGrid[this.CasePosition[0], variablePosition].Fire = true;
+                                MapGrid[this.CasePosition[0], variablePosition].SpawnBonus();
+                            }
+                            else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && MapGrid[this.CasePosition[0], variablePosition].Walkable)
+                            {
+                                MapGrid[this.CasePosition[0], variablePosition].Fire = true;
+                            }
+                            else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && !MapGrid[this.CasePosition[0], variablePosition].Walkable)
+                            {
+                                PropagationLEFT = false;
+                            }
                         }
-                        else if (MapGrid[this.CasePosition[0], variablePosition].Destroyable == false && MapGrid[this.CasePosition[0], variablePosition].Walkable)
-                        {
-                            //If free case 
-                            MapGrid[this.CasePosition[0], variablePosition].Fire = true;
-
-
-                        }
-                        else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && !MapGrid[this.CasePosition[0], variablePosition].Walkable)
-                        {
-                            PropagationLEFT = false;
-                        }
-
                     }
                 }
-                //RIGHT
+
+                // RIGHT
                 if (PropagationRIGHT)
                 {
-                    //If not out of bounds
-                    if ((variablePosition = this.CasePosition[1] + i) <= MapGrid.GetLength(1) - 1)
+                    if ((variablePosition = this.CasePosition[1] + i) < MapGrid.GetLength(1))
                     {
-                        //if destroyable block
-                        if (MapGrid[this.CasePosition[0], variablePosition].Destroyable == true)
+                        if (variablePosition >= 0)
                         {
-                            MapGrid[this.CasePosition[0], variablePosition].Destroyable = false;
-                            MapGrid[this.CasePosition[0], variablePosition].Walkable = true;
-                            MapGrid[this.CasePosition[0], variablePosition].Fire = true;
-                            MapGrid[this.CasePosition[0], variablePosition].SpawnBonus();
+                            if (MapGrid[this.CasePosition[0], variablePosition].Destroyable)
+                            {
+                                MapGrid[this.CasePosition[0], variablePosition].Destroyable = false;
+                                MapGrid[this.CasePosition[0], variablePosition].Walkable = true;
+                                MapGrid[this.CasePosition[0], variablePosition].Fire = true;
+                                MapGrid[this.CasePosition[0], variablePosition].SpawnBonus();
+                            }
+                            else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && MapGrid[this.CasePosition[0], variablePosition].Walkable)
+                            {
+                                MapGrid[this.CasePosition[0], variablePosition].Fire = true;
+                            }
+                            else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && !MapGrid[this.CasePosition[0], variablePosition].Walkable)
+                            {
+                                PropagationRIGHT = false;
+                            }
                         }
-                        else if (MapGrid[this.CasePosition[0], variablePosition].Destroyable == false && MapGrid[this.CasePosition[0], variablePosition].Walkable)
-                        {
-                            //If free case 
-                            MapGrid[this.CasePosition[0], variablePosition].Fire = true;
-
-
-                        }
-                        else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && !MapGrid[this.CasePosition[0], variablePosition].Walkable)
-                        {
-                            PropagationRIGHT = false;
-                        }
-
                     }
                 }
             }
@@ -246,12 +213,10 @@ namespace BombermanMultiplayer
             MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied = false;
             MapGrid[this.CasePosition[0], this.CasePosition[1]].bomb = null;
 
-
             this.Dispose();
-
         }
 
-        
+
 
 
         #region IDisposable Support

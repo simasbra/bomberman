@@ -17,43 +17,21 @@ namespace BombermanMultiplayer
     /// </summary>
     public class Server
     {
-
-       
-        //List the connections with which the server is connected
         public List<Connection> connections = new List<Connection>();
-        //Socket of the server
         TcpListener server;
-        //Determine if the game is running or not
         public bool IsRunning = false;
-        //If all players are not connected
         private bool WaitingPlayers = true;
-
         private int port = 3000;
 
-        //The variable describing the state of the game, who'll be sended throught network
         GameState gamestate;
-
-        //All logic game elements
         Game game;
 
-
-
-        //Send Packet
         Packet TX_Packet;
-        //Receive Packet
         Packet RX_Packet;
-        //Determine the person who's sending a packet
         Sender Station = Sender.Server;
 
-        public Server()
-        {
-
-        }
-
-        public Server(int port_)
-        {
-            port = port_;
-        }
+        public Server() { }
+        public Server(int port_) { port = port_; }
 
         /// <summary>
         /// Launch the listening of connections and after the treatement of game data
@@ -69,8 +47,8 @@ namespace BombermanMultiplayer
             {
                 AcceptConnections();
 
-                //When there's two players, no need to wait anymore
-                if(connections.Count == 2)
+                // Dabar laukiame 4 žaidėjų
+                if (connections.Count == 4)
                 {
                     WaitingPlayers = false;
                     Thread.Sleep(1000);
@@ -81,19 +59,13 @@ namespace BombermanMultiplayer
                 {
                     //Disconnect all clients
                     foreach (var item in connections)
-                    {
                         item.sock.Close();
-                    }
 
                     server.Stop();
                     token.ThrowIfCancellationRequested();
                 }
-
-
-
                 Thread.Sleep(5);
             }
-
 
             //If we load and old savegame
             if (fileName != null)
@@ -108,12 +80,11 @@ namespace BombermanMultiplayer
                 game = new Game(528, 528);
             }
 
-            gamestate = new GameState();            
+            gamestate = new GameState();
             int PlayersReady = 0;
-           
+
             System.Timers.Timer GameStateTime = new System.Timers.Timer(120);
             GameStateTime.Elapsed += GameStateTime_Elapsed;
-            
 
 
             //Game initialized, need to transfer the map to all players now
@@ -121,26 +92,19 @@ namespace BombermanMultiplayer
 
             RX_Packet = new Packet();
 
-            //Wait till all players have received the map
-            while (PlayersReady < 2)
+            // Laukiam kol visi žaidėjai pasiruošę
+            while (PlayersReady < 4)
             {
-                
-                //Try to get a packet
                 this.RecvData(ref RX_Packet);
 
                 //If there's a packet
                 if (RX_Packet.GetPacketType() == PacketType.Ready)
                 {
                     PlayersReady++;
-                    switch (RX_Packet.GetSender())
-                    {
-                        case Sender.Player1:
-                            game.player1.Name = RX_Packet.GetPayload<string>();
-                            break;
-                        case Sender.Player2:
-                            game.player2.Name = RX_Packet.GetPayload<string>();
-                            break;
-                    }
+                    var sender = RX_Packet.GetSender();
+                    int idx = (int)sender - 1; // Sender.Player1 = 1, Player2 = 2, ...
+                    if (idx >= 0 && idx < game.players.Length)
+                        game.players[idx].Name = RX_Packet.GetPayload<string>();
 
                     RX_Packet = new Packet();
 
@@ -163,7 +127,7 @@ namespace BombermanMultiplayer
             {
                 //Try to get a packet
                 this.RecvData(ref RX_Packet);
-
+                                    
                 //If there's a packet
                 if (!RX_Packet.Empty())
                 {
@@ -207,73 +171,45 @@ namespace BombermanMultiplayer
                         }
 
                     }
-                    catch (Exception)
-                    {
+                    catch (Exception) { }
 
-                        //throw;
-                    }
-
-
-                    server.Stop();
-                    token.ThrowIfCancellationRequested();
-
+                    //throw;
                 }
 
 
-            }
-            
+                server.Stop();
+                token.ThrowIfCancellationRequested();
 
+            }
         }
 
-
-        /// <summary>
-        /// Callback from the timer, send the game state to every clients 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        // Callback from the timer, send the game state to every clients         // Callback from the timer, send the game state to every clients         // Callback from the timer, send the game state to every clients         // Callback from the timer, send the game state to every clients         // Callback from the timer, send the game state to every clients         // Callback from the timer, send the game state to every clients         // Callback from the timer, send the game state to every clients         // Callback from the timer, send the game state to every clients 
         private void GameStateTime_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-
             gamestate.Paused = this.game.Paused;
-
             gamestate.Over = this.game.Over;
             gamestate.Winner = this.game.Winner;
 
-            //Send game state to everyone
-            gamestate.XY_Position_Player1 = new short[2] { (short)this.game.player1.Source.X, (short)this.game.player1.Source.Y };
-            gamestate.XY_Position_Player2 = new short[2] { (short)this.game.player2.Source.X, (short)this.game.player2.Source.Y };
-
-            gamestate.framePlayer1 = (short)game.player1.frameindex;
-            gamestate.framePlayer2 = (short)game.player2.frameindex;
-
-            gamestate.orientationPlayer1 = game.player1.Orientation;
-            gamestate.orientationPlayer2 = game.player2.Orientation;
-
-            gamestate.BonusSlotPlayer1 = game.player1.BonusSlot;
-            gamestate.BonusTimerPlayer1 = game.player1.BonusTimer;
-
-            gamestate.BonusSlotPlayer2 = game.player2.BonusSlot;
-            gamestate.BonusTimerPlayer2 = game.player2.BonusTimer;
-
-            gamestate.NamePlayer1 = game.player1.Name;
-            gamestate.NamePlayer2 = game.player2.Name;
-
+            // --- 4 player support using arrays ---
+            for (int i = 0; i < 4; i++)
+            {
+                gamestate.XY_Position_Players[i][0] = (short)game.players[i].Source.X;
+                gamestate.XY_Position_Players[i][1] = (short)game.players[i].Source.Y;
+                gamestate.framePlayers[i] = (short)game.players[i].frameindex;
+                gamestate.orientationPlayers[i] = game.players[i].Orientation;
+                gamestate.BonusSlotPlayers[i] = game.players[i].BonusSlot;
+                gamestate.BonusTimerPlayers[i] = game.players[i].BonusTimer;
+                gamestate.NamePlayers[i] = game.players[i].Name;
+                gamestate.deadPlayers[i] = game.players[i].Dead;
+                gamestate.NbBomb_Players[i] = game.players[i].BombNumb;
+            }
 
             gamestate.bombsList = game.BombsOnTheMap;
-
-
-            //Use a mask of short to represent the map
             gamestate.map = game.BuildMapMask();
 
-
             TX_Packet = new Packet(Station, PacketType.GameState, gamestate);
-
             this.SendData(TX_Packet);
-
         }
-
-
-
 
         /// <summary>
         /// Accept a incoming connection
@@ -291,7 +227,7 @@ namespace BombermanMultiplayer
                 //Send Player list to all players
                 SendPlayersList();
 
-                
+
             }
         }
 
@@ -301,12 +237,11 @@ namespace BombermanMultiplayer
         private void SendPlayersList()
         {
             List<string> infosPlayers = new List<string>(connections.Count);
-
             StringBuilder s = new StringBuilder();
 
             for (int i = 0; i < connections.Count; i++)
             {
-                infosPlayers.Add(s.Append("Player " + i + " : " + connections[i].sock.Client.RemoteEndPoint.ToString()).ToString());
+                infosPlayers.Add(s.Append("Player " + (i + 1) + " : " + connections[i].sock.Client.RemoteEndPoint.ToString()).ToString());
                 s.Clear();
             }
 
@@ -330,9 +265,9 @@ namespace BombermanMultiplayer
                     c.stream.Flush();
                 }
             }
-            catch(Exception) { }
-
+            catch (Exception) { }
         }
+
         /// <summary>
         /// Receive data from the clients 
         /// </summary>
@@ -347,14 +282,13 @@ namespace BombermanMultiplayer
                 }
             }
         }
-
     }
+
     /// <summary>
     /// Represent a connection with a client
     /// </summary>
     public class Connection
     {
-
         public TcpClient sock;
         public IFormatter formatter = new BinaryFormatter();
         public NetworkStream stream;
