@@ -9,6 +9,8 @@ using System.Timers;
 using System.Windows.Forms;
 using BombermanMultiplayer.Commands;
 using BombermanMultiplayer.Commands.Interface;
+using BombermanMultiplayer.Strategy;
+using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
 
 namespace BombermanMultiplayer
 {
@@ -535,12 +537,11 @@ namespace BombermanMultiplayer
                 {
                     if (player.BonusTimer[i] <= 0)
                     {
-                        if (player.BonusSlot[i] == Objects.BonusType.SpeedBoost)
+                        if (player.ActiveStrategies[i] != null)
                         {
-                            player.Vitesse /= 2;
+                            player.ActiveStrategies[i].Remove(player, i);
+                            player.ActiveStrategies[i] = null;
                         }
-
-                        player.BonusSlot[i] = Objects.BonusType.None;
                     }
                     else
                     {
@@ -562,33 +563,38 @@ namespace BombermanMultiplayer
 
                 if (freeSlot != -1)
                 {
-                    switch (this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Type)
+                    var bonusType = this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Type;
+
+                    IBonusEffectStrategy strategy = null;
+
+                    switch (bonusType)
                     {
                         case Objects.BonusType.PowerBomb:
-                            player.BonusSlot[freeSlot] = Objects.BonusType.PowerBomb;
-                            player.BonusTimer[freeSlot] = 5000;
+                            strategy = new PowerBombEffectStrategy();
                             break;
                         case Objects.BonusType.SpeedBoost:
-                            player.BonusSlot[freeSlot] = Objects.BonusType.SpeedBoost;
-                            player.Vitesse *= 2;
-                            player.BonusTimer[freeSlot] = 5000;
+                            strategy = new SpeedBoostEffectStrategy();
                             break;
                         case Objects.BonusType.Desamorce:
-                            player.BonusSlot[freeSlot] = Objects.BonusType.Desamorce;
-                            player.BonusTimer[freeSlot] = 10000;
+                            strategy = new DefuseBombEffectStrategy();
                             break;
                         case Objects.BonusType.Armor:
-                            player.BonusSlot[freeSlot] = Objects.BonusType.Armor;
-                            player.BonusTimer[freeSlot] = 5000;
+                            strategy = new ArmorEffectStrategy();
                             break;
                         default:
                             break;
                     }
+
+                    if (strategy != null)
+                    {
+                        strategy.Apply(player, freeSlot);
+                        player.ActiveStrategies[freeSlot] = strategy;
+                    }
+
                     this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere = null;
                 }
             }
         }
-
         private void PlayersLogic()
         {
             for (int i = 0; i < players.Length; i++)
