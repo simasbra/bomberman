@@ -10,6 +10,8 @@ using System.Media;
 using System.Diagnostics;
 using System.Collections;
 using BombermanMultiplayer.Objects;
+using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
+using BombermanMultiplayer.Strategy;
 
 namespace BombermanMultiplayer
 {
@@ -28,9 +30,10 @@ namespace BombermanMultiplayer
         public short[] BonusTimer = new short[2];
 
         public MovementDirection Orientation  = MovementDirection.NONE;
-        
+        public IBonusEffectStrategy[] ActiveStrategies = new IBonusEffectStrategy[2];
 
-        
+
+
 
 
         public int Wait = 500;
@@ -295,7 +298,8 @@ namespace BombermanMultiplayer
             Bomb toDesamorce = null;
 
             //Check if player has the bonus
-            if (this.BonusSlot[0]!= BonusType.Desamorce && this.BonusSlot[1] != BonusType.Desamorce)
+            if (!(this.ActiveStrategies[0] is DefuseBombEffectStrategy) &&
+                !(this.ActiveStrategies[1] is DefuseBombEffectStrategy))
             {
                 return;
             }
