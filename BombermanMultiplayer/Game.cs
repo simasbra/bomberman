@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
+using BombermanMultiplayer.Commands;
+using BombermanMultiplayer.Commands.Interface;
 
 namespace BombermanMultiplayer
 {
@@ -24,6 +26,9 @@ namespace BombermanMultiplayer
 
         public List<Bomb> BombsOnTheMap;
         public System.Timers.Timer LogicTimer;
+
+        // Command pattern - komandų istorija (replay sistemai ar debugging'ui)
+        public List<ICommand> CommandHistory = new List<ICommand>();
 
         //ctor when picture box size is determined
         public Game(int hebergeurWidth, int hebergeurHeight)
@@ -65,12 +70,28 @@ namespace BombermanMultiplayer
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
         }
+
         //default ctor
         public Game()
         {
             this.world = new World();
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
+        }
+
+        /// <summary>
+        /// Vykdyti komandą ir išsaugoti į istoriją
+        /// </summary>
+        private void ExecuteCommand(ICommand command)
+        {
+            command.Execute();
+            CommandHistory.Add(command);
+
+            // Riboti istorijos dydį (pvz. paskutiniai 1000 veiksmų)
+            if (CommandHistory.Count > 1000)
+            {
+                CommandHistory.RemoveAt(0);
+            }
         }
 
         //Use a mask to represente the placement of different objects on the map
@@ -153,45 +174,185 @@ namespace BombermanMultiplayer
             return mask;
         }
 
+        /// <summary>
+        /// Atnaujintas Game_KeyDown su Command pattern
+        /// </summary>
         public void Game_KeyDown(Keys key)
         {
-            if (key == Keys.W) { if (!players[0].Dead) { players[0].Orientation = Player.MovementDirection.UP; players[0].LoadSprite(Properties.Resources.AT_UP); } }
-            else if (key == Keys.S) { if (!players[0].Dead) { players[0].Orientation = Player.MovementDirection.DOWN; players[0].LoadSprite(Properties.Resources.AT_DOWN); } }
-            else if (key == Keys.A) { if (!players[0].Dead) { players[0].Orientation = Player.MovementDirection.LEFT; players[0].LoadSprite(Properties.Resources.AT_LEFT); } }
-            else if (key == Keys.D) { if (!players[0].Dead) { players[0].Orientation = Player.MovementDirection.RIGHT; players[0].LoadSprite(Properties.Resources.AT_RIGHT); } }
-            else if (key == Keys.Space) { if (!players[0].Dead) players[0].DropBomb(world.MapGrid, BombsOnTheMap, players[1]); }
+            ICommand command = null;
 
-            else if (key == Keys.Up) { if (!players[1].Dead) { players[1].Orientation = Player.MovementDirection.UP; players[1].LoadSprite(Properties.Resources.T_UP); } }
-            else if (key == Keys.Down) { if (!players[1].Dead) { players[1].Orientation = Player.MovementDirection.DOWN; players[1].LoadSprite(Properties.Resources.T_DOWN); } }
-            else if (key == Keys.Left) { if (!players[1].Dead) { players[1].Orientation = Player.MovementDirection.LEFT; players[1].LoadSprite(Properties.Resources.T_LEFT); } }
-            else if (key == Keys.Right) { if (!players[1].Dead) { players[1].Orientation = Player.MovementDirection.RIGHT; players[1].LoadSprite(Properties.Resources.T_RIGHT); } }
-            else if (key == Keys.Enter) { if (!players[1].Dead) players[1].DropBomb(world.MapGrid, BombsOnTheMap, players[0]); }
+            // Žaidėjas 1 - WASD
+            if (key == Keys.W)
+            {
+                if (!players[0].Dead)
+                {
+                    command = new MovePlayerCommand(players[0], Player.MovementDirection.UP, Properties.Resources.AT_UP);
+                }
+            }
+            else if (key == Keys.S)
+            {
+                if (!players[0].Dead)
+                {
+                    command = new MovePlayerCommand(players[0], Player.MovementDirection.DOWN, Properties.Resources.AT_DOWN);
+                }
+            }
+            else if (key == Keys.A)
+            {
+                if (!players[0].Dead)
+                {
+                    command = new MovePlayerCommand(players[0], Player.MovementDirection.LEFT, Properties.Resources.AT_LEFT);
+                }
+            }
+            else if (key == Keys.D)
+            {
+                if (!players[0].Dead)
+                {
+                    command = new MovePlayerCommand(players[0], Player.MovementDirection.RIGHT, Properties.Resources.AT_RIGHT);
+                }
+            }
+            else if (key == Keys.Space)
+            {
+                if (!players[0].Dead)
+                {
+                    command = new DropBombCommand(players[0], world.MapGrid, BombsOnTheMap, players[1]);
+                }
+            }
 
-            else if (key == Keys.I) { if (!players[2].Dead) { players[2].Orientation = Player.MovementDirection.UP; players[2].LoadSprite(Properties.Resources.AT_UP); } }
-            else if (key == Keys.K) { if (!players[2].Dead) { players[2].Orientation = Player.MovementDirection.DOWN; players[2].LoadSprite(Properties.Resources.AT_DOWN); } }
-            else if (key == Keys.J) { if (!players[2].Dead) { players[2].Orientation = Player.MovementDirection.LEFT; players[2].LoadSprite(Properties.Resources.AT_LEFT); } }
-            else if (key == Keys.L) { if (!players[2].Dead) { players[2].Orientation = Player.MovementDirection.RIGHT; players[2].LoadSprite(Properties.Resources.AT_RIGHT); } }
-            else if (key == Keys.U) { if (!players[2].Dead) players[2].DropBomb(world.MapGrid, BombsOnTheMap, players[3]); }
+            // Žaidėjas 2 - Rodyklės
+            else if (key == Keys.Up)
+            {
+                if (!players[1].Dead)
+                {
+                    command = new MovePlayerCommand(players[1], Player.MovementDirection.UP, Properties.Resources.T_UP);
+                }
+            }
+            else if (key == Keys.Down)
+            {
+                if (!players[1].Dead)
+                {
+                    command = new MovePlayerCommand(players[1], Player.MovementDirection.DOWN, Properties.Resources.T_DOWN);
+                }
+            }
+            else if (key == Keys.Left)
+            {
+                if (!players[1].Dead)
+                {
+                    command = new MovePlayerCommand(players[1], Player.MovementDirection.LEFT, Properties.Resources.T_LEFT);
+                }
+            }
+            else if (key == Keys.Right)
+            {
+                if (!players[1].Dead)
+                {
+                    command = new MovePlayerCommand(players[1], Player.MovementDirection.RIGHT, Properties.Resources.T_RIGHT);
+                }
+            }
+            else if (key == Keys.Enter)
+            {
+                if (!players[1].Dead)
+                {
+                    command = new DropBombCommand(players[1], world.MapGrid, BombsOnTheMap, players[0]);
+                }
+            }
 
-            else if (key == Keys.NumPad8) { if (!players[3].Dead) { players[3].Orientation = Player.MovementDirection.UP; players[3].LoadSprite(Properties.Resources.T_UP); } }
-            else if (key == Keys.NumPad5) { if (!players[3].Dead) { players[3].Orientation = Player.MovementDirection.DOWN; players[3].LoadSprite(Properties.Resources.T_DOWN); } }
-            else if (key == Keys.NumPad4) { if (!players[3].Dead) { players[3].Orientation = Player.MovementDirection.LEFT; players[3].LoadSprite(Properties.Resources.T_LEFT); } }
-            else if (key == Keys.NumPad6) { if (!players[3].Dead) { players[3].Orientation = Player.MovementDirection.RIGHT; players[3].LoadSprite(Properties.Resources.T_RIGHT); } }
-            else if (key == Keys.NumPad0) { if (!players[3].Dead) players[3].DropBomb(world.MapGrid, BombsOnTheMap, players[2]); }
+            // Žaidėjas 3 - IJKL
+            else if (key == Keys.I)
+            {
+                if (!players[2].Dead)
+                {
+                    command = new MovePlayerCommand(players[2], Player.MovementDirection.UP, Properties.Resources.AT_UP);
+                }
+            }
+            else if (key == Keys.K)
+            {
+                if (!players[2].Dead)
+                {
+                    command = new MovePlayerCommand(players[2], Player.MovementDirection.DOWN, Properties.Resources.AT_DOWN);
+                }
+            }
+            else if (key == Keys.J)
+            {
+                if (!players[2].Dead)
+                {
+                    command = new MovePlayerCommand(players[2], Player.MovementDirection.LEFT, Properties.Resources.AT_LEFT);
+                }
+            }
+            else if (key == Keys.L)
+            {
+                if (!players[2].Dead)
+                {
+                    command = new MovePlayerCommand(players[2], Player.MovementDirection.RIGHT, Properties.Resources.AT_RIGHT);
+                }
+            }
+            else if (key == Keys.U)
+            {
+                if (!players[2].Dead)
+                {
+                    command = new DropBombCommand(players[2], world.MapGrid, BombsOnTheMap, players[3]);
+                }
+            }
 
-            else if (key == Keys.Escape) Pause();
+            // Žaidėjas 4 - NumPad
+            else if (key == Keys.NumPad8)
+            {
+                if (!players[3].Dead)
+                {
+                    command = new MovePlayerCommand(players[3], Player.MovementDirection.UP, Properties.Resources.T_UP);
+                }
+            }
+            else if (key == Keys.NumPad5)
+            {
+                if (!players[3].Dead)
+                {
+                    command = new MovePlayerCommand(players[3], Player.MovementDirection.DOWN, Properties.Resources.T_DOWN);
+                }
+            }
+            else if (key == Keys.NumPad4)
+            {
+                if (!players[3].Dead)
+                {
+                    command = new MovePlayerCommand(players[3], Player.MovementDirection.LEFT, Properties.Resources.T_LEFT);
+                }
+            }
+            else if (key == Keys.NumPad6)
+            {
+                if (!players[3].Dead)
+                {
+                    command = new MovePlayerCommand(players[3], Player.MovementDirection.RIGHT, Properties.Resources.T_RIGHT);
+                }
+            }
+            else if (key == Keys.NumPad0)
+            {
+                if (!players[3].Dead)
+                {
+                    command = new DropBombCommand(players[3], world.MapGrid, BombsOnTheMap, players[2]);
+                }
+            }
+
+            else if (key == Keys.Escape)
+            {
+                Pause();
+                return;
+            }
+
+            // Vykdyti komandą jei buvo sukurta
+            if (command != null)
+            {
+                ExecuteCommand(command);
+            }
         }
 
         //Manage key push for server side
         public void Game_KeyDownWithoutSprite(Keys key, Sender station)
         {
+            ICommand command = null;
+
             // Surandam žaidėją pagal Sender
             int senderIndex = -1;
             switch (station)
             {
                 case Sender.Player1: senderIndex = 0; break;
                 case Sender.Player2: senderIndex = 1; break;
-                // Jei turi daugiau Sender reikšmių, pridėk Player3, Player4
                 case Sender.Player3: senderIndex = 2; break;
                 case Sender.Player4: senderIndex = 3; break;
                 default: return;
@@ -200,26 +361,25 @@ namespace BombermanMultiplayer
             Player sender = players[senderIndex];
             if (sender.Dead) return;
 
-            // Kitas žaidėjas (galima keisti pagal poreikį, pvz. kitą žaidėją rasti pagal index)
             int otherIndex = (senderIndex + 1) % players.Length;
             Player otherPlayer = players[otherIndex];
 
             switch (key)
             {
                 case Keys.Up:
-                    sender.Orientation = Player.MovementDirection.UP;
+                    command = new MovePlayerCommand(sender, Player.MovementDirection.UP);
                     break;
                 case Keys.Down:
-                    sender.Orientation = Player.MovementDirection.DOWN;
+                    command = new MovePlayerCommand(sender, Player.MovementDirection.DOWN);
                     break;
                 case Keys.Left:
-                    sender.Orientation = Player.MovementDirection.LEFT;
+                    command = new MovePlayerCommand(sender, Player.MovementDirection.LEFT);
                     break;
                 case Keys.Right:
-                    sender.Orientation = Player.MovementDirection.RIGHT;
+                    command = new MovePlayerCommand(sender, Player.MovementDirection.RIGHT);
                     break;
                 case Keys.Space:
-                    sender.DropBomb(this.world.MapGrid, this.BombsOnTheMap, otherPlayer);
+                    command = new DropBombCommand(sender, world.MapGrid, BombsOnTheMap, otherPlayer);
                     break;
                 case Keys.ControlKey:
                     sender.Deactivate(this.world.MapGrid, BombsOnTheMap, otherPlayer);
@@ -227,6 +387,11 @@ namespace BombermanMultiplayer
                 case Keys.Escape:
                     Pause();
                     break;
+            }
+
+            if (command != null)
+            {
+                ExecuteCommand(command);
             }
         }
 
@@ -452,6 +617,7 @@ namespace BombermanMultiplayer
                     players[i].frameindex = 1;
             }
         }
+
         //Collision management
 
         //Check collision between two rectangles
@@ -468,6 +634,7 @@ namespace BombermanMultiplayer
             //True if there's a collision
 
         }
+
         public bool CheckCollisionPlayer(Player movingPlayer, Player player2, Tile[,] map, Player.MovementDirection direction)
         {
             int lig = movingPlayer.CasePosition[0];
@@ -576,6 +743,7 @@ namespace BombermanMultiplayer
             }
             return true;
         }
+
         private void LogicTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             InteractionLogic();
@@ -586,8 +754,8 @@ namespace BombermanMultiplayer
 
         public void SaveGame(string fileName)
         {
-         System.Runtime.Serialization.IFormatter formatter = new BinaryFormatter();
-         System.IO.FileStream filestream = new System.IO.FileStream(fileName, System.IO.FileMode.Create);
+            System.Runtime.Serialization.IFormatter formatter = new BinaryFormatter();
+            System.IO.FileStream filestream = new System.IO.FileStream(fileName, System.IO.FileMode.Create);
             try
             {
                 formatter.Serialize(filestream, new SaveGameData(BombsOnTheMap, world.MapGrid, players));
@@ -629,7 +797,7 @@ namespace BombermanMultiplayer
                 this.Winner = 0;
             }
         }
-        
+
         public void Pause()
         {
             //If the game is already over, no need for pause
