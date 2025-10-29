@@ -53,6 +53,13 @@
     <Compile Include="MainMenu.Designer.cs">
       <DependentUpon>MainMenu.cs</DependentUpon>
     </Compile>
+    <Compile Include="Objects\BonusFactory.cs" />
+    <Compile Include="Objects\HealthBonus.cs" />
+    <Compile Include="Objects\HealthBonusFactory.cs" />
+    <Compile Include="Objects\PowerBonus.cs" />
+    <Compile Include="Objects\PowerBonusFactory.cs" />
+    <Compile Include="Objects\SpeedBonus.cs" />
+    <Compile Include="Objects\SpeedBonusFactory.cs" />
     <Compile Include="SaveGameData.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameState.cs" />
