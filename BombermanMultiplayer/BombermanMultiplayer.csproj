@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Adapters\PacketCommandAdapter.cs" />
     <Compile Include="Commands\DropBombCommand.cs" />
     <Compile Include="Commands\Interface\ICommand.cs" />
     <Compile Include="Commands\MovePlayerCommand.cs" />
