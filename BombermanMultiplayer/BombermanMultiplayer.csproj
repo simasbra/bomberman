@@ -56,11 +56,17 @@
     <Compile Include="MainMenu.Designer.cs">
       <DependentUpon>MainMenu.cs</DependentUpon>
     </Compile>
+    <Compile Include="Objects\BluePlayer.cs" />
+    <Compile Include="Objects\BluePlayerBuilder.cs" />
     <Compile Include="Objects\BonusFactory.cs" />
+    <Compile Include="Objects\Director.cs" />
     <Compile Include="Objects\HealthBonus.cs" />
     <Compile Include="Objects\HealthBonusFactory.cs" />
+    <Compile Include="Objects\IBuilder.cs" />
     <Compile Include="Objects\PowerBonus.cs" />
     <Compile Include="Objects\PowerBonusFactory.cs" />
+    <Compile Include="Objects\RedPlayer.cs" />
+    <Compile Include="Objects\RedPlayerBuilder.cs" />
     <Compile Include="Objects\SpeedBonus.cs" />
     <Compile Include="Objects\SpeedBonusFactory.cs" />
     <Compile Include="SaveGameData.cs" />
