@@ -118,44 +118,61 @@ namespace BombermanMultiplayer
         {
             Random r = new Random();
             int rand = 0;
-            //Génération grille du terrain
             MapGrid = new Tile[hebergeurWidth / TILE_WIDTH, hebergeurHeight / TILE_HEIGHT];
 
-            for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
-            {
-                for (int j = 0; j < MapGrid.GetLength(1); j++) //Colonne
-                {
+            int rows = MapGrid.GetLength(0);
+            int cols = MapGrid.GetLength(1);
 
-                    rand = r.Next(0,10);
-                       
-                    if (j == 0 || j == (MapGrid.GetLength(0) - 1) || i == 0 || i == (MapGrid.GetLength(1) - 1))
+            for (int i = 0; i < rows; i++) // Row
+            {
+                for (int j = 0; j < cols; j++) // Column
+                {
+                    rand = r.Next(0, 10);
+
+                    if (j == 0 || j == cols - 1 || i == 0 || i == rows - 1)
                         MapGrid[i, j] = new Tile(j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, false, false);
                     else
                     {
                         if (i % 2 == 0 && j % 2 == 0)
-                            MapGrid[i, j] = new Tile( j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, false, false);
+                            MapGrid[i, j] = new Tile(j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, false, false);
                         else
                         {
                             if (((i == 1 && (j == 1 || j == 2)) || (i == 2 && j == 1)
-                                || (i == (MapGrid.GetLength(0) - 1) - 2 && j == (MapGrid.GetLength(0) - 1) - 1) || (i == (MapGrid.GetLength(0) - 1) - 1 && (j == (MapGrid.GetLength(0) - 1) - 1 || j == (MapGrid.GetLength(0) - 1) - 2)))) // les cases adjacentes au point de spawn du joueurs sont exemptes de blocks destructibles
-                                MapGrid[i, j] = new Tile( j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, true, false);
-                            else if (rand >= 1) // Si le random est pair la case est remplie par un bloc destructible
-                                MapGrid[i, j] = new Tile(j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, false, true);
-                            else // Le reste des cases est libre 
+                                || (i == rows - 3 && j == cols - 2) || (i == rows - 2 && (j == cols - 2 || j == cols - 3))))
                                 MapGrid[i, j] = new Tile(j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, true, false);
-
+                            else if (rand >= 1)
+                                MapGrid[i, j] = new Tile(j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, false, true);
+                            else
+                                MapGrid[i, j] = new Tile(j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, true, false);
                         }
-                            
-
                     }
-                    
-
                 }
             }
+
+            // Ensure all four corners and their adjacent tiles are walkable and not destroyable
+            // Top-left
+            MapGrid[1, 1].Walkable = true; MapGrid[1, 1].Destroyable = false;
+            MapGrid[1, 2].Walkable = true; MapGrid[1, 2].Destroyable = false;
+            MapGrid[2, 1].Walkable = true; MapGrid[2, 1].Destroyable = false;
+
+            // Top-right
+            MapGrid[1, cols - 2].Walkable = true; MapGrid[1, cols - 2].Destroyable = false;
+            MapGrid[1, cols - 3].Walkable = true; MapGrid[1, cols - 3].Destroyable = false;
+            MapGrid[2, cols - 2].Walkable = true; MapGrid[2, cols - 2].Destroyable = false;
+
+            // Bottom-left
+            MapGrid[rows - 2, 1].Walkable = true; MapGrid[rows - 2, 1].Destroyable = false;
+            MapGrid[rows - 2, 2].Walkable = true; MapGrid[rows - 2, 2].Destroyable = false;
+            MapGrid[rows - 3, 1].Walkable = true; MapGrid[rows - 3, 1].Destroyable = false;
+
+            // Bottom-right
+            MapGrid[rows - 2, cols - 2].Walkable = true; MapGrid[rows - 2, cols - 2].Destroyable = false;
+            MapGrid[rows - 2, cols - 3].Walkable = true; MapGrid[rows - 2, cols - 3].Destroyable = false;
+            MapGrid[rows - 3, cols - 2].Walkable = true; MapGrid[rows - 3, cols - 2].Destroyable = false;
         }
 
 
-        
+
 
 
 

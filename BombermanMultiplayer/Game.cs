@@ -31,17 +31,19 @@ namespace BombermanMultiplayer
 
         // Command pattern - komandų istorija (replay sistemai ar debugging'ui)
         public List<ICommand> CommandHistory = new List<ICommand>();
+        private const int tileWidth = 48;
+        private const int tileHeight = 48;
 
         //ctor when picture box size is determined
         public Game(int hebergeurWidth, int hebergeurHeight)
         {
-            this.world = new World(hebergeurWidth, hebergeurHeight, 48, 48, 1);
+            this.world = new World(hebergeurWidth, hebergeurHeight, tileWidth, tileHeight, 1);
 
             players = new Player[4];
-            players[0] = new Player(1, 2, 33, 33, 1, 1, 48, 48, 80, 1);
-            players[1] = new Player(1, 2, 33, 33, world.MapGrid.GetLength(0) - 2, world.MapGrid.GetLength(0) - 2, 48, 48, 80, 2);
-            players[2] = new Player(1, 2, 33, 33, 1, world.MapGrid.GetLength(1) - 2, 48, 48, 80, 3);
-            players[3] = new Player(1, 2, 33, 33, world.MapGrid.GetLength(0) - 2, 1, 48, 48, 80, 4);
+            players[0] = new Player(1, 2, 33, 33, 1, 1, tileWidth, tileHeight, 80, 1);
+            players[1] = new Player(1, 2, 33, 33, world.MapGrid.GetLength(0) - 2, world.MapGrid.GetLength(0) - 2, tileWidth, tileHeight, 80, 2);
+            players[2] = new Player(1, 2, 33, 33, 1, world.MapGrid.GetLength(1) - 2, tileWidth, tileHeight, 80, 3);
+            players[3] = new Player(1, 2, 33, 33, world.MapGrid.GetLength(0) - 2, 1, tileWidth, tileHeight, 80, 4);
 
             this.BombsOnTheMap = new List<Bomb>();
             this.LogicTimer = new System.Timers.Timer(40);
