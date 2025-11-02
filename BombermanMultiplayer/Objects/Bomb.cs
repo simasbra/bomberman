@@ -11,8 +11,12 @@ using System.Diagnostics;
 
 namespace BombermanMultiplayer
 {
+    /// <summary>
+    /// Abstract base class for all bomb types
+    /// Part of Abstract Factory pattern for creating explosive families
+    /// </summary>
     [Serializable]
-    public class Bomb : GameObject, IDisposable
+    public abstract class Bomb : GameObject, IDisposable
     {
 
         private int _DetonationTime = 2000;
@@ -24,7 +28,14 @@ namespace BombermanMultiplayer
 
         #region Accessors
 
-      
+        /// <summary>
+        /// Explosion power radius
+        /// </summary>
+        public int Power
+        {
+            get { return bombPower; }
+            set { bombPower = value; }
+        }
 
         public int DetonationTime
         {
@@ -48,13 +59,11 @@ namespace BombermanMultiplayer
 
   
 
-        public Bomb(int caseLigne, int caseCol, int totalFrames, int frameWidth, int frameHeight, int detonationTime, int TileWidth, int TileHeight, short proprietary)
+        protected Bomb(int caseLigne, int caseCol, int totalFrames, int frameWidth, int frameHeight, int detonationTime, int TileWidth, int TileHeight, short proprietary)
             : base(caseCol * TileWidth, caseLigne * TileHeight, totalFrames, frameWidth, frameHeight)
         {
             CasePosition = new int[2] { caseLigne, caseCol };
 
-            //Charge the sprite
-            this.LoadSprite(Properties.Resources.Bombe);
             //Define the proprietary player (who drops this bomb)
             this.Proprietary = proprietary;
             this._DetonationTime = detonationTime;
