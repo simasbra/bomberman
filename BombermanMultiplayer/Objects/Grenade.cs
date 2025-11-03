@@ -1,107 +1,131 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Drawing.Drawing2D;
-using System.Media;
-using System.Diagnostics;
+// filepath: BombermanMultiplayer/Objects/Grenade.cs
+using System;
 
 namespace BombermanMultiplayer
 {
     /// <summary>
-    /// Abstract base class for all bomb types
-    /// Part of Abstract Factory pattern for creating explosive families
+    /// Base class for grenade explosives
+    /// Grenades are projectiles that can be thrown
     /// </summary>
     [Serializable]
-    public abstract class Bomb : GameObject, IDisposable
+    public abstract class Grenade : GameObject, IDisposable
     {
+        public int ThrowDistance { get; set; } = 3;
+        public int DetonationTime { get; set; } = 1500;
+        public bool Exploding { get; set; } = false;
+        public int Power { get; set; } = 2;
+        public short Proprietary { get; set; }
+        
+        public int Direction { get; set; } = 0; // 0=not thrown, 1=UP, 2=DOWN, 3=LEFT, 4=RIGHT
+        public int DistanceTraveled { get; set; } = 0;
 
-        private int _DetonationTime = 2000;
-        public bool Explosing = false;
-        private int bombPower = 3;
-
-        //Who drops the bomb, player 1 = 1, player 2 = 2
-        public short Proprietary;
-
-        #region Accessors
+        protected Grenade(int row, int col, int totalFrames, int frameWidth, int frameHeight,
+                         int detonationTime, int tileWidth, int tileHeight, short owner)
+            : base(col * tileWidth, row * tileHeight, totalFrames, frameWidth, frameHeight)
+        {
+            CasePosition = new int[2] { row, col };
+            DetonationTime = detonationTime;
+            Proprietary = owner;
+        }
 
         /// <summary>
-        /// Explosion power radius
+        /// Throw grenade in a direction
         /// </summary>
-        public int Power
-        {
-            get { return bombPower; }
-            set { bombPower = value; }
-        }
+        public abstract void Throw(int targetRow, int targetCol);
 
-        public int DetonationTime
+        /// <summary>
+        /// Move grenade projectile
+        /// </summary>
+        public void MoveGrenade(Tile[,] mapGrid)
         {
-            get
+            if (Direction == 0) return; // Not thrown yet
+            
+            // Grenades clear their current tile when moving
+            mapGrid[CasePosition[0], CasePosition[1]].Occupied = false;
+            
+            // Move grenade in thrown direction until it hits obstacle or max distance
+            if (DistanceTraveled < ThrowDistance)
             {
-                return _DetonationTime;
+                bool canContinue = false;
+                
+                switch (Direction)
+                {
+                    case 1: // UP
+                        if (CasePosition[0] - 1 >= 0 && mapGrid[CasePosition[0] - 1, CasePosition[1]].Walkable)
+                        {
+                            CasePosition[0]--;
+                            DistanceTraveled++;
+                            canContinue = true;
+                        }
+                        break;
+                    case 2: // DOWN
+                        if (CasePosition[0] + 1 < mapGrid.GetLength(0) && mapGrid[CasePosition[0] + 1, CasePosition[1]].Walkable)
+                        {
+                            CasePosition[0]++;
+                            DistanceTraveled++;
+                            canContinue = true;
+                        }
+                        break;
+                    case 3: // LEFT
+                        if (CasePosition[1] - 1 >= 0 && mapGrid[CasePosition[0], CasePosition[1] - 1].Walkable)
+                        {
+                            CasePosition[1]--;
+                            DistanceTraveled++;
+                            canContinue = true;
+                        }
+                        break;
+                    case 4: // RIGHT
+                        if (CasePosition[1] + 1 < mapGrid.GetLength(1) && mapGrid[CasePosition[0], CasePosition[1] + 1].Walkable)
+                        {
+                            CasePosition[1]++;
+                            DistanceTraveled++;
+                            canContinue = true;
+                        }
+                        break;
+                }
+                
+                // If grenade hit obstacle or max distance, stop throwing
+                if (!canContinue)
+                {
+                    Direction = 0;
+                }
             }
-
-            set
+            else
             {
-                if(_DetonationTime > 0)
-                _DetonationTime = value;
+                Direction = 0; // Stop throwing after max distance
             }
         }
 
-     
-
-
-        #endregion
-
-
-  
-
-        protected Bomb(int caseLigne, int caseCol, int totalFrames, int frameWidth, int frameHeight, int detonationTime, int TileWidth, int TileHeight, short proprietary)
-            : base(caseCol * TileWidth, caseLigne * TileHeight, totalFrames, frameWidth, frameHeight)
+        public void TimingExplosion(int elapsedTime)
         {
-            CasePosition = new int[2] { caseLigne, caseCol };
-
-            //Define the proprietary player (who drops this bomb)
-            this.Proprietary = proprietary;
-            this._DetonationTime = detonationTime;
-
-            this._frameTime = DetonationTime / 8;
-        }
-
-
-
-        public void TimingExplosion(int elsapedTime)
-        {
+            DetonationTime -= elapsedTime;
             if (DetonationTime <= 0)
             {
-                this.Explosing = true;
+                Exploding = true;
             }
-            DetonationTime -= elsapedTime;
         }
 
+        /// <summary>
+        /// Grenade explosion - similar to bomb but typically with wider radius
+        /// </summary>
         public void Explosion(Tile[,] MapGrid, Player[] players)
         {
             int variablePosition = 0;
-
             bool PropagationUP = true, PropagationDOWN = true, PropagationLEFT = true, PropagationRIGHT = true;
 
-            // Grąžinti bombą savininkui ir patikrinti bonusą
+            // Return grenade to owner
             for (int i = 0; i < players.Length; i++)
             {
                 if (Proprietary == players[i].PlayerNumero)
                 {
-                    players[i].BombNumb++;
                     if (players[i].BonusSlot[0] == Objects.BonusType.PowerBomb || players[i].BonusSlot[1] == Objects.BonusType.PowerBomb)
                     {
-                        this.bombPower++;
+                        this.Power++;
                     }
                 }
             }
 
-            // Patikrinti ar žaidėjas stovi ant bombos
+            // Check if player is on the grenade
             for (int i = 0; i < players.Length; i++)
             {
                 if (this.CasePosition[0] == players[i].CasePosition[0] && this.CasePosition[1] == players[i].CasePosition[1]
@@ -112,7 +136,8 @@ namespace BombermanMultiplayer
                 }
             }
 
-            for (int i = 0; i < this.bombPower; i++)
+            // Explosion propagation
+            for (int i = 0; i < this.Power; i++)
             {
                 // UP
                 if (PropagationUP)
@@ -220,59 +245,78 @@ namespace BombermanMultiplayer
             }
 
             MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied = false;
-            MapGrid[this.CasePosition[0], this.CasePosition[1]].bomb = null;
-
             this.Dispose();
         }
 
-
-
-
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-
-                    this.Sprite = null;
-
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
-            }
-        }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~Bomb() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-             GC.SuppressFinalize(this);
+            Sprite = null;
+            GC.SuppressFinalize(this);
         }
-        #endregion
+    }
 
+    [Serializable]
+    public class ClassicGrenade : Grenade
+    {
+        public ClassicGrenade(int row, int col, int totalFrames, int frameWidth, int frameHeight,
+                             int detonationTime, int tileWidth, int tileHeight, short owner)
+            : base(row, col, totalFrames, frameWidth, frameHeight, detonationTime, tileWidth, tileHeight, owner)
+        {
+            Power = 2;  
+            ThrowDistance = 3; 
+            DetonationTime = 1500; 
+            
+            LoadSprite(Properties.Resources.Bombe); // TODO: Add grenade sprite
+        }
 
+        public override void Throw(int targetRow, int targetCol)
+        {
+            // Simple throw - determine direction based on target
+            int rowDiff = targetRow - CasePosition[0];
+            int colDiff = targetCol - CasePosition[1];
+            
+            if (Math.Abs(rowDiff) > Math.Abs(colDiff))
+            {
+                // Throw vertically
+                Direction = rowDiff > 0 ? 2 : 1; // 2=DOWN, 1=UP
+            }
+            else
+            {
+                // Throw horizontally
+                Direction = colDiff > 0 ? 4 : 3; // 4=RIGHT, 3=LEFT
+            }
+        }
+    }
 
+    [Serializable]
+    public class AdvancedGrenade : Grenade
+    {
+        public bool IsBouncing { get; set; } = true;
 
+        public AdvancedGrenade(int row, int col, int totalFrames, int frameWidth, int frameHeight,
+                              int detonationTime, int tileWidth, int tileHeight, short owner)
+            : base(row, col, totalFrames, frameWidth, frameHeight, detonationTime, tileWidth, tileHeight, owner)
+        {
+            Power = 4;
+            ThrowDistance = 5;  
+            DetonationTime = 1000;     
+            
+            LoadSprite(Properties.Resources.Bombe); // TODO: Add advanced grenade sprite
+        }
 
-
-
-
-
+        public override void Throw(int targetRow, int targetCol)
+        {
+            int rowDiff = targetRow - CasePosition[0];
+            int colDiff = targetCol - CasePosition[1];
+            
+            if (Math.Abs(rowDiff) > Math.Abs(colDiff))
+            {
+                Direction = rowDiff > 0 ? 2 : 1;
+            }
+            else
+            {
+                Direction = colDiff > 0 ? 4 : 3;
+            }
+        }
     }
 }

@@ -45,7 +45,17 @@ namespace BombermanMultiplayer.Commands
             {
                 if (!_mapGrid[_caseRow, _caseCol].Occupied)
                 {
-                    _droppedBomb = new Bomb(_caseRow, _caseCol, 8, 48, 48, 2000, 48, 48, _player.PlayerNumero);
+                    Bomb bombToAdd;
+                    if (_player.ExplosiveFactory != null)
+                    {
+                        bombToAdd = _player.ExplosiveFactory.CreateBomb(_caseRow, _caseCol, 48, 48, (short)_player.PlayerNumero);
+                    }
+                    else
+                    {
+                        bombToAdd = new ClassicBomb(_caseRow, _caseCol, 8, 48, 48, 2000, 48, 48, (short)_player.PlayerNumero);
+                    }
+
+                    _droppedBomb = bombToAdd;
                     _bombsOnTheMap.Add(_droppedBomb);
 
                     _mapGrid[_caseRow, _caseCol].bomb = _droppedBomb;

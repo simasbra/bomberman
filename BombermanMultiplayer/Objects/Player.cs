@@ -30,9 +30,11 @@ namespace BombermanMultiplayer
         public short[] BonusTimer = new short[2];
 
         public MovementDirection Orientation  = MovementDirection.NONE;
+        public MovementDirection LastOrientation = MovementDirection.UP;
         public IBonusEffectStrategy[] ActiveStrategies = new IBonusEffectStrategy[2];
 
-
+        [NonSerialized]
+        public ExplosiveFactory ExplosiveFactory;
 
 
 
@@ -101,14 +103,16 @@ namespace BombermanMultiplayer
 
 
 
-        public Player(byte lifes, int totalFrames, int frameWidth, int frameHeight, int caseligne, int casecolonne, int TileWidth, int TileHeight, int frameTime, byte playerNumero)
+        public Player(byte lifes, int totalFrames, int frameWidth, int frameHeight, 
+                     int caseligne, int casecolonne, int TileWidth, int TileHeight, 
+                     int frameTime, byte playerNumero)
             : base(casecolonne * TileWidth, caseligne * TileHeight, totalFrames, frameWidth, frameHeight, frameTime)
         {
             CasePosition = new int[2] { caseligne, casecolonne };
             Lifes = lifes;
             Wait = 0;
             PlayerNumero = playerNumero;
-
+            ExplosiveFactory = new ClassicExplosiveFactory();
 
         }
 
@@ -131,15 +135,19 @@ namespace BombermanMultiplayer
             switch (this.Orientation)
             {
                 case MovementDirection.UP:
+                    LastOrientation = MovementDirection.UP;
                     DeplHaut();
                     break;
                 case MovementDirection.DOWN:
+                    LastOrientation = MovementDirection.DOWN;
                     DeplBas();
                     break;
                 case MovementDirection.LEFT:
+                    LastOrientation = MovementDirection.LEFT;
                     DeplGauche();
                     break;
                 case MovementDirection.RIGHT:
+                    LastOrientation = MovementDirection.RIGHT;
                     DeplDroite();
                     break;
                 default:
@@ -197,25 +205,68 @@ namespace BombermanMultiplayer
 
 
 
-#endregion
+        #endregion
 
         #region Actions
-        
+
+        /// <summary>
+        /// Upgrade player's arsenal to advanced weapons
+        /// </summary>
+        public void UpgradeArsenal()
+        {
+            ExplosiveFactory = new AdvancedExplosiveFactory();
+        }
+
+        /// <summary>
+        /// Downgrade player's arsenal to classic weapons
+        /// </summary>
+        public void DowngradeArsenal()
+        {
+            ExplosiveFactory = new ClassicExplosiveFactory();
+        }
         public void DropBomb(Tile[,] MapGrid, List<Bomb> BombsOnTheMap, Player otherplayer)
         {
-            if (this.BombNumb > 0) //If player still has bombs
+            if (this.BombNumb > 0 && !MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied)
             {
-                if (!MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied)
-                {
-                    BombsOnTheMap.Add(new Bomb(this.CasePosition[0], this.CasePosition[1], 8, 48, 48, 2000, 48, 48, this.PlayerNumero));
-                    //Case obtain a reference to the bomb dropped on
-                    MapGrid[this.CasePosition[0], this.CasePosition[1]].bomb = BombsOnTheMap[BombsOnTheMap.Count-1];
-                    MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied = true;
-                    this.BombNumb--;
-                }
+                // Use factory to create appropriate bomb type
+                Bomb newBomb = ExplosiveFactory.CreateBomb(
+                    this.CasePosition[0], 
+                    this.CasePosition[1],
+                    48, 48, 
+                    this.PlayerNumero
+                );
+                
+                BombsOnTheMap.Add(newBomb);
+                MapGrid[this.CasePosition[0], this.CasePosition[1]].bomb = newBomb;
+                MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied = true;
+                this.BombNumb--;
             }
         }
-        
+
+        public void DropMine(Tile[,] MapGrid, List<Mine> MinesOnTheMap, Player otherPlayer)
+        {
+            if (this.Dead) return;
+            if (!MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied)
+            {
+                Mine newMine = ExplosiveFactory.CreateMine(
+                    this.CasePosition[0], this.CasePosition[1], 48, 48, this.PlayerNumero);
+                MinesOnTheMap.Add(newMine);
+                MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied = true;
+            }
+        }
+
+        public void DropGrenade(Tile[,] MapGrid, List<Grenade> GrenadesOnTheMap, Player otherPlayer)
+        {
+            if (this.Dead) return;
+            if (!MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied)
+            {
+                Grenade newGrenade = ExplosiveFactory.CreateGrenade(
+                    this.CasePosition[0], this.CasePosition[1], 48, 48, this.PlayerNumero);
+                GrenadesOnTheMap.Add(newGrenade);
+                MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied = true;
+            }
+        }
+
         public void DrawPosition(Graphics g)
         {
 

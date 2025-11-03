@@ -1,107 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Drawing.Drawing2D;
-using System.Media;
-using System.Diagnostics;
+// filepath: BombermanMultiplayer/Objects/Mine.cs
+using System;
 
 namespace BombermanMultiplayer
 {
     /// <summary>
-    /// Abstract base class for all bomb types
-    /// Part of Abstract Factory pattern for creating explosive families
+    /// Base class for mine explosives
+    /// Mines activate when player steps on them
     /// </summary>
     [Serializable]
-    public abstract class Bomb : GameObject, IDisposable
+    public abstract class Mine : GameObject, IDisposable
     {
+        public int ActivationTime { get; set; } = 1000;
+        public bool IsActivated { get; set; } = false;
+        public bool Exploding { get; set; } = false;
+        public int Power { get; set; } = 2;
+        public short Proprietary { get; set; }
+        
+        public int InitialDelay { get; set; } = 1000;
+        public bool PlayerHasLeftMine { get; set; } = false;
 
-        private int _DetonationTime = 2000;
-        public bool Explosing = false;
-        private int bombPower = 3;
+        protected Mine(int row, int col, int totalFrames, int frameWidth, int frameHeight, 
+                      int tileWidth, int tileHeight, short owner)
+            : base(col * tileWidth, row * tileHeight, totalFrames, frameWidth, frameHeight)
+        {
+            CasePosition = new int[2] { row, col };
+            Proprietary = owner;
+            InitialDelay = 1000;
+            PlayerHasLeftMine = false;
+        }
 
-        //Who drops the bomb, player 1 = 1, player 2 = 2
-        public short Proprietary;
-
-        #region Accessors
+        public abstract void Activate();
+        public abstract void CheckProximity(Player[] players);
 
         /// <summary>
-        /// Explosion power radius
+        /// Handle mine timing and activation logic
         /// </summary>
-        public int Power
+        public void TimingExplosion(int elapsedTime)
         {
-            get { return bombPower; }
-            set { bombPower = value; }
-        }
-
-        public int DetonationTime
-        {
-            get
+            if (IsActivated)
             {
-                return _DetonationTime;
-            }
-
-            set
-            {
-                if(_DetonationTime > 0)
-                _DetonationTime = value;
+                ActivationTime -= elapsedTime;
+                if (ActivationTime <= 0)
+                {
+                    Exploding = true;
+                }
             }
         }
 
-     
-
-
-        #endregion
-
-
-  
-
-        protected Bomb(int caseLigne, int caseCol, int totalFrames, int frameWidth, int frameHeight, int detonationTime, int TileWidth, int TileHeight, short proprietary)
-            : base(caseCol * TileWidth, caseLigne * TileHeight, totalFrames, frameWidth, frameHeight)
-        {
-            CasePosition = new int[2] { caseLigne, caseCol };
-
-            //Define the proprietary player (who drops this bomb)
-            this.Proprietary = proprietary;
-            this._DetonationTime = detonationTime;
-
-            this._frameTime = DetonationTime / 8;
-        }
-
-
-
-        public void TimingExplosion(int elsapedTime)
-        {
-            if (DetonationTime <= 0)
-            {
-                this.Explosing = true;
-            }
-            DetonationTime -= elsapedTime;
-        }
-
+        /// <summary>
+        /// Mine explosion - similar logic to bomb but with mine-specific behavior
+        /// </summary>
         public void Explosion(Tile[,] MapGrid, Player[] players)
         {
             int variablePosition = 0;
-
             bool PropagationUP = true, PropagationDOWN = true, PropagationLEFT = true, PropagationRIGHT = true;
 
-            // Grąžinti bombą savininkui ir patikrinti bonusą
+            // Return mine to owner
             for (int i = 0; i < players.Length; i++)
             {
                 if (Proprietary == players[i].PlayerNumero)
                 {
-                    players[i].BombNumb++;
                     if (players[i].BonusSlot[0] == Objects.BonusType.PowerBomb || players[i].BonusSlot[1] == Objects.BonusType.PowerBomb)
                     {
-                        this.bombPower++;
+                        this.Power++;
                     }
                 }
             }
 
-            // Patikrinti ar žaidėjas stovi ant bombos
+            // Check if player is on the mine
             for (int i = 0; i < players.Length; i++)
             {
                 if (this.CasePosition[0] == players[i].CasePosition[0] && this.CasePosition[1] == players[i].CasePosition[1]
@@ -112,7 +78,8 @@ namespace BombermanMultiplayer
                 }
             }
 
-            for (int i = 0; i < this.bombPower; i++)
+            // Explosion propagation
+            for (int i = 0; i < this.Power; i++)
             {
                 // UP
                 if (PropagationUP)
@@ -220,59 +187,154 @@ namespace BombermanMultiplayer
             }
 
             MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied = false;
-            MapGrid[this.CasePosition[0], this.CasePosition[1]].bomb = null;
-
             this.Dispose();
         }
 
-
-
-
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-
-                    this.Sprite = null;
-
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
-            }
-        }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~Bomb() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-             GC.SuppressFinalize(this);
+            Sprite = null;
+            GC.SuppressFinalize(this);
         }
-        #endregion
+    }
 
+    [Serializable]
+    public class ClassicMine : Mine
+    {
+        public ClassicMine(int row, int col, int totalFrames, int frameWidth, int frameHeight,
+                          int tileWidth, int tileHeight, short owner)
+            : base(row, col, totalFrames, frameWidth, frameHeight, tileWidth, tileHeight, owner)
+        {
+            LoadSprite(Properties.Resources.Bombe); // TODO: Add mine sprite
+        }
 
+        public override void Activate()
+        {
+            IsActivated = true;
+        }
 
+        public override void CheckProximity(Player[] players)
+        {
+            if (InitialDelay > 0)
+            {
+                InitialDelay -= 40; // Subtract one logic frame (40ms)
+                
+                // While waiting, check if player has LEFT the mine
+                bool playerOnMine = false;
+                foreach (var player in players)
+                {
+                    if (!player.Dead && 
+                        player.CasePosition[0] == this.CasePosition[0] && 
+                        player.CasePosition[1] == this.CasePosition[1])
+                    {
+                        playerOnMine = true;
+                        break;
+                    }
+                }
+                
+                // If player was on mine but is gone now, mark as LEFT
+                if (!playerOnMine && InitialDelay > 0)
+                {
+                    PlayerHasLeftMine = true;
+                }
+                
+                return;
+            }
 
+            foreach (var player in players)
+            {
+                if (player.Dead) continue;
 
+                bool playerOnMine = (player.CasePosition[0] == this.CasePosition[0] && 
+                                     player.CasePosition[1] == this.CasePosition[1]);
 
+                if (playerOnMine)
+                {
+                    // Only activate if player left first, then came back
+                    if (PlayerHasLeftMine)
+                    {
+                        Activate();
+                        break;
+                    }
+                }
+                else
+                {
+                    // Player is not on mine anymore - they can come back
+                    if (!PlayerHasLeftMine)
+                    {
+                        PlayerHasLeftMine = true;
+                    }
+                }
+            }
+        }
+    }
 
+    [Serializable]
+    public class AdvancedMine : Mine
+    {
+        public bool IsProximity { get; set; } = true;
 
+        public AdvancedMine(int row, int col, int totalFrames, int frameWidth, int frameHeight,
+                           int tileWidth, int tileHeight, short owner)
+            : base(row, col, totalFrames, frameWidth, frameHeight, tileWidth, tileHeight, owner)
+        {
+            LoadSprite(Properties.Resources.Bombe); // TODO: Add advanced mine sprite
+        }
 
+        public override void Activate()
+        {
+            IsActivated = true;
+            Exploding = true;
+        }
+
+        public override void CheckProximity(Player[] players)
+        {
+            if (InitialDelay > 0)
+            {
+                InitialDelay -= 40;
+                
+                bool playerNearMine = false;
+                foreach (var player in players)
+                {
+                    if (!player.Dead)
+                    {
+                        int distance = Math.Abs(player.CasePosition[0] - CasePosition[0]) +
+                                      Math.Abs(player.CasePosition[1] - CasePosition[1]);
+                        if (distance <= 1)
+                        {
+                            playerNearMine = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!playerNearMine && InitialDelay > 0)
+                {
+                    PlayerHasLeftMine = true;
+                }
+                
+                return;
+            }
+
+            if (!IsProximity || IsActivated) return;
+
+            foreach (var player in players)
+            {
+                if (player.Dead) continue;
+
+                int distance = Math.Abs(player.CasePosition[0] - CasePosition[0]) +
+                              Math.Abs(player.CasePosition[1] - CasePosition[1]);
+
+                if (distance <= 1 && PlayerHasLeftMine)
+                {
+                    Activate();
+                    break;
+                }
+                
+                if (distance > 1 && !PlayerHasLeftMine)
+                {
+                    PlayerHasLeftMine = true;
+                }
+            }
+        }
     }
 }

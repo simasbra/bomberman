@@ -14,11 +14,15 @@ namespace BombermanMultiplayer.Strategy
         {
             player.BonusSlot[slotIndex] = BonusType.PowerBomb;
             player.BonusTimer[slotIndex] = (short)GetDuration();
+            
+            player.UpgradeArsenal();
         }
 
         public void Remove(Player player, int slotIndex)
         {
             player.BonusSlot[slotIndex] = BonusType.None;
+            
+            player.DowngradeArsenal();
         }
 
         public int GetDuration()

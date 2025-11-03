@@ -49,6 +49,8 @@
   <ItemGroup>
     <Compile Include="Adapters\PacketCommandAdapter.cs" />
     <Compile Include="Commands\DropBombCommand.cs" />
+    <Compile Include="Commands\DropGrenadeCommand.cs" />
+    <Compile Include="Commands\DropMineCommand.cs" />
     <Compile Include="Commands\Interface\ICommand.cs" />
     <Compile Include="Commands\MovePlayerCommand.cs" />
     <Compile Include="MainMenu.cs">
@@ -57,13 +59,20 @@
     <Compile Include="MainMenu.Designer.cs">
       <DependentUpon>MainMenu.cs</DependentUpon>
     </Compile>
+    <Compile Include="Objects\AdvancedBomb.cs" />
+    <Compile Include="Objects\AdvancedExplosiveFactory.cs" />
     <Compile Include="Objects\BluePlayer.cs" />
     <Compile Include="Objects\BluePlayerBuilder.cs" />
     <Compile Include="Objects\BonusFactory.cs" />
+    <Compile Include="Objects\ClassicBomb.cs" />
+    <Compile Include="Objects\ClassicExplosiveFactory.cs" />
     <Compile Include="Objects\Director.cs" />
+    <Compile Include="Objects\ExplosiveFactory.cs" />
+    <Compile Include="Objects\Grenade.cs" />
     <Compile Include="Objects\HealthBonus.cs" />
     <Compile Include="Objects\HealthBonusFactory.cs" />
     <Compile Include="Objects\IBuilder.cs" />
+    <Compile Include="Objects\Mine.cs" />
     <Compile Include="Objects\PowerBonus.cs" />
     <Compile Include="Objects\PowerBonusFactory.cs" />
     <Compile Include="Objects\RedPlayer.cs" />

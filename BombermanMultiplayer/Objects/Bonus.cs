@@ -69,7 +69,11 @@ namespace BombermanMultiplayer.Objects
         /// <summary>
         /// Provides armor or health protection
         /// </summary>
-        Armor
+        Armor,
+        /// <summary>
+        /// Provides advanced weapons and explosives
+        /// </summary>
+        AdvancedArsenal
 
     }
 }
