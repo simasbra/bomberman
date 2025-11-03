@@ -73,6 +73,12 @@ namespace BombermanMultiplayer.Adapters
                 case Keys.Space:
                     return new DropBombCommand(player, _game.world.MapGrid, _game.BombsOnTheMap, otherPlayer);
 
+                case Keys.M:
+                    return new DropMineCommand(player, _game.world.MapGrid, _game.MinesOnTheMap, otherPlayer);
+
+                case Keys.G:
+                    return new DropGrenadeCommand(player, _game.world.MapGrid, _game.GrenadesOnTheMap, otherPlayer);
+
                 default:
                     return null;
             }

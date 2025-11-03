@@ -30,11 +30,11 @@ namespace BombermanMultiplayer
         public short[] BonusTimer = new short[2];
 
         public MovementDirection Orientation  = MovementDirection.NONE;
+        public MovementDirection LastOrientation = MovementDirection.UP;
         public IBonusEffectStrategy[] ActiveStrategies = new IBonusEffectStrategy[2];
 
         [NonSerialized]
         public ExplosiveFactory ExplosiveFactory;
-
 
 
 
@@ -135,15 +135,19 @@ namespace BombermanMultiplayer
             switch (this.Orientation)
             {
                 case MovementDirection.UP:
+                    LastOrientation = MovementDirection.UP;
                     DeplHaut();
                     break;
                 case MovementDirection.DOWN:
+                    LastOrientation = MovementDirection.DOWN;
                     DeplBas();
                     break;
                 case MovementDirection.LEFT:
+                    LastOrientation = MovementDirection.LEFT;
                     DeplGauche();
                     break;
                 case MovementDirection.RIGHT:
+                    LastOrientation = MovementDirection.RIGHT;
                     DeplDroite();
                     break;
                 default:
@@ -238,7 +242,31 @@ namespace BombermanMultiplayer
                 this.BombNumb--;
             }
         }
-        
+
+        public void DropMine(Tile[,] MapGrid, List<Mine> MinesOnTheMap, Player otherPlayer)
+        {
+            if (this.Dead) return;
+            if (!MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied)
+            {
+                Mine newMine = ExplosiveFactory.CreateMine(
+                    this.CasePosition[0], this.CasePosition[1], 48, 48, this.PlayerNumero);
+                MinesOnTheMap.Add(newMine);
+                MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied = true;
+            }
+        }
+
+        public void DropGrenade(Tile[,] MapGrid, List<Grenade> GrenadesOnTheMap, Player otherPlayer)
+        {
+            if (this.Dead) return;
+            if (!MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied)
+            {
+                Grenade newGrenade = ExplosiveFactory.CreateGrenade(
+                    this.CasePosition[0], this.CasePosition[1], 48, 48, this.PlayerNumero);
+                GrenadesOnTheMap.Add(newGrenade);
+                MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied = true;
+            }
+        }
+
         public void DrawPosition(Graphics g)
         {
 

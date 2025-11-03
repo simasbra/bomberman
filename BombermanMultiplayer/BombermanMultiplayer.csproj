@@ -49,6 +49,8 @@
   <ItemGroup>
     <Compile Include="Adapters\PacketCommandAdapter.cs" />
     <Compile Include="Commands\DropBombCommand.cs" />
+    <Compile Include="Commands\DropGrenadeCommand.cs" />
+    <Compile Include="Commands\DropMineCommand.cs" />
     <Compile Include="Commands\Interface\ICommand.cs" />
     <Compile Include="Commands\MovePlayerCommand.cs" />
     <Compile Include="MainMenu.cs">

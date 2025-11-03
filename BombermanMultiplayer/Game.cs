@@ -27,6 +27,9 @@ namespace BombermanMultiplayer
         public Player[] players;
 
         public List<Bomb> BombsOnTheMap;
+        public List<Mine> MinesOnTheMap;
+        public List<Grenade> GrenadesOnTheMap;
+
         public System.Timers.Timer LogicTimer;
 
         // Command pattern - komandų istorija (replay sistemai ar debugging'ui)
@@ -46,6 +49,8 @@ namespace BombermanMultiplayer
             players[3] = new Player(1, 2, 33, 33, world.MapGrid.GetLength(0) - 2, 1, tileWidth, tileHeight, 80, 4);
 
             this.BombsOnTheMap = new List<Bomb>();
+            this.MinesOnTheMap = new List<Mine>();
+            this.GrenadesOnTheMap = new List<Grenade>();
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
             int rows = world.MapGrid.GetLength(0);
@@ -71,6 +76,8 @@ namespace BombermanMultiplayer
                 this.players[i] = save.players[i];
 
             this.BombsOnTheMap = save.bombsOnTheMap;
+            this.MinesOnTheMap = new List<Mine>();
+            this.GrenadesOnTheMap = new List<Grenade>();
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
         }
@@ -79,6 +86,10 @@ namespace BombermanMultiplayer
         public Game()
         {
             this.world = new World();
+            this.players = new Player[4];
+            this.BombsOnTheMap = new List<Bomb>();
+            this.MinesOnTheMap = new List<Mine>();
+            this.GrenadesOnTheMap = new List<Grenade>();
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
         }
@@ -221,6 +232,20 @@ namespace BombermanMultiplayer
                     command = new DropBombCommand(players[0], world.MapGrid, BombsOnTheMap, players[1]);
                 }
             }
+            else if (key == Keys.X)
+            {
+                if (!players[0].Dead)
+                {
+                    command = new DropMineCommand(players[0], world.MapGrid, MinesOnTheMap, players[1]);
+                }
+            }
+            else if (key == Keys.Z)
+            {
+                if (!players[0].Dead)
+                {
+                    command = new DropGrenadeCommand(players[0], world.MapGrid, GrenadesOnTheMap, players[1]);
+                }
+            }
 
             // Žaidėjas 2 - Rodyklės
             else if (key == Keys.Up)
@@ -256,6 +281,20 @@ namespace BombermanMultiplayer
                 if (!players[1].Dead)
                 {
                     command = new DropBombCommand(players[1], world.MapGrid, BombsOnTheMap, players[0]);
+                }
+            }
+            else if (key == Keys.M)
+            {
+                if (!players[1].Dead)
+                {
+                    command = new DropMineCommand(players[1], world.MapGrid, MinesOnTheMap, players[0]);
+                }
+            }
+            else if (key == Keys.G)
+            {
+                if (!players[1].Dead)
+                {
+                    command = new DropGrenadeCommand(players[1], world.MapGrid, GrenadesOnTheMap, players[0]);
                 }
             }
 
@@ -295,6 +334,20 @@ namespace BombermanMultiplayer
                     command = new DropBombCommand(players[2], world.MapGrid, BombsOnTheMap, players[3]);
                 }
             }
+            else if (key == Keys.OemOpenBrackets) // [ - Drop Mine
+            {
+                if (!players[2].Dead)
+                {
+                    command = new DropMineCommand(players[2], world.MapGrid, MinesOnTheMap, players[3]);
+                }
+            }
+            else if (key == Keys.O)
+            {
+                if (!players[2].Dead)
+                {
+                    command = new DropGrenadeCommand(players[2], world.MapGrid, GrenadesOnTheMap, players[3]);
+                }
+            }
 
             // Žaidėjas 4 - NumPad
             else if (key == Keys.NumPad8)
@@ -330,6 +383,20 @@ namespace BombermanMultiplayer
                 if (!players[3].Dead)
                 {
                     command = new DropBombCommand(players[3], world.MapGrid, BombsOnTheMap, players[2]);
+                }
+            }
+            else if (key == Keys.Subtract) // NumPad - Drop Mine
+            {
+                if (!players[3].Dead)
+                {
+                    command = new DropMineCommand(players[3], world.MapGrid, MinesOnTheMap, players[2]);
+                }
+            }
+            else if (key == Keys.Decimal) // NumPad . - Drop Grenade
+            {
+                if (!players[3].Dead)
+                {
+                    command = new DropGrenadeCommand(players[3], world.MapGrid, GrenadesOnTheMap, players[2]);
                 }
             }
 
@@ -384,6 +451,12 @@ namespace BombermanMultiplayer
                     break;
                 case Keys.Space:
                     command = new DropBombCommand(sender, world.MapGrid, BombsOnTheMap, otherPlayer);
+                    break;
+                case Keys.M:
+                    command = new DropMineCommand(sender, world.MapGrid, MinesOnTheMap, otherPlayer);
+                    break;
+                case Keys.G:
+                    command = new DropGrenadeCommand(sender, world.MapGrid, GrenadesOnTheMap, otherPlayer);
                     break;
                 case Keys.ControlKey:
                     sender.Deactivate(this.world.MapGrid, BombsOnTheMap, otherPlayer);
@@ -527,6 +600,53 @@ namespace BombermanMultiplayer
             for (int i = 0; i < ToRemove.Count; i++)
             {
                 try { BombsOnTheMap.RemoveAt(ToRemove[i]); } catch (Exception) { }
+            }
+        }
+        private void MinesLogic()
+        {
+            if (MinesOnTheMap == null || MinesOnTheMap.Count == 0)
+                return;
+
+            List<int> ToRemove = new List<int>();
+            for (int i = 0; i < MinesOnTheMap.Count; i++)
+            {
+                MinesOnTheMap[i].CheckProximity(players);
+                MinesOnTheMap[i].UpdateFrame((int)LogicTimer.Interval);
+                MinesOnTheMap[i].TimingExplosion((int)LogicTimer.Interval);
+                if (MinesOnTheMap[i].Exploding == true)
+                {
+                    MinesOnTheMap[i].Explosion(world.MapGrid, players);
+                    ToRemove.Add(i);
+                }
+            }
+            for (int i = ToRemove.Count - 1; i >= 0; i--)
+            {
+                try { MinesOnTheMap.RemoveAt(ToRemove[i]); } catch (Exception) { }
+            }
+        }
+
+        private void GrenadesLogic()
+        {
+            if (GrenadesOnTheMap == null || GrenadesOnTheMap.Count == 0)
+                return;
+
+            List<int> ToRemove = new List<int>();
+            for (int i = 0; i < GrenadesOnTheMap.Count; i++)
+            {
+                // Move grenade if it's being thrown
+                GrenadesOnTheMap[i].MoveGrenade(world.MapGrid);
+                
+                GrenadesOnTheMap[i].UpdateFrame((int)LogicTimer.Interval);
+                GrenadesOnTheMap[i].TimingExplosion((int)LogicTimer.Interval);
+                if (GrenadesOnTheMap[i].Exploding == true)
+                {
+                    GrenadesOnTheMap[i].Explosion(world.MapGrid, players);
+                    ToRemove.Add(i);
+                }
+            }
+            for (int i = ToRemove.Count - 1; i >= 0; i--)
+            {
+                try { GrenadesOnTheMap.RemoveAt(ToRemove[i]); } catch (Exception) { }
             }
         }
 
@@ -757,6 +877,8 @@ namespace BombermanMultiplayer
             InteractionLogic();
             PlayersLogic();
             BombsLogic();
+            MinesLogic();
+            GrenadesLogic();
             GameOver();
         }
 
