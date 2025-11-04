@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Adapters\IPacketCommandAdapter.cs" />
     <Compile Include="Adapters\PacketCommandAdapter.cs" />
     <Compile Include="Commands\DropBombCommand.cs" />
     <Compile Include="Commands\DropGrenadeCommand.cs" />

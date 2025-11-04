@@ -15,7 +15,7 @@ namespace BombermanMultiplayer.Objects
         private string Name = "Red Player";
         private byte BombCount = 2;
         private byte Lives = 1;
-        private List<BonusType> Bonuses = new List<BonusType>();
+        private Bomb ExtraBonusSlot;
         private int TileWidth;
         private int TileHeight;
 
@@ -68,23 +68,19 @@ namespace BombermanMultiplayer.Objects
         /// </summary>
         /// <param name="lives">The initial number of lives</param>
         /// <returns>The builder instance for method chaining</returns>
-        public IBuilder SetLives(byte lives)
+        public IBuilder SetLived(byte lives)
         {
             Lives = lives;
             return this;
         }
 
         /// <summary>
-        /// Adds a bonus to the player's bonus slot
+        /// Adds an extra bonus bomb to the player
         /// </summary>
-        /// <param name="bonusType">The type of bonus to add</param>
         /// <returns>The builder instance for method chaining</returns>
-        public IBuilder AddBonus(BonusType bonusType)
+        public IBuilder AddExtra()
         {
-            if (Bonuses.Count < 2)
-            {
-                Bonuses.Add(bonusType);
-            }
+            BombCount++;
             return this;
         }
 
@@ -109,11 +105,6 @@ namespace BombermanMultiplayer.Objects
 
             player.Name = Name;
             player.BombNumb = BombCount;
-
-            for (int i = 0; i < Bonuses.Count && i < 2; i++)
-            {
-                player.BonusSlot[i] = Bonuses[i];
-            }
 
             return player;
         }

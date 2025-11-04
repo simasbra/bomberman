@@ -37,14 +37,13 @@ namespace BombermanMultiplayer.Objects
         /// </summary>
         /// <param name="lives">The initial number of lives</param>
         /// <returns>The builder instance for method chaining</returns>
-        IBuilder SetLives(byte lives);
+        IBuilder SetLived(byte lives);
 
         /// <summary>
-        /// Adds a bonus to the player's bonus slot
+        /// Adds an extra bonus to the player's bonus slot
         /// </summary>
-        /// <param name="bonusType">The type of bonus to add</param>
         /// <returns>The builder instance for method chaining</returns>
-        IBuilder AddBonus(BonusType bonusType);
+        IBuilder AddExtra();
 
         /// <summary>
         /// Builds and returns the configured Player object
