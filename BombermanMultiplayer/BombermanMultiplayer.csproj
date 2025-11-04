@@ -52,6 +52,10 @@
   <ItemGroup>
     <Compile Include="Adapters\IPacketCommandAdapter.cs" />
     <Compile Include="Adapters\PacketCommandAdapter.cs" />
+    <Compile Include="Builder\IBuilder.cs" />
+    <Compile Include="Builder\RedPlayerBuilder.cs" />
+    <Compile Include="Builder\BluePlayerBuilder.cs" />
+    <Compile Include="Builder\Director.cs" />
     <Compile Include="Commands\DropBombCommand.cs" />
     <Compile Include="Commands\DropGrenadeCommand.cs" />
     <Compile Include="Commands\DropMineCommand.cs" />
@@ -61,6 +65,10 @@
     <Compile Include="Decoratorrr\DurationDecorator.cs" />
     <Compile Include="Decoratorrr\GlowEffectDecorator.cs" />
     <Compile Include="Decoratorrr\MultiplierDecorator.cs" />
+    <Compile Include="Factory\BonusFactory.cs" />
+    <Compile Include="Factory\HealthBonusFactory.cs" />
+    <Compile Include="Factory\PowerBonusFactory.cs" />
+    <Compile Include="Factory\SpeedBonusFactory.cs" />
     <Compile Include="MainMenu.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -70,26 +78,18 @@
     <Compile Include="Objects\AdvancedBomb.cs" />
     <Compile Include="Objects\AdvancedExplosiveFactory.cs" />
     <Compile Include="Objects\BluePlayer.cs" />
-    <Compile Include="Objects\BluePlayerBuilder.cs" />
-    <Compile Include="Objects\BonusFactory.cs" />
     <Compile Include="Objects\ClassicBomb.cs" />
     <Compile Include="Objects\ClassicExplosiveFactory.cs" />
-    <Compile Include="Objects\Director.cs" />
     <Compile Include="Objects\ExplosiveFactory.cs" />
     <Compile Include="Objects\Grenade.cs" />
     <Compile Include="Objects\HealthBonus.cs" />
-    <Compile Include="Objects\HealthBonusFactory.cs" />
-    <Compile Include="Objects\IBuilder.cs" />
     <Compile Include="Objects\ICloneable.cs" />
     <Compile Include="Objects\Mine.cs" />
     <Compile Include="Objects\PlayerManager.cs" />
     <Compile Include="Objects\PowerBonus.cs" />
-    <Compile Include="Objects\PowerBonusFactory.cs" />
     <Compile Include="Objects\PrototypeDemo.cs" />
     <Compile Include="Objects\RedPlayer.cs" />
-    <Compile Include="Objects\RedPlayerBuilder.cs" />
     <Compile Include="Objects\SpeedBonus.cs" />
-    <Compile Include="Objects\SpeedBonusFactory.cs" />
     <Compile Include="SaveGameData.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameState.cs" />
