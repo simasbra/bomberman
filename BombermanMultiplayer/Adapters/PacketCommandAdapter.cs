@@ -31,7 +31,7 @@ namespace BombermanMultiplayer.Adapters
         /// </summary>
         /// <param name="packet">The packet to convert</param>
         /// <returns>An ICommand that can be executed, or null if packet cannot be converted</returns>
-        public ICommand convertToCommand(Packet packet)
+        public ICommand ConvertToCommand(Packet packet)
         {
             if (packet == null || packet.Empty())
                 return null;

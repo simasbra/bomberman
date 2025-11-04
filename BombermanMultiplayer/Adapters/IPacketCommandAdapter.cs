@@ -12,6 +12,6 @@ namespace BombermanMultiplayer.Adapters
         /// </summary>
         /// <param name="packet">The packet to convert</param>
         /// <returns>An ICommand that can be executed</returns>
-        ICommand convertToCommand(Packet packet);
+        ICommand ConvertToCommand(Packet packet);
     }
 }
