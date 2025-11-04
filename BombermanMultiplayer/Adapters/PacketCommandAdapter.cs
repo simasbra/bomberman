@@ -13,17 +13,17 @@ namespace BombermanMultiplayer.Adapters
     /// Adapter that converts network Packet objects into executable ICommand objects
     /// Implements the Adapter design pattern to bridge network communication and command execution
     /// </summary>
-    public class PacketCommandAdapter
+    public class PacketCommandAdapter : IPacketCommandAdapter
     {
-        private readonly Game _game;
+        private readonly Packet Packet;
 
         /// <summary>
         /// Initializes a new instance of the PacketCommandAdapter class
         /// </summary>
-        /// <param name="game">The game instance that commands will operate on</param>
-        public PacketCommandAdapter(Game game)
+        /// <param name="packet">The packet to be converted</param>
+        public PacketCommandAdapter(Packet packet)
         {
-            _game = game ?? throw new ArgumentNullException(nameof(game));
+            this.Packet = packet ?? throw new ArgumentNullException(nameof(packet));
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace BombermanMultiplayer.Adapters
         /// </summary>
         /// <param name="packet">The packet to convert</param>
         /// <returns>An ICommand that can be executed, or null if packet cannot be converted</returns>
-        public ICommand ConvertToCommand(Packet packet)
+        public ICommand convertToCommand(Packet packet)
         {
             if (packet == null || packet.Empty())
                 return null;
