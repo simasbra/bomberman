@@ -12,7 +12,7 @@ using System.Diagnostics;
 namespace BombermanMultiplayer
 {
     [Serializable]
-    public abstract class GameObject
+    public abstract class GameObject : ICloneable
     {
         //Rectangle permettant de 'matérialiser' le sprite
         protected Rectangle _Source;
@@ -168,8 +168,39 @@ namespace BombermanMultiplayer
             
         }
 
-        
+        #region Prototype Pattern Implementation
 
+        /// <summary>
+        /// Sukuria paviršinę kopija - reference tipo atributai (Sprite) lieka tą patys
+        /// </summary>
+        public virtual object Clone()
+        {
+            // Shallow copy - tik primityvai atributai kopijuojami
+            return this.MemberwiseClone();
+        }
+
+        /// <summary>
+        /// Sukuria giliąją kopija - visi atributai (įskaitant Sprite) yra nukopijuoti
+        /// </summary>
+        public virtual object DeepClone()
+        {
+            // Deep copy
+            GameObject cloned = (GameObject)this.MemberwiseClone();
+            
+            if (this.Sprite != null)
+            {
+                cloned.Sprite = (Image)this.Sprite.Clone();
+            }
+
+            if (this._CasePosition != null)
+            {
+                cloned._CasePosition = (int[])this._CasePosition.Clone();
+            }
+
+            return cloned;
+        }
+
+        #endregion
 
     }
 }

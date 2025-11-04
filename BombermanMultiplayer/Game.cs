@@ -597,7 +597,7 @@ namespace BombermanMultiplayer
                     ToRemove.Add(i);
                 }
             }
-            for (int i = 0; i < ToRemove.Count; i++)
+            for (int i = ToRemove.Count - 1; i >= 0; i--)
             {
                 try { BombsOnTheMap.RemoveAt(ToRemove[i]); } catch (Exception) { }
             }
