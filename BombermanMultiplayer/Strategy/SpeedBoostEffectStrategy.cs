@@ -10,11 +10,12 @@ namespace BombermanMultiplayer.Strategy
 {
     public class SpeedBoostEffectStrategy : IBonusEffectStrategy
     {
-        public void Apply(Player player, int slotIndex)
+        public void Apply(Player player, int slotIndex, Bonus bonus)
         {
-            player.Vitesse *= 2;
+            int newSpeed = (int)(player.Vitesse * bonus.GetSpeedMultiplier());
+            player.Vitesse = (byte)Math.Min(255, newSpeed);
             player.BonusSlot[slotIndex] = BonusType.SpeedBoost;
-            player.BonusTimer[slotIndex] = (short)GetDuration();
+            player.BonusTimer[slotIndex] = (short)bonus.GetDuration();
         }
 
         public void Remove(Player player, int slotIndex)

@@ -37,5 +37,20 @@ namespace BombermanMultiplayer.Objects
             this.SpeedMultiplier = speedMultiplier;
             this.Duration = duration;
         }
+
+        public override int GetDuration()
+        {
+            return this.Duration;
+        }
+
+        public override double GetSpeedMultiplier()
+        {
+            return this.SpeedMultiplier;
+        }
+
+        public override string GetDescription()
+        {
+            return $"SpeedBonus (x{SpeedMultiplier}, {Duration}ms)";
+        }
     }
 }

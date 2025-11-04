@@ -43,6 +43,25 @@ namespace BombermanMultiplayer.Objects
             this.CasePosition[1] = this.Source.X / TileWidth; //Colonne
         }
 
+        public virtual double GetSpeedMultiplier()
+        {
+            return 1.0;
+        }
+
+        public virtual int GetDuration()
+        {
+            return 0;
+        }
+
+        public virtual double GetPowerMultiplier()
+        {
+            return 1.0;
+        }
+
+        public virtual string GetDescription()
+        {
+            return $"Basic {Type} bonus";
+        }
     }
 
     /// <summary>

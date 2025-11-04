@@ -1,14 +1,15 @@
-﻿using System;
+﻿using BombermanMultiplayer.Decoratorrr;
+using BombermanMultiplayer.Objects;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Media;
-using System.Diagnostics;
-using BombermanMultiplayer.Objects;
+using System.Text;
+using System.Windows.Forms;
 
 namespace BombermanMultiplayer
 {
@@ -40,39 +41,164 @@ namespace BombermanMultiplayer
             Destroyable = destroyable;
         }
 
-
         public void SpawnBonus()
         {
             Random r = new Random((int)DateTime.Now.Ticks);
             int num = r.Next(0, 4);
+            Bonus baseBonus = null;
 
             if (num == 0)
             {
-                this.BonusHere = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.PowerBomb);
-                this.BonusHere.LoadSprite(Properties.Resources.SuperBomb);
+                baseBonus = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.PowerBomb);
             }
-            else if (num == 1 )
+            else if (num == 1)
             {
-                this.BonusHere = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.SpeedBoost);
-                this.BonusHere.LoadSprite(Properties.Resources.SpeedUp);
+                baseBonus = new SpeedBonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, speedMultiplier: 1.5, duration: 5000);
             }
             else if (num == 2)
             {
-                this.BonusHere = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.Desamorce);
-                this.BonusHere.LoadSprite(Properties.Resources.Deactivate);
+                baseBonus = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.Desamorce);
+            }
+            else if (num == 3)
+            {
+                baseBonus = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.Armor);
             }
 
-            else if (num ==  3)
+            if (baseBonus != null)
             {
-                this.BonusHere = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.Armor);
-                this.BonusHere.LoadSprite(Properties.Resources.Armor);
-            }
+                // TEST
+                //Bonus decorated = new MultiplierDecorator(baseBonus, 2.5);
+                //decorated = new DurationDecorator(decorated, 5000);
+                //this.BonusHere = new GlowEffectDecorator(decorated, "Golden", 90);
 
-            if (this.BonusHere != null)
-            {
+                //System.Diagnostics.Debug.WriteLine($"TESTING: Created fully decorated bonus: {this.BonusHere.GetDescription()}");
+                // TEST
+                // PROD
+                int decoratorChance = r.Next(0, 100);
+
+                if (decoratorChance < 50)
+                {
+                    // 50% - paprastas bonus be dekoratorių
+                    this.BonusHere = baseBonus;
+                }
+                else if (decoratorChance < 80)
+                {
+                    // 30% - bonus su 1 dekoratoriumi
+                    this.BonusHere = new MultiplierDecorator(baseBonus, 1.5);
+                }
+                else if (decoratorChance < 95)
+                {
+                    // 15% - bonus su 2 dekoratoriais
+                    Bonus decorated = new MultiplierDecorator(baseBonus, 2.0);
+                    this.BonusHere = new DurationDecorator(decorated, 3000);
+                }
+                else
+                {
+                    // 5% - bonus su 3 dekoratoriais
+                    Bonus decorated = new MultiplierDecorator(baseBonus, 2.5);
+                    decorated = new DurationDecorator(decorated, 5000);
+                    this.BonusHere = new GlowEffectDecorator(decorated, "Golden", 90);
+                }
+                // PROD
+                if (num == 0)
+                    this.BonusHere.LoadSprite(Properties.Resources.SuperBomb);
+                else if (num == 1)
+                    this.BonusHere.LoadSprite(Properties.Resources.SpeedUp);
+                else if (num == 2)
+                    this.BonusHere.LoadSprite(Properties.Resources.Deactivate);
+                else if (num == 3)
+                    this.BonusHere.LoadSprite(Properties.Resources.Armor);
+
                 this.BonusHere.CheckCasePosition(this.Source.Width, this.Source.Height);
+
+                System.Diagnostics.Debug.WriteLine($"Spawned bonus: {this.BonusHere.GetDescription()}");
             }
         }
+        //public void SpawnBonus()
+        //{
+        //    Random r = new Random((int)DateTime.Now.Ticks);
+        //    int num = r.Next(0, 4);
+        //    Bonus baseBonus = null;
+
+        //    // Sukuriame bazinį bonusą
+        //    if (num == 0)
+        //    {
+        //        baseBonus = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.PowerBomb);
+        //        baseBonus.LoadSprite(Properties.Resources.SuperBomb);
+        //    }
+        //    else if (num == 1)
+        //    {
+        //        baseBonus = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.SpeedBoost);
+        //        baseBonus.LoadSprite(Properties.Resources.SpeedUp);
+        //    }
+        //    else if (num == 2)
+        //    {
+        //        baseBonus = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.Desamorce);
+        //        baseBonus.LoadSprite(Properties.Resources.Deactivate);
+        //    }
+        //    else if (num == 3)
+        //    {
+        //        baseBonus = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.Armor);
+        //        baseBonus.LoadSprite(Properties.Resources.Armor);
+        //    }
+
+        //    if (baseBonus != null)
+        //    {
+        //        // TESTAVIMUI: Užkomentuok šią sekciją ir atkomentuok žemiau esančią "TESTING MODE" sekciją
+        //        // kad visada gautum visus 3 dekoratorius
+
+        //        // === PRODUCTION MODE: Atsitiktiniai dekoratoriai ===
+        //        //int decoratorChance = r.Next(0, 100);
+
+        //        //if (decoratorChance < 50)
+        //        //{
+        //        //    // 50% - paprastas bonus be dekoratorių
+        //        //    this.BonusHere = baseBonus;
+        //        //}
+        //        //else if (decoratorChance < 80)
+        //        //{
+        //        //    // 30% - bonus su 1 dekoratoriumi
+        //        //    this.BonusHere = new MultiplierDecorator(baseBonus, 1.5);
+        //        //}
+        //        //else if (decoratorChance < 95)
+        //        //{
+        //        //    // 15% - bonus su 2 dekoratoriais
+        //        //    Bonus decorated = new MultiplierDecorator(baseBonus, 2.0);
+        //        //    this.BonusHere = new DurationDecorator(decorated, 3000);
+        //        //}
+        //        //else
+        //        //{
+        //        //    // 5% - bonus su 3 dekoratoriais (super retas!)
+        //        //    Bonus decorated = new MultiplierDecorator(baseBonus, 2.5);
+        //        //    decorated = new DurationDecorator(decorated, 5000);
+        //        //    this.BonusHere = new GlowEffectDecorator(decorated, "Golden", 90);
+        //        //}
+
+        //        // === TESTING MODE: Visada 3 dekoratoriai ===
+        //        // Užkomentuok viršuje esančią "PRODUCTION MODE" sekciją
+        //        // ir atkomentuok šią sekciją testavimui
+
+        //        Bonus decorated = new MultiplierDecorator(baseBonus, 2.5);
+        //        decorated = new DurationDecorator(decorated, 5000);
+        //        this.BonusHere = new GlowEffectDecorator(decorated, "Golden", 90);
+
+        //        System.Diagnostics.Debug.WriteLine($"TESTING: Created fully decorated bonus: {this.BonusHere.GetDescription()}");
+
+        //        if (num == 0)
+        //            this.BonusHere.LoadSprite(Properties.Resources.SuperBomb);
+        //        else if (num == 1)
+        //            this.BonusHere.LoadSprite(Properties.Resources.SpeedUp);
+        //        else if (num == 2)
+        //            this.BonusHere.LoadSprite(Properties.Resources.Deactivate);
+        //        else if (num == 3)
+        //            this.BonusHere.LoadSprite(Properties.Resources.Armor);
+
+        //        this.BonusHere.CheckCasePosition(this.Source.Width, this.Source.Height);
+
+        //        // Debug output (gali palikti arba ištrinti)
+        //        System.Diagnostics.Debug.WriteLine($"Spawned bonus: {this.BonusHere.GetDescription()}");
+        //    }
+        //}
 
         public new void Draw(Graphics gr)
         {

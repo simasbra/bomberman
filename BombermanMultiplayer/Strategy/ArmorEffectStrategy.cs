@@ -10,7 +10,7 @@ namespace BombermanMultiplayer.Strategy
 {
     public class ArmorEffectStrategy : IBonusEffectStrategy
     {
-        public void Apply(Player player, int slotIndex)
+        public void Apply(Player player, int slotIndex, Bonus bonus)
         {
             player.BonusSlot[slotIndex] = BonusType.Armor;
             player.BonusTimer[slotIndex] = (short)GetDuration();
