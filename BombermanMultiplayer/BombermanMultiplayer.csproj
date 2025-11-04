@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{E7B19E97-86DC-4339-AF03-E4005AAA6770}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BombermanMultiplayer</RootNamespace>
     <AssemblyName>BombermanMultiplayer</AssemblyName>
@@ -32,6 +32,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>BombermanMultiplayer.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -72,9 +75,12 @@
     <Compile Include="Objects\HealthBonus.cs" />
     <Compile Include="Objects\HealthBonusFactory.cs" />
     <Compile Include="Objects\IBuilder.cs" />
+    <Compile Include="Objects\ICloneable.cs" />
     <Compile Include="Objects\Mine.cs" />
+    <Compile Include="Objects\PlayerManager.cs" />
     <Compile Include="Objects\PowerBonus.cs" />
     <Compile Include="Objects\PowerBonusFactory.cs" />
+    <Compile Include="Objects\PrototypeDemo.cs" />
     <Compile Include="Objects\RedPlayer.cs" />
     <Compile Include="Objects\RedPlayerBuilder.cs" />
     <Compile Include="Objects\SpeedBonus.cs" />

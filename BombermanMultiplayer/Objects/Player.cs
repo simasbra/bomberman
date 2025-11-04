@@ -433,8 +433,80 @@ namespace BombermanMultiplayer
 
         }
 
-
         #endregion
 
+        #region Prototype Pattern Implementation
+
+        /// <summary>
+        /// Sukuria šallią žaidėjo kopija (shallow copy)
+        /// BonusSlot ir BonusTimer masyvai lieka tie patys objektai atmintyje
+        /// </summary>
+        public new object Clone()
+        {
+            Player cloned = (Player)base.Clone();
+            return cloned;
+        }
+
+        /// <summary>
+        /// Sukuria giliąją žaidėjo kopija (deep copy)
+        /// Visi masyvai ir nested objektai yra nukopijuoti
+        /// </summary>
+        public new object DeepClone()
+        {
+            Player cloned = (Player)base.DeepClone();
+
+            // Nukopijuojame bonus masyvus
+            if (this.BonusSlot != null)
+            {
+                cloned.BonusSlot = (BonusType[])this.BonusSlot.Clone();
+            }
+
+            if (this.BonusTimer != null)
+            {
+                cloned.BonusTimer = (short[])this.BonusTimer.Clone();
+            }
+
+            if (this.ActiveStrategies != null)
+            {
+                cloned.ActiveStrategies = new IBonusEffectStrategy[this.ActiveStrategies.Length];
+                for (int i = 0; i < this.ActiveStrategies.Length; i++)
+                {
+                    cloned.ActiveStrategies[i] = CreateStrategyClone(this.ActiveStrategies[i]);
+                }
+            }
+
+            if (this.ExplosiveFactory != null)
+            {
+                if (this.ExplosiveFactory is AdvancedExplosiveFactory)
+                {
+                    cloned.ExplosiveFactory = new AdvancedExplosiveFactory();
+                }
+                else
+                {
+                    cloned.ExplosiveFactory = new ClassicExplosiveFactory();
+                }
+            }
+
+            return cloned;
+        }
+
+        /// <summary>
+        /// Kuria naujas strategijos instances
+        /// </summary>
+        private IBonusEffectStrategy CreateStrategyClone(IBonusEffectStrategy strategy)
+        {
+            if (strategy is PowerBombEffectStrategy)
+                return new PowerBombEffectStrategy();
+            else if (strategy is SpeedBoostEffectStrategy)
+                return new SpeedBoostEffectStrategy();
+            else if (strategy is DefuseBombEffectStrategy)
+                return new DefuseBombEffectStrategy();
+            else if (strategy is ArmorEffectStrategy)
+                return new ArmorEffectStrategy();
+
+            return null;
+        }
+
+        #endregion
     }
 }

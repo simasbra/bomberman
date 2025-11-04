@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BombermanMultiplayer.Objects;
 
 namespace BombermanMultiplayer
 {
@@ -14,6 +15,8 @@ namespace BombermanMultiplayer
         [STAThread]
         static void Main()
         {
+            //PrototypeDemo.RunDemo();
+            //System.Console.WriteLine("\nDemonstracija baigta. Uždarykite console langą");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainMenu());
