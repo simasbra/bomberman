@@ -10,7 +10,7 @@ namespace BombermanMultiplayer.Strategy
 {
     public class DefuseBombEffectStrategy : IBonusEffectStrategy
     {
-        public void Apply(Player player, int slotIndex)
+        public void Apply(Player player, int slotIndex, Bonus bonus)
         {
             player.BonusSlot[slotIndex] = BonusType.Desamorce;
             player.BonusTimer[slotIndex] = (short)GetDuration();

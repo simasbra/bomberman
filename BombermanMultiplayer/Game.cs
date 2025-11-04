@@ -668,6 +668,7 @@ namespace BombermanMultiplayer
                     else
                     {
                         player.BonusTimer[i] -= (short)LogicTimer.Interval;
+                        System.Diagnostics.Debug.WriteLine($"Player BonusTimer[{i}] = {player.BonusTimer[i]}ms");
                     }
                 }
                 else
@@ -709,7 +710,7 @@ namespace BombermanMultiplayer
 
                     if (strategy != null)
                     {
-                        strategy.Apply(player, freeSlot);
+                        strategy.Apply(player, freeSlot, this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere);
                         player.ActiveStrategies[freeSlot] = strategy;
                     }
 

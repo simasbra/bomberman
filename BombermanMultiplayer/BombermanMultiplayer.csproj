@@ -56,6 +56,10 @@
     <Compile Include="Commands\DropMineCommand.cs" />
     <Compile Include="Commands\Interface\ICommand.cs" />
     <Compile Include="Commands\MovePlayerCommand.cs" />
+    <Compile Include="Decoratorrr\BonusDecorator.cs" />
+    <Compile Include="Decoratorrr\DurationDecorator.cs" />
+    <Compile Include="Decoratorrr\GlowEffectDecorator.cs" />
+    <Compile Include="Decoratorrr\MultiplierDecorator.cs" />
     <Compile Include="MainMenu.cs">
       <SubType>Form</SubType>
     </Compile>

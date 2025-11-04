@@ -11,7 +11,7 @@ namespace BombermanMultiplayer.Strategy.Interface
     {
         public interface IBonusEffectStrategy
         {
-            void Apply(Player player, int slotIndex);
+            void Apply(Player player, int slotIndex, Bonus bonus);
             void Remove(Player player, int slotIndex);
             int GetDuration();
             BonusType GetBonusType();
