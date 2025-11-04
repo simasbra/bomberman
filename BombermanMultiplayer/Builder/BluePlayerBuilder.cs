@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BombermanMultiplayer.Objects;
 
-namespace BombermanMultiplayer.Objects
+namespace BombermanMultiplayer.Builder
 {
     /// <summary>
     /// Concrete builder for creating Blue team players
