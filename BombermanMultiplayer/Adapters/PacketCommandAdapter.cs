@@ -16,6 +16,7 @@ namespace BombermanMultiplayer.Adapters
     public class PacketCommandAdapter : IPacketCommandAdapter
     {
         private readonly Packet Packet;
+        private readonly Game _game;//pridedu, nes ne kitaip neveikia
 
         /// <summary>
         /// Initializes a new instance of the PacketCommandAdapter class

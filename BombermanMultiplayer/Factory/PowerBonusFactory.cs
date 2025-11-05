@@ -24,7 +24,7 @@ namespace BombermanMultiplayer.Factory
         /// <returns>A new PowerBonus instance with 5000ms duration and +1 power</returns>
         public override Bonus CreateBonus(int x, int y, int frameNumber, int frameWidth, int frameHeight)
         {
-            return new PowerBonus(x, y, frameNumber, frameWidth, frameHeight, duration: 5000, powerIncrease: 1);
+            return new PowerBonus(x, y, frameNumber, frameWidth, frameHeight, opponentDamageDecrease: 0, damageIncrease: 1);
         }
     }
 }

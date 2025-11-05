@@ -24,7 +24,7 @@ namespace BombermanMultiplayer.Factory
         /// <returns>A new SpeedBonus instance with 5000ms duration and +5 speed</returns>
         public override Bonus CreateBonus(int x, int y, int frameNumber, int frameWidth, int frameHeight)
         {
-            return new SpeedBonus(x, y, frameNumber, frameWidth, frameHeight, duration: 5000, speedIncrease: 5);
+            return new SpeedBonus(x, y, frameNumber, frameWidth, frameHeight, duration: 5000, speedMultiplier: 5);
         }
     }
 }
