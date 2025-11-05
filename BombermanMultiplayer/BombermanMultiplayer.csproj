@@ -65,6 +65,10 @@
     <Compile Include="Decoratorrr\DurationDecorator.cs" />
     <Compile Include="Decoratorrr\GlowEffectDecorator.cs" />
     <Compile Include="Decoratorrr\MultiplierDecorator.cs" />
+    <Compile Include="Facade\ExplosiveRenderer.cs" />
+    <Compile Include="Facade\PlayerRenderer.cs" />
+    <Compile Include="Facade\RenderingFacade.cs" />
+    <Compile Include="Facade\WorldRenderer.cs" />
     <Compile Include="Factory\BonusFactory.cs" />
     <Compile Include="Factory\HealthBonusFactory.cs" />
     <Compile Include="Factory\PowerBonusFactory.cs" />

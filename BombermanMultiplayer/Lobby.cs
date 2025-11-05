@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BombermanMultiplayer.Facade;
 
 namespace BombermanMultiplayer
 {
@@ -32,7 +33,7 @@ namespace BombermanMultiplayer
 
         //Store the variable defining the state of the game
         GameState gamestate;
-        
+
         //Identify who sends  packet
         Sender Station = 0;
 
@@ -44,14 +45,13 @@ namespace BombermanMultiplayer
         private Graphics gr;
         private System.Timers.Timer TimerDelayKeyDown = new System.Timers.Timer(40);
         bool DelayKey = false;
+        private RenderingFacade _renderingFacade;
 
 
         public Lobby()
         {
             InitializeComponent();
-
-
-
+            _renderingFacade = new RenderingFacade();
         }
 
         private void btnServer_Click(object sender, EventArgs e)
@@ -92,7 +92,7 @@ namespace BombermanMultiplayer
 
             lbServerOnline.Visible = true;
             PanelConnections.Visible = false;
-            
+
 
             //Make a local connection the server
             client = new Client("127.0.0.1", 3000);
@@ -109,7 +109,7 @@ namespace BombermanMultiplayer
 
             List<string> PlayersInfos = RX_Packet.GetPayload<List<string>>();
 
-            
+
             lbConnected.Items.Clear();
 
             for (int i = 0; i < PlayersInfos.Count; i++)
@@ -117,12 +117,12 @@ namespace BombermanMultiplayer
                 lbConnected.Items.Add(PlayersInfos[i]);
 
             }
-            
+
 
 
             //Start timer to check for incoming packet on the server
             ConnectionTimer.Start();
-            
+
 
         }
 
@@ -139,7 +139,7 @@ namespace BombermanMultiplayer
 
             int port = 0;
 
-            
+
             if (!ipParser.IsMatch(tbAddressConnect.Text))
             {
                 MessageBox.Show("Non valid IP address", "Problem", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -198,7 +198,7 @@ namespace BombermanMultiplayer
                 //If there's a data received 
                 if (!RX_Packet.Empty())
                 {
-                   //If game haven't been launched yet
+                    //If game haven't been launched yet
                     if (!GameRunning)
                     {
                         //If it's the player list incoming
@@ -211,21 +211,21 @@ namespace BombermanMultiplayer
                                 lbConnected.Items.Add(PlayersInfos[i]);
 
                             }
-                            
+
                         }
                         if (RX_Packet.GetPacketType() == PacketType.MapTransfer)
                         {
 
                             //transfering the random generated map
                             //this.pbGame.SizeMode = PictureBoxSizeMode.StretchImage;
-                            
+
                             this.pbGame.Visible = this.panelGame.Visible = true;
 
-                            
+
                             //this.panelGame.Size = new Size(3 * (this.pbGame.ClientSize.Width / 3), 3 * (this.pbGame.ClientSize.Width / 3));
-                            
+
                             this.panelGame.Location = this.PanelConnections.Location;
-                            this.ClientSize = new Size(this.ClientSize.Width , this.ClientSize.Height + 528);
+                            this.ClientSize = new Size(this.ClientSize.Width, this.ClientSize.Height + 528);
 
                             this.pbGame.ClientSize = new Size(528, 528);
                             //Center picture box
@@ -240,11 +240,11 @@ namespace BombermanMultiplayer
                             game.world.MapGrid = RX_Packet.GetPayload<Tile[,]>();
                             LoadGameComponents();
                             GameRunning = true;
-                            
+
                             //Send the player name
                             TX_Packet = new Packet(Station, PacketType.Ready, tbNamePlayer.Text);
                             client.sendData(TX_Packet);
-                            
+
                         }
                     }
                     else
@@ -257,7 +257,7 @@ namespace BombermanMultiplayer
                             game.Paused = gamestate.Paused;
                             game.Over = gamestate.Over;
                             game.Winner = gamestate.Winner;
-                            
+
 
                             // Support for up to 4 players
                             for (int i = 0; i < players.Length; i++)
@@ -302,7 +302,7 @@ namespace BombermanMultiplayer
                                         game.world.MapGrid[i, j].BonusHere = null;
                                     }
 
-                                    switch (gamestate.map[i,j])
+                                    switch (gamestate.map[i, j])
                                     {
                                         case 0:
                                             game.world.MapGrid[i, j].Walkable = true;
@@ -319,7 +319,7 @@ namespace BombermanMultiplayer
                                             game.world.MapGrid[i, j].Destroyable = false;
                                             break;
 
-                                            //Bonus
+                                        //Bonus
                                         case 10:
                                             game.world.MapGrid[i, j].BonusHere =
                                                 new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
@@ -415,7 +415,7 @@ namespace BombermanMultiplayer
                 //ConnectionTimer.Stop();
                 //panelClient.Enabled = true;
             }
-            
+
         }
 
         //Load all sprite 
@@ -425,7 +425,7 @@ namespace BombermanMultiplayer
             {
                 for (int j = 0; j < game.world.MapGrid.GetLength(1); j++) //Colonne
                 {
-                    if (!game.world.MapGrid[i,j].Destroyable && game.world.MapGrid[i, j].Walkable)
+                    if (!game.world.MapGrid[i, j].Destroyable && game.world.MapGrid[i, j].Walkable)
                     {
                         game.world.MapGrid[i, j].UnloadSprite();
                     }
@@ -437,7 +437,7 @@ namespace BombermanMultiplayer
 
                     if (game.world.MapGrid[i, j].BonusHere != null)
                     {
-                        switch (game.world.MapGrid[i,j].BonusHere.Type)
+                        switch (game.world.MapGrid[i, j].BonusHere.Type)
                         {
                             case Objects.BonusType.None:
                                 break;
@@ -482,7 +482,7 @@ namespace BombermanMultiplayer
                 }
             }
 
-            //game.world.loadBackground(Properties.Resources.World);
+            game.world.loadBackground(Properties.Resources.World);
             game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
             players[0].LoadSprite(Properties.Resources.AT_DOWN);
             players[1].LoadSprite(Properties.Resources.T_UP);
@@ -490,7 +490,7 @@ namespace BombermanMultiplayer
 
             bufferG = BufferedGraphicsManager.Current.Allocate(pbGame.CreateGraphics(), pbGame.DisplayRectangle);
             gr = bufferG.Graphics;
-            
+
 
             this.refreshGraphics.Start();
 
@@ -498,71 +498,7 @@ namespace BombermanMultiplayer
 
         public void Draw()
         {
-
-            if (!players[0].Dead)
-            {
-                switch (players[0].Orientation)
-                {
-                    case Player.MovementDirection.UP:
-                        players[0].LoadSprite(Properties.Resources.AT_UP);
-                        break;
-                    case Player.MovementDirection.DOWN:
-                        players[0].LoadSprite(Properties.Resources.AT_DOWN);
-                        break;
-                    case Player.MovementDirection.LEFT:
-                        players[0].LoadSprite(Properties.Resources.AT_LEFT);
-                        break;
-                    case Player.MovementDirection.RIGHT:
-                        players[0].LoadSprite(Properties.Resources.AT_RIGHT);
-                        break;
-                    case Player.MovementDirection.NONE:
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else
-                players[0].LoadSprite(Properties.Resources.Blood);
-
-            if (!players[1].Dead)
-            {
-                switch (players[1].Orientation)
-                {
-                    case Player.MovementDirection.UP:
-                        players[1].LoadSprite(Properties.Resources.T_UP);
-                        break;
-                    case Player.MovementDirection.DOWN:
-                        players[1].LoadSprite(Properties.Resources.T_DOWN);
-                        break;
-                    case Player.MovementDirection.LEFT:
-                        players[1].LoadSprite(Properties.Resources.T_LEFT);
-                        break;
-                    case Player.MovementDirection.RIGHT:
-                        players[1].LoadSprite(Properties.Resources.T_RIGHT);
-                        break;
-                    case Player.MovementDirection.NONE:
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else
-                players[1].LoadSprite(Properties.Resources.Blood);
-
-            gr.Clear(pbGame.BackColor);
-
-            game.world.Draw(gr);
-                    
-            for (int i = 0; i < players.Length; i++)
-            {
-                players[i].Draw(gr);
-                players[i].DrawPosition(gr);
-            }
-
-            foreach (Bomb bomb in game.BombsOnTheMap)
-            {
-                try { bomb.Draw(gr); } catch (Exception) { }
-            }
+            _renderingFacade.DrawGameScene(gr, game);
 
             DrawInterface();
             bufferG.Render();
@@ -730,16 +666,16 @@ namespace BombermanMultiplayer
                         {
                             runServer.Wait();
                         }
-                        catch (AggregateException ex){ }
-                        finally { cts.Dispose();}
+                        catch (AggregateException ex) { }
+                        finally { cts.Dispose(); }
                     }
                 }
             }
-                   
+
         }
 
         private void Lobby_KeyDown(object sender, KeyEventArgs e)
-        {          
+        {
             if (GameRunning && !game.Over)
             {
                 TX_Packet = new Packet(Station, PacketType.KeyDown, e.KeyCode);
@@ -747,9 +683,9 @@ namespace BombermanMultiplayer
 
                 DelayKey = true;
                 TimerDelayKeyDown.Start();
-                
+
             }
-           
+
         }
 
         private void Lobby_KeyUp(object sender, KeyEventArgs e)
@@ -759,7 +695,7 @@ namespace BombermanMultiplayer
                 TX_Packet = new Packet(Station, PacketType.KeyUp, e.KeyCode);
                 client.sendData(TX_Packet);
             }
-            
+
         }
 
         private void TimerDelayKeyDown_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -871,7 +807,7 @@ namespace BombermanMultiplayer
             }
 
             this.Close();
-        
+
         }
     }
 }
