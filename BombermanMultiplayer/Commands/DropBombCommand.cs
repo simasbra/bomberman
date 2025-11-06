@@ -55,6 +55,9 @@ namespace BombermanMultiplayer.Commands
                         bombToAdd = new ClassicBomb(_caseRow, _caseCol, 8, 48, 48, 2000, 48, 48, (short)_player.PlayerNumero);
                     }
 
+                    // Bridge pattern: Set the explosion pattern from player's current pattern
+                    bombToAdd.SetExplosionPattern(_player.GetCurrentExplosionPattern());
+
                     _droppedBomb = bombToAdd;
                     _bombsOnTheMap.Add(_droppedBomb);
 

@@ -19,6 +19,17 @@ namespace BombermanMultiplayer.Facade
         {
             if (gr == null || players == null) return;
 
+            // Load explosion pattern sprite sheet if available
+            Image explosionPatternSprite = null;
+            try
+            {
+                explosionPatternSprite = Properties.Resources.explosion_pattern;
+            }
+            catch
+            {
+                // Sprite not loaded, skip pattern indicator
+            }
+
             for (int i = 0; i < players.Length; i++)
             {
                 var player = players[i];
@@ -28,6 +39,24 @@ namespace BombermanMultiplayer.Facade
 
                 if (showPlayerPositions)
                     player.DrawPosition(gr);
+
+                // Draw explosion pattern indicator above player
+                if (explosionPatternSprite != null && !player.Dead)
+                {
+                    int patternIndex = player.GetExplosionPatternIndex();
+                    int frameWidth = 32; // Assuming each frame is 32 pixels wide
+                    int frameHeight = 32; // Assuming each frame is 32 pixels high
+
+                    // Position above player (centered)
+                    int indicatorX = player.Source.X + player.Source.Width / 2 - frameWidth / 2;
+                    int indicatorY = player.Source.Y - frameHeight - 5; // 5 pixels above player
+
+                    // Draw the current pattern frame from sprite sheet
+                    Rectangle destRect = new Rectangle(indicatorX, indicatorY, frameWidth, frameHeight);
+                    Rectangle srcRect = new Rectangle(patternIndex * frameWidth, 0, frameWidth, frameHeight);
+
+                    gr.DrawImage(explosionPatternSprite, destRect, srcRect, GraphicsUnit.Pixel);
+                }
             }
         }
     }
