@@ -165,13 +165,13 @@ namespace BombermanMultiplayer
         {
             _Source.X += deplX;
             _Source.Y += deplY;
-            
+
         }
 
         #region Prototype Pattern Implementation
 
         /// <summary>
-        /// Sukuria paviršinę kopija - reference tipo atributai (Sprite) lieka tą patys
+        /// Creates a shallow copy of the current GameObject.
         /// </summary>
         public virtual object Clone()
         {
@@ -180,13 +180,13 @@ namespace BombermanMultiplayer
         }
 
         /// <summary>
-        /// Sukuria giliąją kopija - visi atributai (įskaitant Sprite) yra nukopijuoti
+        /// Creates a deep copy of the current GameObject.
         /// </summary>
         public virtual object DeepClone()
         {
             // Deep copy
             GameObject cloned = (GameObject)this.MemberwiseClone();
-            
+
             if (this.Sprite != null)
             {
                 cloned.Sprite = (Image)this.Sprite.Clone();

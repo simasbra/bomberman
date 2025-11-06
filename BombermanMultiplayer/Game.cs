@@ -590,7 +590,7 @@ namespace BombermanMultiplayer
             {
                 BombsOnTheMap[i].UpdateFrame((int)LogicTimer.Interval);
                 BombsOnTheMap[i].TimingExplosion((int)LogicTimer.Interval);
-                if (BombsOnTheMap[i].Explosing == true)
+                if (BombsOnTheMap[i].Exploding == true)
                 {
                     // Paduok visus žaidėjus
                     BombsOnTheMap[i].Explosion(world.MapGrid, players);
