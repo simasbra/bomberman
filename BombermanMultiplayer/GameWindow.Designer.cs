@@ -37,6 +37,7 @@
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tlsbExit = new System.Windows.Forms.ToolStripButton();
+            this.chkAutoSave = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).BeginInit();
             this.tlsMenu.SuspendLayout();
             this.SuspendLayout();
@@ -110,15 +111,34 @@
             this.tlsbExit.Text = "Exit";
             this.tlsbExit.Click += new System.EventHandler(this.tlsbExit_Click);
             // 
+            // chkAutoSave
+            //
+            this.chkAutoSave.AutoSize = true;
+            this.chkAutoSave.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chkAutoSave.ForeColor = System.Drawing.Color.Black;
+            this.chkAutoSave.Location = new System.Drawing.Point(12, 60);
+            this.chkAutoSave.Name = "chkAutoSave";
+            this.chkAutoSave.Size = new System.Drawing.Size(113, 32);
+            this.chkAutoSave.TabIndex = 2;
+            this.chkAutoSave.TabStop = false;
+            this.chkAutoSave.Text = "Auto Save";
+            this.chkAutoSave.UseVisualStyleBackColor = false;
+            this.chkAutoSave.Visible = false;
+            this.chkAutoSave.CheckedChanged += new System.EventHandler(this.chkAutoSave_CheckedChanged);
+            this.chkAutoSave.Click += new System.EventHandler(this.chkAutoSave_Click);
+            this.chkAutoSave.KeyDown += new System.Windows.Forms.KeyEventHandler(this.chkAutoSave_KeyDown);
+            //
             // GameWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(882, 853);
+            this.Controls.Add(this.chkAutoSave);
             this.Controls.Add(this.tlsMenu);
             this.Controls.Add(this.pbGame);
             this.MinimumSize = new System.Drawing.Size(600, 600);
             this.Name = "GameWindow";
+            this.KeyPreview = true;
             this.Text = "Form1";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Game_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Game_KeyUp);
@@ -140,6 +160,7 @@
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tlsbExit;
+        private System.Windows.Forms.CheckBox chkAutoSave;
     }
 }
 

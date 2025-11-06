@@ -37,6 +37,10 @@ namespace BombermanMultiplayer
         private const int tileWidth = 48;
         private const int tileHeight = 48;
 
+        // Observer pattern - GameState for notifications
+        private GameState gameState;
+        private bool[] previousDeathStates = new bool[4]; // Track previous death states to detect changes
+
         //ctor when picture box size is determined
         public Game(int hebergeurWidth, int hebergeurHeight)
         {
@@ -53,6 +57,12 @@ namespace BombermanMultiplayer
             this.GrenadesOnTheMap = new List<Grenade>();
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
+
+            // Initialize death state tracking
+            for (int i = 0; i < 4; i++)
+            {
+                previousDeathStates[i] = false;
+            }
             int rows = world.MapGrid.GetLength(0);
             int cols = world.MapGrid.GetLength(1);
 
@@ -80,6 +90,12 @@ namespace BombermanMultiplayer
             this.GrenadesOnTheMap = new List<Grenade>();
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
+
+            // Initialize death state tracking
+            for (int i = 0; i < 4; i++)
+            {
+                previousDeathStates[i] = players[i].Dead;
+            }
         }
 
         //default ctor
@@ -92,6 +108,12 @@ namespace BombermanMultiplayer
             this.GrenadesOnTheMap = new List<Grenade>();
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
+
+            // Initialize death state tracking
+            for (int i = 0; i < 4; i++)
+            {
+                previousDeathStates[i] = false;
+            }
         }
 
         /// <summary>
@@ -875,12 +897,61 @@ namespace BombermanMultiplayer
 
         private void LogicTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            // Save current death states before processing
+            for (int i = 0; i < players.Length; i++)
+            {
+                previousDeathStates[i] = players[i].Dead;
+            }
+
             InteractionLogic();
             PlayersLogic();
             BombsLogic();
             MinesLogic();
             GrenadesLogic();
             GameOver();
+
+            // Check if any player just died (after all logic processing)
+            CheckForPlayerDeath();
+        }
+
+        /// <summary>
+        /// Check if any player just died and trigger auto-save if so
+        /// </summary>
+        private void CheckForPlayerDeath()
+        {
+            if (gameState == null) return;
+
+            // Check if any player just died (was alive, now dead)
+            for (int i = 0; i < players.Length; i++)
+            {
+                if (!previousDeathStates[i] && players[i].Dead)
+                {
+                    // Player just died - significant change, trigger auto-save
+                    UpdateGameState();
+                    break; // Only need to save once per frame, even if multiple deaths
+                }
+            }
+        }
+
+        /// <summary>
+        /// Set the GameState instance for Observer pattern
+        /// </summary>
+        /// <param name="state">The GameState instance</param>
+        public void SetGameState(GameState state)
+        {
+            this.gameState = state;
+        }
+
+        /// <summary>
+        /// Update GameState and notify observers
+        /// </summary>
+        private void UpdateGameState()
+        {
+            if (gameState != null)
+            {
+                SaveGameData saveData = new SaveGameData(BombsOnTheMap, world.MapGrid, players);
+                gameState.SetState(saveData);
+            }
         }
 
         public void SaveGame(string fileName)
