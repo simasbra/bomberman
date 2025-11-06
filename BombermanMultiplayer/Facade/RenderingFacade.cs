@@ -3,12 +3,18 @@ using System.Windows.Forms;
 
 namespace BombermanMultiplayer.Facade
 {
+    /// <summary>
+    /// Provides a unified interface for rendering the game scene and user interface elements.
+    /// </summary>
     public class RenderingFacade
     {
         private readonly WorldRenderer _worldRenderer;
         private readonly PlayerRenderer _playerRenderer;
         private readonly ExplosiveRenderer _explosiveRenderer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RenderingFacade"/> class.
+        /// </summary>
         public RenderingFacade()
         {
             _worldRenderer = new WorldRenderer();
@@ -16,6 +22,12 @@ namespace BombermanMultiplayer.Facade
             _explosiveRenderer = new ExplosiveRenderer();
         }
 
+        /// <summary>
+        /// Draws the entire game scene, including the world, players, and explosives.
+        /// </summary>
+        /// <param name="gr"></param>
+        /// <param name="game"></param>
+        /// <param name="showPlayerPositions"></param>
         public void DrawGameScene(Graphics gr, Game game, bool showPlayerPositions = false)
         {
             if (gr == null || game == null || game.world == null) return;
@@ -27,6 +39,13 @@ namespace BombermanMultiplayer.Facade
             _playerRenderer.Draw(gr, game.players, showPlayerPositions);
         }
 
+        /// <summary>
+        /// Draws the game interface, including pause and game over messages, as well as player bonuses.
+        /// </summary>
+        /// <param name="gr"></param>
+        /// <param name="game"></param>
+        /// <param name="bonusSlots"></param>
+        /// <param name="canvasSize"></param>
         public void DrawInterface(Graphics gr, Game game, Rectangle[] bonusSlots, Size canvasSize)
         {
             if (gr == null || game == null || game.world == null || bonusSlots == null) return;
