@@ -80,11 +80,11 @@
       <DependentUpon>MainMenu.cs</DependentUpon>
     </Compile>
     <Compile Include="Objects\AdvancedBomb.cs" />
-    <Compile Include="Objects\AdvancedExplosiveFactory.cs" />
+    <Compile Include="AbstractFactory\AdvancedExplosiveFactory.cs" />
     <Compile Include="Objects\BluePlayer.cs" />
     <Compile Include="Objects\ClassicBomb.cs" />
-    <Compile Include="Objects\ClassicExplosiveFactory.cs" />
-    <Compile Include="Objects\ExplosiveFactory.cs" />
+    <Compile Include="AbstractFactory\ClassicExplosiveFactory.cs" />
+    <Compile Include="AbstractFactory\ExplosiveFactory.cs" />
     <Compile Include="Objects\Grenade.cs" />
     <Compile Include="Objects\HealthBonus.cs" />
     <Compile Include="Objects\ICloneable.cs" />
@@ -210,6 +210,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Sprites\Blood.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Sprites\Grenade.png" />
+    <Content Include="Sprites\mine.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

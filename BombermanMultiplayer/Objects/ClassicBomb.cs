@@ -21,7 +21,7 @@ namespace BombermanMultiplayer
             // Classic bomb default properties
             this.Power = 3;
             this.DetonationTime = 2000;
-            this.Explosing = false;
+            this.Exploding = false;
         }
     }
 }

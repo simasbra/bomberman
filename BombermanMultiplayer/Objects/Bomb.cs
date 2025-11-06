@@ -20,7 +20,7 @@ namespace BombermanMultiplayer
     {
 
         private int _DetonationTime = 2000;
-        public bool Explosing = false;
+        public bool Exploding = false;
         private int bombPower = 3;
 
         //Who drops the bomb, player 1 = 1, player 2 = 2
@@ -77,7 +77,7 @@ namespace BombermanMultiplayer
         {
             if (DetonationTime <= 0)
             {
-                this.Explosing = true;
+                this.Exploding = true;
             }
             DetonationTime -= elsapedTime;
         }

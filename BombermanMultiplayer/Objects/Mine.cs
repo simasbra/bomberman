@@ -204,7 +204,7 @@ namespace BombermanMultiplayer
                           int tileWidth, int tileHeight, short owner)
             : base(row, col, totalFrames, frameWidth, frameHeight, tileWidth, tileHeight, owner)
         {
-            LoadSprite(Properties.Resources.Bombe); // TODO: Add mine sprite
+            LoadSprite(Properties.Resources.Mine); // TODO: Add mine sprite
         }
 
         public override void Activate()
@@ -277,7 +277,7 @@ namespace BombermanMultiplayer
                            int tileWidth, int tileHeight, short owner)
             : base(row, col, totalFrames, frameWidth, frameHeight, tileWidth, tileHeight, owner)
         {
-            LoadSprite(Properties.Resources.Bombe); // TODO: Add advanced mine sprite
+            LoadSprite(Properties.Resources.Mine); // TODO: Add advanced mine sprite
         }
 
         public override void Activate()
