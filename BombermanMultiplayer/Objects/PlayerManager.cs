@@ -5,8 +5,7 @@ using System.Diagnostics;
 namespace BombermanMultiplayer.Objects
 {
     /// <summary>
-    /// PlayerManager - Prototype šablono implementacija
-    /// Naudoja esamą žaidėjo objektą kaip šabloną naujų žaidėjų kūrimui
+    /// Manages the creation and cloning of <see cref="Player"/> objects using the Prototype design pattern.
     /// </summary>
     public class PlayerManager
     {
@@ -18,37 +17,40 @@ namespace BombermanMultiplayer.Objects
         }
 
         /// <summary>
-        /// Sukuria žaidėjo shallow kopija (shallow copy)
+        /// Creates a shallow copy of the current player prototype.
         /// </summary>
+        /// <returns>A <see cref="Player"/> instance that is a shallow copy of the player prototype.</returns>
         public Player CreatePlayerShallowCopy()
         {
             return (Player)_playerPrototype.Clone();
         }
 
         /// <summary>
-        /// Sukuria žaidėjo deep kopija (deep copy)
+        /// Creates a deep copy of the current player instance.
         /// </summary>
+        /// <returns>A new <see cref="Player"/> instance that is a deep copy of the current player.</returns>
         public Player CreatePlayerDeepCopy()
         {
             return (Player)_playerPrototype.DeepClone();
         }
 
         /// <summary>
-        /// Užmezga žaidėjo šabloną (panaudoti jį kaip bazę klonavimuui)
+        /// Sets the prototype player instance to be used as a template for creating new players.
         /// </summary>
+        /// <param name="prototype">The <see cref="Player"/> instance to use as the prototype.  This parameter cannot be <see langword="null"/>.</param>
         public void SetPrototype(Player prototype)
         {
             _playerPrototype = prototype;
         }
 
-        #region Demonstraciniai Metodai - Atminties Lyginimui
+        #region Prototype Demonstration
 
         /// <summary>
-        /// Demonstruoja shallow ir deep kopijų skirtumus
+        /// Demonstrates the differences between shallow and deep cloning of a <see cref="Player"/> object.
         /// </summary>
         public void DemonstrateCloneTypes()
         {
-            Console.WriteLine("PROTOTYPE DEMONSTRACIJA\n");
+            Console.WriteLine("Prototipo demonstracija\n");
 
             // Originalus žaidėjas (šablonas)
             Console.WriteLine($"Orginalus žaidėjas:");
@@ -56,7 +58,7 @@ namespace BombermanMultiplayer.Objects
             Console.WriteLine($"BonusSlot adresas: {GetObjectAddress(_playerPrototype.BonusSlot)}");
             Console.WriteLine($"Name: {_playerPrototype.Name}\n");
 
-            // Sallow copy
+            // Shllow copy
             Player shallowCopy = this.CreatePlayerShallowCopy();
             Console.WriteLine($"Shallow kopija:");
             Console.WriteLine($"Objekto adresas: {GetObjectAddress(shallowCopy)}");
@@ -70,7 +72,7 @@ namespace BombermanMultiplayer.Objects
             Console.WriteLine($"BonusSlot adresas: {GetObjectAddress(deepCopy.BonusSlot)}");
             Console.WriteLine($"Yra tas pats BonusSlot? {ReferenceEquals(deepCopy.BonusSlot, _playerPrototype.BonusSlot)}\n");
 
-            // Modifikacija
+            // Modification test
             Console.WriteLine("Modifikacijos bandymas:\n");
             
             _playerPrototype.BonusSlot[0] = BonusType.PowerBomb;
@@ -84,14 +86,17 @@ namespace BombermanMultiplayer.Objects
             Console.WriteLine($"Deep kopija BombNumb: {deepCopy.BombNumb}");
 
             Console.WriteLine("\nApibendirinimas:");
-            Console.WriteLine("Shallow kopija dalijasi BonusSlot masyvu su originalu!");
-            Console.WriteLine("Deep kopija turi atskirą BonusSlot masyvą!");
-            Console.WriteLine("Primityvūs lauko (int, byte) visada kopijuojami!\n");
+            Console.WriteLine("Shallow kopija dalijasi BonusSlot masyvu su originalu");
+            Console.WriteLine("Deep kopija turi atskirą BonusSlot masyvą");
         }
 
         /// <summary>
-        /// Grąžina objekto atminties adresą
+        /// Retrieves the memory address representation of the specified object as a hexadecimal string.
         /// </summary>
+        /// <param name="obj">The object whose memory address representation is to be retrieved. If <paramref name="obj"/> is <see
+        /// langword="null"/>, the method returns "null".</param>
+        /// <returns>A hexadecimal string representing the memory address of the specified object, or "null" if <paramref
+        /// name="obj"/> is <see langword="null"/>.</returns>
         private static string GetObjectAddress(object obj)
         {
             if (obj == null) return "null";

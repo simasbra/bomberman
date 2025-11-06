@@ -246,6 +246,8 @@ namespace BombermanMultiplayer
         public void DropMine(Tile[,] MapGrid, List<Mine> MinesOnTheMap, Player otherPlayer)
         {
             if (this.Dead) return;
+            
+            if (MinesOnTheMap != null && MinesOnTheMap.Count >= 2) return;
             if (!MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied)
             {
                 Mine newMine = ExplosiveFactory.CreateMine(
@@ -258,6 +260,7 @@ namespace BombermanMultiplayer
         public void DropGrenade(Tile[,] MapGrid, List<Grenade> GrenadesOnTheMap, Player otherPlayer)
         {
             if (this.Dead) return;
+            if (GrenadesOnTheMap != null && GrenadesOnTheMap.Count >= 2) return;
             if (!MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied)
             {
                 Grenade newGrenade = ExplosiveFactory.CreateGrenade(
@@ -438,9 +441,9 @@ namespace BombermanMultiplayer
         #region Prototype Pattern Implementation
 
         /// <summary>
-        /// Sukuria šallią žaidėjo kopija (shallow copy)
-        /// BonusSlot ir BonusTimer masyvai lieka tie patys objektai atmintyje
+        /// Creates a new object that is a copy of the current instance.
         /// </summary>
+        /// <returns>A new <see cref="Player"/> object that is a copy of the current instance.</returns>
         public new object Clone()
         {
             Player cloned = (Player)base.Clone();
@@ -448,14 +451,13 @@ namespace BombermanMultiplayer
         }
 
         /// <summary>
-        /// Sukuria giliąją žaidėjo kopija (deep copy)
-        /// Visi masyvai ir nested objektai yra nukopijuoti
+        /// Creates a deep copy of the current <see cref="Player"/> instance, including all nested objects and arrays.
         /// </summary>
+        /// <returns>A new <see cref="Player"/> instance that is a deep copy of the current instance.</returns>
         public new object DeepClone()
         {
             Player cloned = (Player)base.DeepClone();
 
-            // Nukopijuojame bonus masyvus
             if (this.BonusSlot != null)
             {
                 cloned.BonusSlot = (BonusType[])this.BonusSlot.Clone();
@@ -491,8 +493,15 @@ namespace BombermanMultiplayer
         }
 
         /// <summary>
-        /// Kuria naujas strategijos instances
+        /// Creates a new instance of the same type as the specified bonus effect strategy.
         /// </summary>
+        /// <remarks>Supported strategy types include: <list type="bullet"> <item><see
+        /// cref="PowerBombEffectStrategy"/></item> <item><see cref="SpeedBoostEffectStrategy"/></item> <item><see
+        /// cref="DefuseBombEffectStrategy"/></item> <item><see cref="ArmorEffectStrategy"/></item> </list> If the
+        /// specified strategy is not one of the supported types, the method returns <see langword="null"/>.</remarks>
+        /// <param name="strategy">The bonus effect strategy to clone. Must be one of the supported strategy types.</param>
+        /// <returns>A new instance of the same type as <paramref name="strategy"/>, or <see langword="null"/> if the strategy
+        /// type is not supported.</returns>
         private IBonusEffectStrategy CreateStrategyClone(IBonusEffectStrategy strategy)
         {
             if (strategy is PowerBombEffectStrategy)
