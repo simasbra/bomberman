@@ -12,6 +12,7 @@ using System.Collections;
 using BombermanMultiplayer.Objects;
 using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
 using BombermanMultiplayer.Strategy;
+using BombermanMultiplayer.Bridge;
 
 namespace BombermanMultiplayer
 {
@@ -35,6 +36,17 @@ namespace BombermanMultiplayer
 
         [NonSerialized]
         public ExplosiveFactory ExplosiveFactory;
+
+        // Bridge pattern: Current explosion pattern index (0=Plus, 1=Horizontal, 2=Vertical)
+        private int explosionPatternIndex = 0;
+
+        // Available explosion patterns
+        private static readonly ExplosionPattern[] AvailablePatterns = new ExplosionPattern[]
+        {
+            new PlusPattern(),
+            new HorizontalPattern(),
+            new VerticalPattern()
+        };
 
 
 
@@ -96,6 +108,30 @@ namespace BombermanMultiplayer
 
             }
 
+        }
+
+        /// <summary>
+        /// Get the current explosion pattern
+        /// </summary>
+        public ExplosionPattern GetCurrentExplosionPattern()
+        {
+            return AvailablePatterns[explosionPatternIndex];
+        }
+
+        /// <summary>
+        /// Get the current explosion pattern index (0=Plus, 1=Horizontal, 2=Vertical)
+        /// </summary>
+        public int GetExplosionPatternIndex()
+        {
+            return explosionPatternIndex;
+        }
+
+        /// <summary>
+        /// Cycle to the next explosion pattern
+        /// </summary>
+        public void CycleExplosionPattern()
+        {
+            explosionPatternIndex = (explosionPatternIndex + 1) % AvailablePatterns.Length;
         }
 
         #endregion

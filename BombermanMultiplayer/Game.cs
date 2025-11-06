@@ -420,6 +420,36 @@ namespace BombermanMultiplayer
                 {
                     command = new DropGrenadeCommand(players[3], world.MapGrid, GrenadesOnTheMap, players[2]);
                 }
+                }
+
+            // Bridge pattern: Cycle explosion patterns
+            else if (key == Keys.C) // Player 1
+            {
+                if (players.Length > 0 && !players[0].Dead)
+                {
+                    players[0].CycleExplosionPattern();
+                }
+            }
+            else if (key == Keys.N) // Player 2
+            {
+                if (players.Length > 1 && !players[1].Dead)
+                {
+                    players[1].CycleExplosionPattern();
+                }
+            }
+            else if (key == Keys.Y) // Player 3
+            {
+                if (players.Length > 2 && !players[2].Dead)
+                {
+                    players[2].CycleExplosionPattern();
+                }
+            }
+            else if (key == Keys.NumPad1) // Player 4
+            {
+                if (players.Length > 3 && !players[3].Dead)
+                {
+                    players[3].CycleExplosionPattern();
+                }
             }
 
             else if (key == Keys.Escape)
