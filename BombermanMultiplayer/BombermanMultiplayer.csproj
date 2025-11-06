@@ -73,6 +73,8 @@
     <Compile Include="Factory\HealthBonusFactory.cs" />
     <Compile Include="Factory\PowerBonusFactory.cs" />
     <Compile Include="Factory\SpeedBonusFactory.cs" />
+    <Compile Include="Observer\IObserver.cs" />
+    <Compile Include="Observer\ISubject.cs" />
     <Compile Include="MainMenu.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -117,6 +119,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Client.cs" />
+    <Compile Include="SaveGameDataObserver.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Strategy\ArmorEffectStrategy.cs" />
     <Compile Include="Strategy\DefuseBombEffectStrategy.cs" />

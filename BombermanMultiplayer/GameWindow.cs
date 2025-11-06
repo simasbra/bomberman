@@ -15,6 +15,8 @@ namespace BombermanMultiplayer
     {
         Game game;
         private RenderingFacade _renderingFacade;
+        private GameState gameState;
+        private SaveGameDataObserver saveGameObserver;
 
         private BufferedGraphics bufferG = null;
         private Graphics gr;
@@ -27,6 +29,11 @@ namespace BombermanMultiplayer
             _renderingFacade = new RenderingFacade();
 
             game = new Game(this.pbGame.Width, this.pbGame.Height);
+
+            // Initialize observer pattern
+            gameState = new GameState();
+            saveGameObserver = new SaveGameDataObserver(gameState);
+            game.SetGameState(gameState);
 
             game.world.loadBackground(Properties.Resources.World);
             game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
@@ -56,7 +63,7 @@ namespace BombermanMultiplayer
 
             _renderingFacade.DrawGameScene(gr, game);
             tlsMenu.Visible = game.Paused || game.Over;
-
+            chkAutoSave.Visible = game.Paused && !game.Over;
             _renderingFacade.DrawInterface(gr, game, BonusSlot, pbGame.ClientSize);
 
             bufferG.Render();
@@ -66,12 +73,16 @@ namespace BombermanMultiplayer
 
         private void Game_KeyDown(object sender, KeyEventArgs e)
         {
+            // Handle Escape key explicitly to ensure it works even when controls have focus
+            if (e.KeyCode == Keys.Escape)
+            {
+                e.Handled = true;
+                game.Game_KeyDown(e.KeyCode);
+                return;
+            }
+
             game.Game_KeyDown(e.KeyCode);
-
-           
         }
-
-        
 
         private void Game_KeyUp(object sender, KeyEventArgs e)
         {
@@ -86,9 +97,7 @@ namespace BombermanMultiplayer
 
         private void refreshGraphics_Tick(object sender, EventArgs e)
         {
-
-                Draw();
-
+            Draw();
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
@@ -166,6 +175,47 @@ namespace BombermanMultiplayer
         private void tlsbExit_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void chkAutoSave_CheckedChanged(object sender, EventArgs e)
+        {
+            // Update observer state to match checkbox state when user changes it
+            if (saveGameObserver != null && sender is CheckBox checkBox)
+            {
+                saveGameObserver.SetAutoSaveEnabled(checkBox.Checked);
+            }
+        }
+
+        private void chkAutoSave_Click(object sender, EventArgs e)
+        {
+            // Return focus to form after click to prevent Space key from toggling checkbox
+            this.Focus();
+            if (pbGame != null && pbGame.CanFocus)
+            {
+                pbGame.Focus();
+            }
+        }
+
+        private void chkAutoSave_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Prevent Space key from toggling checkbox - forward to game instead
+            if (e.KeyCode == Keys.Space)
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+                game.Game_KeyDown(Keys.Space);
+                this.Focus();
+                return;
+            }
+
+            // Process Escape key to ensure unpause works
+            if (e.KeyCode == Keys.Escape)
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+                game.Game_KeyDown(Keys.Escape);
+                this.Focus();
+            }
         }
     }
 }
