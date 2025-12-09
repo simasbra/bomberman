@@ -46,32 +46,36 @@ namespace BombermanMultiplayer
             this.world = new World(hebergeurWidth, hebergeurHeight, tileWidth, tileHeight, 1);
 
             players = new Player[4];
-            RedPlayerBuilder redPlayerBuilder = new RedPlayerBuilder(tileWidth, tileHeight);
-            BluePlayerBuilder bluePlayerBuilder = new BluePlayerBuilder(tileWidth, tileHeight, world.MapGrid.GetLength(0));
-
-            players[0] = redPlayerBuilder
-                .SetName("Player 1")
-                .SetNumber(1)
-                .SetSpawnPosition(1, 1)
-                .Build();
-
-            players[1] = bluePlayerBuilder
-                .SetName("Player 2")
-                .SetNumber(2)
-                .SetSpawnPosition(world.MapGrid.GetLength(0) - 2, world.MapGrid.GetLength(0) - 2)
-                .Build();
-
-            players[2] = redPlayerBuilder
-                .SetName("Player 3")
-                .SetNumber(3)
-                .SetSpawnPosition(1, world.MapGrid.GetLength(1) - 2)
-                .Build();
-
-            players[3] = bluePlayerBuilder
-                .SetName("Player 4")
-                .SetNumber(4)
-                .SetSpawnPosition(world.MapGrid.GetLength(0) - 2, 1)
-                .Build();
+            players[0] = new Player(1, 2, 33, 33, 1, 1, tileWidth, tileHeight, 80, 1);
+            players[1] = new Player(1, 2, 33, 33, world.MapGrid.GetLength(0) - 2, world.MapGrid.GetLength(0) - 2, tileWidth, tileHeight, 80, 2);
+            players[2] = new Player(1, 2, 33, 33, 1, world.MapGrid.GetLength(1) - 2, tileWidth, tileHeight, 80, 3);
+            players[3] = new Player(1, 2, 33, 33, world.MapGrid.GetLength(0) - 2, 1, tileWidth, tileHeight, 80, 4);
+            // RedPlayerBuilder redPlayerBuilder = new RedPlayerBuilder(tileWidth, tileHeight);
+            // BluePlayerBuilder bluePlayerBuilder = new BluePlayerBuilder(tileWidth, tileHeight, world.MapGrid.GetLength(0));
+            //
+            // players[0] = redPlayerBuilder
+            //     .SetName("Player 1")
+            //     .SetNumber(1)
+            //     .SetSpawnPosition(1, 1)
+            //     .Build();
+            //
+            // players[1] = bluePlayerBuilder
+            //     .SetName("Player 2")
+            //     .SetNumber(2)
+            //     .SetSpawnPosition(world.MapGrid.GetLength(0) - 2, world.MapGrid.GetLength(0) - 2)
+            //     .Build();
+            //
+            // players[2] = redPlayerBuilder
+            //     .SetName("Player 3")
+            //     .SetNumber(3)
+            //     .SetSpawnPosition(1, world.MapGrid.GetLength(1) - 2)
+            //     .Build();
+            //
+            // players[3] = bluePlayerBuilder
+            //     .SetName("Player 4")
+            //     .SetNumber(4)
+            //     .SetSpawnPosition(world.MapGrid.GetLength(0) - 2, 1)
+            //     .Build();
 
             this.BombsOnTheMap = new List<Bomb>();
             this.MinesOnTheMap = new List<Mine>();
