@@ -14,6 +14,8 @@ using BombermanMultiplayer.Facade;
 namespace BombermanMultiplayer
 {
     public partial class Lobby : Form
+
+
     {
         //Server part
         Server server;
@@ -241,6 +243,9 @@ namespace BombermanMultiplayer
                             game.world.MapGrid = RX_Packet.GetPayload<Tile[,]>();
                             LoadGameComponents();
                             GameRunning = true;
+
+                            // Start with countdown before actual gameplay
+                            game.StartCountdown(3000);
 
                             //Send the player name
                             TX_Packet = new Packet(Station, PacketType.Ready, tbNamePlayer.Text);

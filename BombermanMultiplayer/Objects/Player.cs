@@ -516,6 +516,39 @@ namespace BombermanMultiplayer
             return null;
         }
 
+        /// <summary>
+        /// Reset player to initial state at specified position
+        /// </summary>
+        public void Reset(int row, int col)
+        {
+            // Reset position
+            Rectangle newSource = this.Source;
+            newSource.X = col * 48; // TileWidth
+            newSource.Y = row * 48; // TileHeight
+            this.Source = newSource;
+            this.CasePosition = new int[2] { row, col };
+
+            // Reset stats
+            this.Dead = false;
+            this.Lifes = 1;
+            this.BombNumb = 2;
+            this.Vitesse = 5;
+            this.Orientation = MovementDirection.NONE;
+            this.LastOrientation = MovementDirection.UP;
+            this.Wait = 0;
+
+            // Clear bonuses
+            this.BonusSlot[0] = BonusType.None;
+            this.BonusSlot[1] = BonusType.None;
+            this.BonusTimer[0] = 0;
+            this.BonusTimer[1] = 0;
+            this.ActiveStrategies[0] = null;
+            this.ActiveStrategies[1] = null;
+
+            // Reset to classic factory
+            this.ExplosiveFactory = new ClassicExplosiveFactory();
+        }
+
         #endregion
     }
 }

@@ -11,6 +11,7 @@ using BombermanMultiplayer.Commands;
 using BombermanMultiplayer.Commands.Interface;
 using BombermanMultiplayer.Strategy;
 using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
+using BombermanMultiplayer.State;
 
 namespace BombermanMultiplayer
 {
@@ -19,9 +20,15 @@ namespace BombermanMultiplayer
     /// </summary>
     public class Game
     {
+        // State pattern
+        private IGameState _currentState;
+        public string CurrentStateName => _currentState?.GetType().Name ?? "None";
+
+        // Backward compatible flags (kept in sync by states)
         public bool Paused = false;
         public bool Over = false;
         public byte Winner = 0;
+        public int GamesPlayed = 0; // Track how many games have been played (restarts)
 
         public World world;
         public Player[] players;
@@ -40,6 +47,56 @@ namespace BombermanMultiplayer
         // Observer pattern - GameState for notifications
         private GameState gameState;
         private bool[] previousDeathStates = new bool[4]; // Track previous death states to detect changes
+
+        // Event for restart notification (so UI can reload sprites)
+        public event Action OnRestartRequested;
+
+        /// <summary>
+        /// Change game state and call Enter hook.
+        /// </summary>
+        public void SetState(IGameState newState)
+        {
+            _currentState = newState;
+            _currentState?.Enter(this);
+        }
+
+        /// <summary>
+        /// Restart the game - reset all players, clear explosives, restart countdown
+        /// </summary>
+        public void RestartGame()
+        {
+            // Reset player positions and states
+            players[0].Reset(1, 1);
+            players[1].Reset(world.MapGrid.GetLength(0) - 2, world.MapGrid.GetLength(0) - 2);
+            players[2].Reset(1, world.MapGrid.GetLength(1) - 2);
+            players[3].Reset(world.MapGrid.GetLength(0) - 2, 1);
+
+            // Clear all explosives
+            BombsOnTheMap.Clear();
+            MinesOnTheMap.Clear();
+            GrenadesOnTheMap.Clear();
+
+            // Reset world (regenerate destructible blocks)
+            world.RegenerateMap();
+
+            // Notify UI to reload sprites (e.g., GameWindow will call world.loadSpriteTile)
+            OnRestartRequested?.Invoke();
+
+            // Reset winner
+            Winner = 0;
+
+            // Increment games played counter
+            GamesPlayed++;
+
+            // Reset death state tracking
+            for (int i = 0; i < 4; i++)
+            {
+                previousDeathStates[i] = false;
+            }
+
+            // Start with countdown
+            StartCountdown(3000);
+        }
 
         //ctor when picture box size is determined
         public Game(int hebergeurWidth, int hebergeurHeight)
@@ -73,6 +130,9 @@ namespace BombermanMultiplayer
             // Bottom-left corner
             world.MapGrid[rows - 2, 1].Walkable = true;
             world.MapGrid[rows - 2, 1].Destroyable = false;
+
+            // Default state
+            SetState(new RunningState());
         }
 
         //ctor when loading a game
@@ -96,6 +156,9 @@ namespace BombermanMultiplayer
             {
                 previousDeathStates[i] = players[i].Dead;
             }
+
+            // Default state after load: paused
+            SetState(new PausedState());
         }
 
         //default ctor
@@ -114,6 +177,8 @@ namespace BombermanMultiplayer
             {
                 previousDeathStates[i] = false;
             }
+
+            SetState(new RunningState());
         }
 
         /// <summary>
@@ -212,9 +277,17 @@ namespace BombermanMultiplayer
         }
 
         /// <summary>
-        /// Atnaujintas Game_KeyDown su Command pattern
+        /// State-dispatched input entry.
         /// </summary>
         public void Game_KeyDown(Keys key)
+        {
+            _currentState?.HandleInput(key, this);
+        }
+
+        /// <summary>
+        /// Original gameplay input handling used by RunningState.
+        /// </summary>
+        internal void HandleGameplayKeyDown(Keys key)
         {
             ICommand command = null;
 
@@ -421,7 +494,6 @@ namespace BombermanMultiplayer
                     command = new DropGrenadeCommand(players[3], world.MapGrid, GrenadesOnTheMap, players[2]);
                 }
             }
-
             else if (key == Keys.Escape)
             {
                 Pause();
@@ -536,6 +608,11 @@ namespace BombermanMultiplayer
         //Manage the release of the keys
         public void Game_KeyUp(Keys key)
         {
+            _currentState?.HandleKeyUp(key, this);
+        }
+
+        internal void HandleGameplayKeyUp(Keys key)
+        {
             // Žaidėjas 1: WASD
             if (key == Keys.W || key == Keys.S || key == Keys.A || key == Keys.D)
                 players[0].Orientation = Player.MovementDirection.NONE;
@@ -564,12 +641,12 @@ namespace BombermanMultiplayer
 
             if (deadCount >= players.Length - 1)
             {
-                this.Over = true;
-                this.Paused = true;
                 if (deadCount == players.Length)
                     Winner = 0; // Lygiosios
                 else
                     Winner = (byte)(lastAlive + 1); // Laimėtojo indeksas +1
+
+                SetState(new GameOverState());
             }
         }
 
@@ -897,6 +974,11 @@ namespace BombermanMultiplayer
 
         private void LogicTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            _currentState?.Update(this);
+        }
+
+        internal void RunGameLoopTick()
+        {
             // Save current death states before processing
             for (int i = 0; i < players.Length; i++)
             {
@@ -990,14 +1072,17 @@ namespace BombermanMultiplayer
             this.world.MapGrid = save.MapGrid;
             this.players = save.players;
 
-            this.Paused = true;
-            this.LogicTimer.Stop();
+            this.Over = false;
+            this.Winner = 0;
+            SetState(new PausedState());
+        }
 
-            if (this.Over)
-            {
-                this.Over = false;
-                this.Winner = 0;
-            }
+        /// <summary>
+        /// Start a countdown before entering RunningState.
+        /// </summary>
+        public void StartCountdown(int durationMs = 3000)
+        {
+            SetState(new CountdownState(durationMs));
         }
 
         public void Pause()
@@ -1005,15 +1090,13 @@ namespace BombermanMultiplayer
             //If the game is already over, no need for pause
             if (!Over)
             {
-                if (Paused)
+                if (_currentState is PausedState)
                 {
-                    LogicTimer.Start();
-                    Paused = false;
+                    SetState(new RunningState());
                 }
                 else
                 {
-                    LogicTimer.Stop();
-                    Paused = true;
+                    SetState(new PausedState());
                 }
             }
         }

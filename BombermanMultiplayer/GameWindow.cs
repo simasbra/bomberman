@@ -38,6 +38,17 @@ namespace BombermanMultiplayer
             game.world.loadBackground(Properties.Resources.World);
             game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
 
+            // Subscribe to restart event to reload sprites
+            game.OnRestartRequested += () =>
+            {
+                game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
+                // Reload player sprites
+                if (game.players.Length > 0) game.players[0].LoadSprite(Properties.Resources.AT_DOWN);
+                if (game.players.Length > 1) game.players[1].LoadSprite(Properties.Resources.T_UP);
+                if (game.players.Length > 2) game.players[2].LoadSprite(Properties.Resources.AT_DOWN);
+                if (game.players.Length > 3) game.players[3].LoadSprite(Properties.Resources.T_UP);
+            };
+
             // Inicializuojam visų žaidėjų pradines sprites
             if (game.players.Length > 0) game.players[0].LoadSprite(Properties.Resources.AT_DOWN);
             if (game.players.Length > 1) game.players[1].LoadSprite(Properties.Resources.T_UP);
@@ -52,6 +63,9 @@ namespace BombermanMultiplayer
             {
                 BonusSlot[i] = new Rectangle(10 + i * 60, 10, 50, 50);
             }
+
+            // Start with countdown before gameplay
+            game.StartCountdown(3000);
 
             this.game.LogicTimer.Start();
             this.refreshGraphics.Start();

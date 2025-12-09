@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Windows.Forms;
+using BombermanMultiplayer.State;
 
 namespace BombermanMultiplayer.Facade
 {
@@ -50,6 +51,25 @@ namespace BombermanMultiplayer.Facade
         {
             if (gr == null || game == null || game.world == null || bonusSlots == null) return;
 
+            // Debug: Show current state name and games played
+            gr.DrawString($"State: {game.CurrentStateName}", new Font("Arial", 10, FontStyle.Bold), Brushes.Yellow, 10, canvasSize.Height - 35);
+            if (game.GamesPlayed > 0)
+                gr.DrawString($"Games Played: {game.GamesPlayed}", new Font("Arial", 10, FontStyle.Bold), Brushes.LightGreen, 10, canvasSize.Height - 20);
+
+            // Check if we're in countdown state and show countdown
+            var currentStateType = game.GetType().GetField("_currentState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (currentStateType != null)
+            {
+                var stateValue = currentStateType.GetValue(game);
+                if (stateValue is CountdownState countdownState)
+                {
+                    int remaining = countdownState.RemainingSeconds;
+                    var bigFont = new Font("Stencil", 72, FontStyle.Bold);
+                    string countText = remaining > 0 ? remaining.ToString() : "GO!";
+                    gr.DrawString(countText, bigFont, Brushes.Yellow, canvasSize.Width / 2 - 50, canvasSize.Height / 2 - 50);
+                }
+            }
+
             if (game.Paused && !game.Over)
             {
                 gr.DrawString("PAUSED", new Font("Arial", 30), Brushes.White, canvasSize.Width / 2, canvasSize.Height / 2);
@@ -67,6 +87,10 @@ namespace BombermanMultiplayer.Facade
                     winnerText = "Draw";
 
                 gr.DrawString(winnerText, bigFont, Brushes.WhiteSmoke, 0, canvasSize.Height / 2 - canvasSize.Height / 8 + canvasSize.Height / 9);
+
+                // Show restart instruction
+                var smallFont = new Font("Arial", 16, FontStyle.Bold);
+                gr.DrawString("Press R to Restart", smallFont, Brushes.Yellow, canvasSize.Width / 2 - 100, canvasSize.Height - 80);
             }
 
             // Bonuses for players
