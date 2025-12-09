@@ -25,11 +25,10 @@ namespace BombermanMultiplayer.Objects
         /// <param name="frameWidth">The width of the bonus sprite frame</param>
         /// <param name="frameHeight">The height of the bonus sprite frame</param>
         /// <param name="type">The type of bonus being created</param>
-        public Bonus(int x, int y, int frameNumber, int frameWidth, int frameHeight, BonusType type ) 
+        public Bonus(int x, int y, int frameNumber, int frameWidth, int frameHeight, BonusType type)
             : base(x, y, frameNumber, frameWidth, frameHeight)
         {
             this.Type = type;
-
         }
 
         /// <summary>
@@ -73,26 +72,30 @@ namespace BombermanMultiplayer.Objects
         /// No bonus type
         /// </summary>
         None,
+
         /// <summary>
         /// Increases bomb power or damage
         /// </summary>
         PowerBomb,
+
         /// <summary>
         /// Increases player movement speed
         /// </summary>
         SpeedBoost,
+
         /// <summary>
         /// Allows defusing or disarming bombs
         /// </summary>
         Desamorce,
+
         /// <summary>
         /// Provides armor or health protection
         /// </summary>
         Armor,
+
         /// <summary>
         /// Provides advanced weapons and explosives
         /// </summary>
         AdvancedArsenal
-
     }
 }
