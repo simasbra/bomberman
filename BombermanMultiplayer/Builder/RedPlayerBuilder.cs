@@ -86,6 +86,19 @@ namespace BombermanMultiplayer.Builder
         }
 
         /// <summary>
+        /// Sets the player's initial position on the grid
+        /// </summary>
+        /// <param name="row">The starting row position on the grid</param>
+        /// <param name="col">The starting column position on the grid</param>
+        /// <returns>The builder instance for method chaining</returns>
+        public IBuilder SetSpawnPosition(int row, int col)
+        {
+            caseligne = row;
+            casecolonne = col;
+            return this;
+        } 
+
+        /// <summary>
         /// Builds and returns the configured Red Player object
         /// </summary>
         /// <returns>The constructed RedPlayer instance positioned at the red spawn point (1,1)</returns>
