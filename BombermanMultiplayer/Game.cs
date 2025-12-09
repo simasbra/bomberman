@@ -9,6 +9,8 @@ using System.Timers;
 using System.Windows.Forms;
 using BombermanMultiplayer.Commands;
 using BombermanMultiplayer.Commands.Interface;
+using BombermanMultiplayer.Factory;
+using BombermanMultiplayer.Objects;
 using BombermanMultiplayer.Strategy;
 using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
 
@@ -687,21 +689,20 @@ namespace BombermanMultiplayer
                 if (freeSlot != -1)
                 {
                     var bonusType = this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Type;
-
                     IBonusEffectStrategy strategy = null;
 
                     switch (bonusType)
                     {
-                        case Objects.BonusType.PowerBomb:
+                        case BonusType.PowerBomb:
                             strategy = new PowerBombEffectStrategy();
                             break;
-                        case Objects.BonusType.SpeedBoost:
+                        case BonusType.SpeedBoost:
                             strategy = new SpeedBoostEffectStrategy();
                             break;
-                        case Objects.BonusType.Desamorce:
+                        case BonusType.Desamorce:
                             strategy = new DefuseBombEffectStrategy();
                             break;
-                        case Objects.BonusType.Armor:
+                        case BonusType.Armor:
                             strategy = new ArmorEffectStrategy();
                             break;
                         default:
@@ -712,12 +713,44 @@ namespace BombermanMultiplayer
                     {
                         strategy.Apply(player, freeSlot, this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere);
                         player.ActiveStrategies[freeSlot] = strategy;
+
+                        // Use the appropriate factory to create the bonus
+                        BonusFactory factory = GetBonusFactory(bonusType);
+                        if (factory != null)
+                        {
+                            Bonus newBonus = factory.CreateBonus(
+                                this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].Source.X,
+                                this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].Source.Y,
+                                0, // Assuming frameNumber is not used in this context
+                                this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Source.Width,
+                                this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Source.Height
+                            );
+                            this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere = newBonus;
+                        }
                     }
 
                     this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere = null;
                 }
             }
         }
+
+        private BonusFactory GetBonusFactory(BonusType bonusType)
+        {
+            switch (bonusType)
+            {
+                case BonusType.PowerBomb:
+                    return new PowerBonusFactory();
+                case BonusType.SpeedBoost:
+                    return new SpeedBonusFactory();
+                case BonusType.Armor:
+                    return new HealthBonusFactory();
+                case BonusType.Desamorce:
+                    return new DefuseBonusFactory();
+                default:
+                    return null;
+            }
+        }
+
         private void PlayersLogic()
         {
             for (int i = 0; i < players.Length; i++)

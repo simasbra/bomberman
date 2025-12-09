@@ -66,6 +66,7 @@
     <Compile Include="Decoratorrr\GlowEffectDecorator.cs" />
     <Compile Include="Decoratorrr\MultiplierDecorator.cs" />
     <Compile Include="Factory\BonusFactory.cs" />
+    <Compile Include="Factory\DefuseBonusFactory.cs" />
     <Compile Include="Factory\HealthBonusFactory.cs" />
     <Compile Include="Factory\PowerBonusFactory.cs" />
     <Compile Include="Factory\SpeedBonusFactory.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Objects\BluePlayer.cs" />
     <Compile Include="Objects\ClassicBomb.cs" />
     <Compile Include="Objects\ClassicExplosiveFactory.cs" />
+    <Compile Include="Objects\DefuseBonus.cs" />
     <Compile Include="Objects\ExplosiveFactory.cs" />
     <Compile Include="Objects\Grenade.cs" />
     <Compile Include="Objects\HealthBonus.cs" />
