@@ -1,29 +1,24 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using BombermanMultiplayer.Commands;
 using BombermanMultiplayer.Commands.Interface;
 
 namespace BombermanMultiplayer.Adapters
 {
-    /// <summary>
-    /// Adapter that converts network Packet objects into executable ICommand objects
-    /// Implements the Adapter design pattern to bridge network communication and command execution
-    /// </summary>
     public class PacketCommandAdapter : IPacketCommandAdapter
     {
+        private readonly Game Game;
         private readonly Packet Packet;
 
         /// <summary>
-        /// Initializes a new instance of the PacketCommandAdapter class
+        /// Initializes a new instance of the PacketCommandAdapter class with a reference to the game
         /// </summary>
+        /// <param name="game">The game instance to which commands should be applied</param>
         /// <param name="packet">The packet to be converted</param>
-        public PacketCommandAdapter(Packet packet)
+        public PacketCommandAdapter(Packet packet, Game game)
         {
-            this.Packet = packet ?? throw new ArgumentNullException(nameof(packet));
+            Game = game ?? throw new ArgumentNullException(nameof(game));
+            Packet = packet ?? throw new ArgumentNullException(nameof(packet));
         }
 
         /// <summary>
@@ -48,13 +43,13 @@ namespace BombermanMultiplayer.Adapters
             if (playerIndex == -1)
                 return null;
 
-            Player player = _game.players[playerIndex];
+            Player player = Game.players[playerIndex];
 
             if (player.Dead)
                 return null;
 
-            int otherPlayerIndex = (playerIndex + 1) % _game.players.Length;
-            Player otherPlayer = _game.players[otherPlayerIndex];
+            int otherPlayerIndex = (playerIndex + 1) % Game.players.Length;
+            Player otherPlayer = Game.players[otherPlayerIndex];
 
             switch (key)
             {
@@ -71,13 +66,13 @@ namespace BombermanMultiplayer.Adapters
                     return new MovePlayerCommand(player, Player.MovementDirection.RIGHT);
 
                 case Keys.Space:
-                    return new DropBombCommand(player, _game.world.MapGrid, _game.BombsOnTheMap, otherPlayer);
+                    return new DropBombCommand(player, Game.world.MapGrid, Game.BombsOnTheMap, otherPlayer);
 
                 case Keys.M:
-                    return new DropMineCommand(player, _game.world.MapGrid, _game.MinesOnTheMap, otherPlayer);
+                    return new DropMineCommand(player, Game.world.MapGrid, Game.MinesOnTheMap, otherPlayer);
 
                 case Keys.G:
-                    return new DropGrenadeCommand(player, _game.world.MapGrid, _game.GrenadesOnTheMap, otherPlayer);
+                    return new DropGrenadeCommand(player, Game.world.MapGrid, Game.GrenadesOnTheMap, otherPlayer);
 
                 default:
                     return null;
