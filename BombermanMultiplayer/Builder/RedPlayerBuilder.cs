@@ -19,6 +19,8 @@ namespace BombermanMultiplayer.Builder
         private Bomb ExtraBonusSlot;
         private int TileWidth;
         private int TileHeight;
+        private int SpawnRow;
+        private int SpawnColumn;
 
         /// <summary>
         /// Initializes a new instance of the RedPlayerBuilder class
@@ -93,8 +95,8 @@ namespace BombermanMultiplayer.Builder
         /// <returns>The builder instance for method chaining</returns>
         public IBuilder SetSpawnPosition(int row, int col)
         {
-            caseligne = row;
-            casecolonne = col;
+            SpawnRow = row;
+            SpawnColumn = col;
             return this;
         } 
 
@@ -109,8 +111,8 @@ namespace BombermanMultiplayer.Builder
                 totalFrames: 3,
                 frameWidth: 48,
                 frameHeight: 48,
-                caseligne: 1,
-                casecolonne: 1,
+                caseligne: SpawnRow,
+                casecolonne: SpawnColumn,
                 TileWidth,
                 TileHeight,
                 frameTime: 125,
