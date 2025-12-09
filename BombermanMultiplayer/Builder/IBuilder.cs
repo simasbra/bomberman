@@ -47,6 +47,14 @@ namespace BombermanMultiplayer.Builder
         IBuilder AddExtra();
 
         /// <summary>
+        /// Sets spawn postion of the player
+        /// </summary>
+        /// <param name="row">Row</param>
+        /// <param name="col">Column</param>
+        /// <returns>The builder instance for method chaining</returns>
+        IBuilder SetSpawnPosition(int row, int col);
+
+        /// <summary>
         /// Builds and returns the configured Player object
         /// </summary>
         /// <returns>The constructed Player instance</returns>
