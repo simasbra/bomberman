@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
+using BombermanMultiplayer.Builder;
 using BombermanMultiplayer.Commands;
 using BombermanMultiplayer.Commands.Interface;
 using BombermanMultiplayer.Factory;
@@ -45,10 +46,27 @@ namespace BombermanMultiplayer
             this.world = new World(hebergeurWidth, hebergeurHeight, tileWidth, tileHeight, 1);
 
             players = new Player[4];
-            players[0] = new Player(1, 2, 33, 33, 1, 1, tileWidth, tileHeight, 80, 1);
-            players[1] = new Player(1, 2, 33, 33, world.MapGrid.GetLength(0) - 2, world.MapGrid.GetLength(0) - 2, tileWidth, tileHeight, 80, 2);
-            players[2] = new Player(1, 2, 33, 33, 1, world.MapGrid.GetLength(1) - 2, tileWidth, tileHeight, 80, 3);
-            players[3] = new Player(1, 2, 33, 33, world.MapGrid.GetLength(0) - 2, 1, tileWidth, tileHeight, 80, 4);
+            RedPlayerBuilder redPlayerBuilder = new RedPlayerBuilder(tileWidth, tileHeight);
+            BluePlayerBuilder bluePlayerBuilder = new BluePlayerBuilder(tileWidth, tileHeight, world.MapGrid.GetLength(0));
+
+            for (int i = 0; i < 4; i++)
+            {
+                int number = i + 1;
+                if (i % 2 == 0)
+                {
+                    players[i] = redPlayerBuilder
+                        .SetName($"Player {number}")
+                        .SetNumber(number)
+                        .Build();
+                }
+                else
+                {
+                    players[i] = bluePlayerBuilder
+                        .SetName($"Player {number}")
+                        .SetNumber(number)
+                        .Build();
+                }
+            }
 
             this.BombsOnTheMap = new List<Bomb>();
             this.MinesOnTheMap = new List<Mine>();
