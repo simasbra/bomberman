@@ -34,22 +34,38 @@ namespace BombermanMultiplayer.Objects
             this.HealthIncrease = healthIncrease;
         }
 
+        /// <summary>
+        /// Returns the duration of the health bonus effect in milliseconds.
+        /// </summary>
+        /// <returns>The duration in milliseconds</returns>
         public override int GetDuration()
         {
             return this.Duration;
         }
 
+        /// <summary>
+        /// Applies the effect of a health bonus to a player.
+        /// </summary>
+        /// <param name="player">The player who will receive the bonus effect.</param>
         protected override void ApplyEffect(Player player)
         {
             player.Lifes += (byte)HealthIncrease;
         }
 
-        // Optional hook in action: only apply armor if player is not already at max lives
+        /// <summary>
+        /// Determines whether the health bonus can be applied to a player.
+        /// </summary>
+        /// <param name="player">The player attempting to apply the bonus.</param>
+        /// <returns>True if the bonus can be applied; otherwise, false.</returns>
         protected override bool CanApply(Player player)
         {
             return player.Lifes < 5; // Example limit — prevents infinite stacking
         }
 
+        /// <summary>
+        /// Determines whether a special effect should be played when applying the bonus to a player.
+        /// </summary>
+        /// <returns>True if the special effect should be played; otherwise, false.</returns>
         protected override bool ShouldPlaySpecialEffect()
         {
             return true; // Shield clang sound + glow

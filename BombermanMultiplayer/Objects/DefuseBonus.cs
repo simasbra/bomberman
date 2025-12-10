@@ -27,11 +27,20 @@ namespace BombermanMultiplayer.Objects
             this.Duration = duration;
         }
 
+        /// <summary>
+        /// Returns the duration of the defuse bonus effect in milliseconds.
+        /// </summary>
+        /// <returns>The duration of the defuse bonus effect.</returns>
         public override int GetDuration()
         {
             return this.Duration;
         }
 
+        /// <summary>
+        /// Applies the defuse bonus effect to a player.
+        /// </summary>
+        /// <param name="player">The player to apply the effect to.</param>
+        /// <returns>void</returns>
         protected override void ApplyEffect(Player player)
         {
             // Enable defuse ability — typically done via strategy pattern (already supported)

@@ -39,27 +39,41 @@ namespace BombermanMultiplayer.Objects
             this.CasePosition[1] = this.Source.X / TileWidth; //Colonne
         }
 
+        /// <summary>
+        /// Retrieves the speed multiplier associated with this bonus.
+        /// </summary>
+        /// <returns>The speed multiplier value.</returns>
         public virtual double GetSpeedMultiplier()
         {
             return 1.0;
         }
 
+        /// <summary>
+        /// Gets the duration of the bonus effect.
+        /// </summary>
+        /// <returns>The duration of the bonus effect in seconds.</returns>
         public virtual int GetDuration()
         {
             return 0;
         }
 
+        /// <summary>
+        /// Gets the power multiplier for this bonus.
+        /// </summary>
+        /// <returns>The power multiplier value.</returns>
         public virtual double GetPowerMultiplier()
         {
             return 1.0;
         }
 
+        /// <summary>
+        /// Gets a description of the bonus.
+        /// </summary>
+        /// <returns>A string describing the type of bonus.</returns>
         public virtual string GetDescription()
         {
             return $"Basic {Type} bonus";
         }
-
-        #region Template Method
 
         /// <summary>
         /// Template method defining the algorithm for applying this bonus to a player.
@@ -145,8 +159,6 @@ namespace BombermanMultiplayer.Objects
             player.BonusSlot[0] = this.Type;
             player.BonusTimer[0] = (short)(GetDuration() / 16);
         }
-
-        #endregion
     }
 
     /// <summary>

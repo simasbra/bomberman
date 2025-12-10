@@ -39,11 +39,19 @@ namespace BombermanMultiplayer.Objects
             this.OpponentDamageDecrease = opponentDamageDecrease;
         }
 
+        /// <summary>
+        /// Returns a string describing the power bonus.
+        /// </summary>
+        /// <returns>A string representation of the power bonus with its damage increase value.</returns>
         public override string GetDescription()
         {
             return $"PowerBonus (Damage Increase: {DamageIncrease})";
         }
 
+        /// <summary>
+        /// Applies the effect of the power bonus to the specified player.
+        /// </summary>
+        /// <param name="player">The player to which the effect should be applied.</param>
         protected override void ApplyEffect(Player player)
         {
             // Example: increase bomb power — actual implementation may use strategy or modify bomb factory
