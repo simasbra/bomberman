@@ -20,6 +20,8 @@ namespace BombermanMultiplayer.Builder
         private int TileWidth;
         private int TileHeight;
         private int MapSize;
+        private int SpawnRow;
+        private int SpawnColumn;
 
         /// <summary>
         /// Initializes a new instance of the BluePlayerBuilder class
@@ -89,6 +91,19 @@ namespace BombermanMultiplayer.Builder
         }
 
         /// <summary>
+        /// Sets the player's initial position on the grid
+        /// </summary>
+        /// <param name="row">The starting row position on the grid</param>
+        /// <param name="col">The starting column position on the grid</param>
+        /// <returns>The builder instance for method chaining</returns>
+        public IBuilder SetSpawnPosition(int row, int col)
+        {
+            SpawnRow = row;
+            SpawnColumn = col;
+            return this;
+        } 
+
+        /// <summary>
         /// Builds and returns the configured Blue Player object
         /// </summary>
         /// <returns>The constructed BluePlayer instance positioned at the blue spawn point (opposite corner from red)</returns>
@@ -101,8 +116,8 @@ namespace BombermanMultiplayer.Builder
                 totalFrames: 3,
                 frameWidth: 48,
                 frameHeight: 48,
-                caseligne: spawnPosition,
-                casecolonne: spawnPosition,
+                caseligne: SpawnRow,
+                casecolonne: SpawnColumn,
                 TileWidth,
                 TileHeight,
                 frameTime: 125,

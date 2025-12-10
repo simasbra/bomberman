@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace BombermanMultiplayer.Objects
 {
     /// <summary>
@@ -29,6 +23,7 @@ namespace BombermanMultiplayer.Objects
         /// <param name="frameNumber">The frame number for sprite animation</param>
         /// <param name="frameWidth">The width of the bonus sprite frame</param>
         /// <param name="frameHeight">The height of the bonus sprite frame</param>
+        /// <param name="duration">The duration of the power effect in milliseconds</param>
         /// <param name="damageIncrease">The amount to increase player's bomb damage</param>
         /// <param name="opponentDamageDecrease">The amount to decrease opponent's bomb damage</param>
         public PowerBonus(int x, int y, int frameNumber, int frameWidth, int frameHeight, int damageIncrease, int opponentDamageDecrease)
@@ -36,6 +31,11 @@ namespace BombermanMultiplayer.Objects
         {
             this.DamageIncrease = damageIncrease;
             this.OpponentDamageDecrease = opponentDamageDecrease;
+        }
+
+        public override string GetDescription()
+        {
+            return $"PowerBonus (Damage Increase: {DamageIncrease})";
         }
     }
 }

@@ -27,7 +27,6 @@ namespace BombermanMultiplayer
         //Durée d'une frame
         protected float _frameTime = 125;
 
-
         protected int _totalElapsedTime = 0;
 
         //Nombre de frame de l'animation
@@ -38,25 +37,24 @@ namespace BombermanMultiplayer
 
         #region Accessors
 
-
         public int[] CasePosition
-         {
-             get { return _CasePosition; }
-             set
-             {
+        {
+            get { return _CasePosition; }
+            set
+            {
                 if (!(value[0] < 0 || value[1] < 0))
                 {
                     _CasePosition = value;
-
                 }
             }
+        }
 
-         }
         public Rectangle Source
         {
             get { return _Source; }
             set { _Source = value; }
         }
+
         public float frameSpeed
         {
             get { return this._frameTime; }
@@ -71,37 +69,33 @@ namespace BombermanMultiplayer
         {
             get { return _totalFrames; }
         }
+
         public int frameindex
         {
             get { return _frameindex; }
             set { _frameindex = value; }
         }
 
-
         #endregion
 
         //Constructeur
         public GameObject()
-        { }
+        {
+        }
 
         public GameObject(int x, int y, int totalFrames, int frameWidth, int frameHeight)
-            
         {
             _totalFrames = totalFrames;
             CasePosition = new int[2] { 0, 0 };
             _Source = new Rectangle(x, y, frameWidth, frameHeight);
-            
         }
 
         public GameObject(int x, int y, int totalFrames, int frameWidth, int frameHeight, int frameTime)
-
         {
             _totalFrames = totalFrames;
             CasePosition = new int[2] { 0, 0 };
             _Source = new Rectangle(x, y, frameWidth, frameHeight);
             _frameTime = frameTime;
-            
-
         }
 
         public void ChangeLocation(int x, int y)
@@ -110,62 +104,44 @@ namespace BombermanMultiplayer
             this._Source.Y = y;
         }
 
-        
         public void LoadSprite(Image sprite)
         {
-
             this.Sprite = sprite;
-
         }
+
         public void UnloadSprite()
         {
-
             this.Sprite = null;
-
         }
 
-
-        
         public void Draw(Graphics gr)
         {
             if (this.Sprite != null)
             {
-                gr.DrawImage(this.Sprite, Source, frameindex * Source.Width, 0, Source.Width, Source.Height, GraphicsUnit.Pixel);
+                gr.DrawImage(this.Sprite, Source, frameindex * Source.Width, 0, Source.Width, Source.Height,
+                    GraphicsUnit.Pixel);
                 gr.DrawRectangle(Pens.Red, this.Source);
             }
         }
 
-
-
-
         public void UpdateFrame(int elsapedTime)
         {
-
             _totalElapsedTime += elsapedTime;
-
             if (_totalElapsedTime > this.frameSpeed)
             {
                 frameindex += 1;
-
                 _totalElapsedTime = 0;
-
                 if (frameindex > _totalFrames)
                 {
                     frameindex = 0; // retourne au premier sprite une fois la série finie
-
                 }
             }
-
-
         }
-
-
 
         public void Bouger(int deplX, int deplY) // Ajoute juste le montant du déplacement à la postion de l'objet.
         {
             _Source.X += deplX;
             _Source.Y += deplY;
-
         }
 
         #region Prototype Pattern Implementation
@@ -201,6 +177,5 @@ namespace BombermanMultiplayer
         }
 
         #endregion
-
     }
 }
