@@ -56,6 +56,12 @@
     <Compile Include="Builder\RedPlayerBuilder.cs" />
     <Compile Include="Builder\BluePlayerBuilder.cs" />
     <Compile Include="Builder\Director.cs" />
+    <Compile Include="ChainOfResponsibility\ValidationHandler.cs" />
+    <Compile Include="ChainOfResponsibility\PlayerStateValidator.cs" />
+    <Compile Include="ChainOfResponsibility\MovementValidator.cs" />
+    <Compile Include="ChainOfResponsibility\ResourceValidator.cs" />
+    <Compile Include="ChainOfResponsibility\TileValidator.cs" />
+    <Compile Include="ChainOfResponsibility\CooldownValidator.cs" />
     <Compile Include="Commands\DropBombCommand.cs" />
     <Compile Include="Commands\DropGrenadeCommand.cs" />
     <Compile Include="Commands\DropMineCommand.cs" />
