@@ -9,6 +9,7 @@ namespace BombermanMultiplayer.Adapters
     {
         private readonly Game Game;
         private readonly Packet Packet;
+        private readonly Game _game;//pridedu, nes ne kitaip neveikia
 
         /// <summary>
         /// Initializes a new instance of the PacketCommandAdapter class with a reference to the game

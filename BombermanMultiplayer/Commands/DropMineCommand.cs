@@ -49,6 +49,8 @@ namespace BombermanMultiplayer.Commands
         {
             if (_player.Dead)
                 return;
+                
+            if (_minesOnTheMap != null && _minesOnTheMap.Count >= 2) return;
 
             if (!_mapGrid[_caseRow, _caseCol].Occupied)
             {
@@ -91,7 +93,7 @@ namespace BombermanMultiplayer.Commands
 
         public override string ToString()
         {
-            return $"DropMineCommand: Þaidëjas {PlayerNumber} numetë minà pozicijoje [{_caseRow},{_caseCol}] - {Timestamp:HH:mm:ss.fff}";
+            return $"DropMineCommand: Å½aidÄ—jas {PlayerNumber} numetÄ— minÄ… pozicijoje [{_caseRow},{_caseCol}] - {Timestamp:HH:mm:ss.fff}";
         }
     }
 }

@@ -17,6 +17,8 @@ namespace BombermanMultiplayer
     /// </summary>
     public class Server
     {
+        public static readonly Server Instance = new Server();
+
         public List<Connection> connections = new List<Connection>();
         TcpListener server;
         public bool IsRunning = false;
@@ -30,8 +32,9 @@ namespace BombermanMultiplayer
         Packet RX_Packet;
         Sender Station = Sender.Server;
 
-        public Server() { }
-        public Server(int port_) { port = port_; }
+        private Server() { }
+
+        public void SetPort(int port_) { port = port_; }
 
         /// <summary>
         /// Launch the listening of connections and after the treatement of game data
@@ -39,7 +42,7 @@ namespace BombermanMultiplayer
         /// <param name="token"> the token to cancel the task (server running)</param>
         public void Launch(CancellationToken token, string fileName = null)
         {
-            server = new TcpListener(IPAddress.Any, 3000);
+            server = new TcpListener(IPAddress.Any, port);
             server.Start();
             IsRunning = true;
 

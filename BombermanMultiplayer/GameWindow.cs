@@ -7,12 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BombermanMultiplayer.Facade;
 
 namespace BombermanMultiplayer
 {
     public partial class GameWindow : Form
     {
         Game game;
+        private RenderingFacade _renderingFacade;
+        private GameState gameState;
+        private SaveGameDataObserver saveGameObserver;
 
         private BufferedGraphics bufferG = null;
         private Graphics gr;
@@ -22,18 +26,14 @@ namespace BombermanMultiplayer
             InitializeComponent();
             this.pbGame.ClientSize = new Size(528, 528);
 
+            _renderingFacade = new RenderingFacade();
+
             game = new Game(this.pbGame.Width, this.pbGame.Height);
 
-            BonusSlot = new Rectangle[4];
-
-            for (int i = 0; i < 4; i++)
-            {
-                BonusSlot[i] = new Rectangle(i * pbGame.Width / 18, pbGame.Height / 25, pbGame.Width / 20, pbGame.Height / 20);
-                if (i > 1)
-                {
-                    BonusSlot[i] = new Rectangle(3 * pbGame.Width / 4 + i * pbGame.Width / 18, pbGame.Height / 25, pbGame.Width / 20, pbGame.Height / 20);
-                }
-            }
+            // Initialize observer pattern
+            gameState = new GameState();
+            saveGameObserver = new SaveGameDataObserver(gameState);
+            game.SetGameState(gameState);
 
             game.world.loadBackground(Properties.Resources.World);
             game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
@@ -47,6 +47,12 @@ namespace BombermanMultiplayer
             bufferG = BufferedGraphicsManager.Current.Allocate(pbGame.CreateGraphics(), pbGame.DisplayRectangle);
             gr = bufferG.Graphics;
 
+            BonusSlot = new Rectangle[4];
+            for (int i = 0; i < BonusSlot.Length; i++)
+            {
+                BonusSlot[i] = new Rectangle(10 + i * 60, 10, 50, 50);
+            }
+
             this.game.LogicTimer.Start();
             this.refreshGraphics.Start();
         }
@@ -54,108 +60,29 @@ namespace BombermanMultiplayer
 
         public void Draw()
         {
-            gr.Clear(pbGame.BackColor);
-            game.world.refreshTileSprites();
 
-            game.world.Draw(gr);
-
-            // Piešiame visus žaidėjus
-            for (int i = 0; i < game.players.Length; i++)
-            {
-                game.players[i].Draw(gr);
-                game.players[i].DrawPosition(gr);
-            }
-
-            try
-            {
-                foreach (Bomb bomb in game.BombsOnTheMap)
-                {
-                    bomb.Draw(gr);
-                }
-            }
-            catch (Exception) {}
-
-            DrawInterface();
+            _renderingFacade.DrawGameScene(gr, game);
+            tlsMenu.Visible = game.Paused || game.Over;
+            chkAutoSave.Visible = game.Paused && !game.Over;
+            _renderingFacade.DrawInterface(gr, game, BonusSlot, pbGame.ClientSize);
 
             bufferG.Render();
-        }
 
-        public void DrawInterface()
-        {
-
-            if (game.Paused && !game.Over)
-            {
-                tlsMenu.Visible = true;
-                gr.DrawString("PAUSED", new System.Drawing.Font("Arial", 30), Brushes.White, pbGame.Width / 2, pbGame.Height / 2);
-            }
-            else if (!game.Paused && !game.Over)
-            {
-                tlsMenu.Visible = false;
-            }
-            else
-            {
-                tlsMenu.Visible = true;
-            }
-
-            if (game.Over)
-            {
-                gr.DrawString("GAME OVER", new Font("Stencil", (float)(this.pbGame.Height / 10), System.Drawing.FontStyle.Bold),
-                    new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8);
-
-                if (game.Winner > 0 && game.Winner <= game.players.Length)
-                {
-                    gr.DrawString("Player " + game.Winner + " wins", new Font("Stencil", (float)(this.pbGame.Height / 10), FontStyle.Bold),
-                        new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
-                }
-                else
-                {
-                    gr.DrawString("Draw", new Font("Stencil", (float)(this.pbGame.Height / 10), FontStyle.Bold),
-                        new SolidBrush(Color.WhiteSmoke), 0, this.pbGame.Height / 2 - this.pbGame.Height / 8 + this.pbGame.Height / 9);
-                }
-            }
-
-            // Bonusų atvaizdavimas visiems žaidėjams
-            for (int p = 0; p < game.players.Length; p++)
-            {
-                gr.DrawString("Player " + (p + 1) + " : ", new Font("Arial", 10), Brushes.White, BonusSlot[p].X, BonusSlot[p].Y - BonusSlot[p].Width / 2);
-                for (int i = 0; i < game.players[p].BonusSlot.Length; i++)
-                {
-                    switch (game.players[p].BonusSlot[i])
-                    {
-                        case Objects.BonusType.PowerBomb:
-                            gr.DrawImage(Properties.Resources.SuperBomb, BonusSlot[p]);
-                            gr.DrawString((game.players[p].BonusTimer[i] / 1000).ToString() + "s", new Font("Arial", 10), Brushes.White, BonusSlot[p].X, BonusSlot[p].Y + BonusSlot[p].Height);
-                            break;
-                        case Objects.BonusType.SpeedBoost:
-                            gr.DrawImage(Properties.Resources.SpeedUp, BonusSlot[p]);
-                            gr.DrawString((game.players[p].BonusTimer[i] / 1000).ToString() + "s", new Font("Arial", 10), Brushes.White, BonusSlot[p].X, BonusSlot[p].Y + BonusSlot[p].Height);
-                            break;
-                        case Objects.BonusType.Desamorce:
-                            gr.DrawImage(Properties.Resources.Deactivate, BonusSlot[p]);
-                            gr.DrawString((game.players[p].BonusTimer[i] / 1000).ToString() + "s", new Font("Arial", 10), Brushes.White, BonusSlot[p].X, BonusSlot[p].Y + BonusSlot[p].Height);
-                            break;
-                        case Objects.BonusType.Armor:
-                            gr.DrawImage(Properties.Resources.Armor, BonusSlot[p]);
-                            gr.DrawString((game.players[p].BonusTimer[i] / 1000).ToString() + "s", new Font("Arial", 10), Brushes.White, BonusSlot[p].X, BonusSlot[p].Y + BonusSlot[p].Height);
-                            break;
-                        case Objects.BonusType.None:
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
         }
 
 
         private void Game_KeyDown(object sender, KeyEventArgs e)
         {
+            // Handle Escape key explicitly to ensure it works even when controls have focus
+            if (e.KeyCode == Keys.Escape)
+            {
+                e.Handled = true;
+                game.Game_KeyDown(e.KeyCode);
+                return;
+            }
+
             game.Game_KeyDown(e.KeyCode);
-
-           
         }
-
-        
 
         private void Game_KeyUp(object sender, KeyEventArgs e)
         {
@@ -170,9 +97,7 @@ namespace BombermanMultiplayer
 
         private void refreshGraphics_Tick(object sender, EventArgs e)
         {
-
-                Draw();
-
+            Draw();
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
@@ -250,6 +175,47 @@ namespace BombermanMultiplayer
         private void tlsbExit_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void chkAutoSave_CheckedChanged(object sender, EventArgs e)
+        {
+            // Update observer state to match checkbox state when user changes it
+            if (saveGameObserver != null && sender is CheckBox checkBox)
+            {
+                saveGameObserver.SetAutoSaveEnabled(checkBox.Checked);
+            }
+        }
+
+        private void chkAutoSave_Click(object sender, EventArgs e)
+        {
+            // Return focus to form after click to prevent Space key from toggling checkbox
+            this.Focus();
+            if (pbGame != null && pbGame.CanFocus)
+            {
+                pbGame.Focus();
+            }
+        }
+
+        private void chkAutoSave_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Prevent Space key from toggling checkbox - forward to game instead
+            if (e.KeyCode == Keys.Space)
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+                game.Game_KeyDown(Keys.Space);
+                this.Focus();
+                return;
+            }
+
+            // Process Escape key to ensure unpause works
+            if (e.KeyCode == Keys.Escape)
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+                game.Game_KeyDown(Keys.Escape);
+                this.Focus();
+            }
         }
     }
 }

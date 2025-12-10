@@ -42,7 +42,7 @@ namespace BombermanMultiplayer
         public void Activate()
         {
             this.IsScattering = true;
-            this.Explosing = true;
+            this.Exploding = true;
         }
 
         /// <summary>

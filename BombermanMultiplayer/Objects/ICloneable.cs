@@ -3,20 +3,20 @@ using System;
 namespace BombermanMultiplayer
 {
     /// <summary>
-    /// Prototype ðablono sàsaja - naudojama objektø klonëjimui
+    /// Defines methods to create shallow and deep copies of an object.
     /// </summary>
     public interface ICloneable
     {
         /// <summary>
-        /// Sukuria pavirðinæ (shallow) objekto kopija - tik pagrindiniai atributai
+        /// Creates a new object that is a copy of the current instance.
         /// </summary>
-        /// <returns>Shallow kopija</returns>
+        /// <returns>A new object that is a copy of this instance.</returns>
         object Clone();
 
         /// <summary>
-        /// Sukuria giliàjà (deep) objekto kopija - visi nested objektai taip pat kopijuojami
+        /// Creates a deep copy of the current object.
         /// </summary>
-        /// <returns>Deep kopija</returns>
+        /// <returns>A new object that is a deep copy of the current instance.</returns>
         object DeepClone();
     }
 }

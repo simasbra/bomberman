@@ -39,15 +39,19 @@ namespace BombermanMultiplayer
         public void MoveGrenade(Tile[,] mapGrid)
         {
             if (Direction == 0) return; // Not thrown yet
-            
+
             // Grenades clear their current tile when moving
             mapGrid[CasePosition[0], CasePosition[1]].Occupied = false;
+
+            if (CasePosition != null && mapGrid[CasePosition[0], CasePosition[1]].Occupied)
+            {
+                mapGrid[CasePosition[0], CasePosition[1]].Occupied = false;
+            }
             
-            // Move grenade in thrown direction until it hits obstacle or max distance
             if (DistanceTraveled < ThrowDistance)
             {
                 bool canContinue = false;
-                
+
                 switch (Direction)
                 {
                     case 1: // UP
@@ -83,6 +87,11 @@ namespace BombermanMultiplayer
                         }
                         break;
                 }
+                this.ChangeLocation(this.CasePosition[1] * this.Source.Width,
++                                     this.CasePosition[0] * this.Source.Height);
+                
+                mapGrid[CasePosition[0], CasePosition[1]].Occupied = true;
+
                 
                 // If grenade hit obstacle or max distance, stop throwing
                 if (!canContinue)
@@ -266,7 +275,7 @@ namespace BombermanMultiplayer
             ThrowDistance = 3; 
             DetonationTime = 1500; 
             
-            LoadSprite(Properties.Resources.Bombe); // TODO: Add grenade sprite
+            LoadSprite(Properties.Resources.Grenade); // TODO: Add grenade sprite
         }
 
         public override void Throw(int targetRow, int targetCol)
@@ -301,7 +310,7 @@ namespace BombermanMultiplayer
             ThrowDistance = 5;  
             DetonationTime = 1000;     
             
-            LoadSprite(Properties.Resources.Bombe); // TODO: Add advanced grenade sprite
+            LoadSprite(Properties.Resources.Grenade); // TODO: Add advanced grenade sprite
         }
 
         public override void Throw(int targetRow, int targetCol)
