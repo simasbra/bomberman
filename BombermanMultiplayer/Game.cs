@@ -11,6 +11,7 @@ using BombermanMultiplayer.Builder;
 using BombermanMultiplayer.Commands;
 using BombermanMultiplayer.Commands.Interface;
 using BombermanMultiplayer.Factory;
+using BombermanMultiplayer.Iterator;
 using BombermanMultiplayer.Objects;
 using BombermanMultiplayer.Strategy;
 using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
@@ -32,6 +33,10 @@ namespace BombermanMultiplayer
         public List<Bomb> BombsOnTheMap;
         public List<Mine> MinesOnTheMap;
         public List<Grenade> GrenadesOnTheMap;
+
+        public IGameIterator<Bomb> GetBombIterator() => new BombIterator(BombsOnTheMap);
+        public IGameIterator<Player> GetPlayerIterator() => new PlayerIterator(players);
+        public IGameIterator<Tile> GetTileIterator() => new TileIterator(world.MapGrid); 
 
         public System.Timers.Timer LogicTimer;
 
