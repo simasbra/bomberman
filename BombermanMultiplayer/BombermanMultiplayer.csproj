@@ -81,6 +81,13 @@
     <Compile Include="Interpreter\IExpression.cs" />
     <Compile Include="Interpreter\MoveCommandExpression.cs" />
     <Compile Include="Interpreter\PlayerExpression.cs" />
+    <Compile Include="Mediator\BombColleague.cs" />
+    <Compile Include="Mediator\GameMediator.cs" />
+    <Compile Include="Mediator\IColleague.cs" />
+    <Compile Include="Mediator\IGameMediator.cs" />
+    <Compile Include="Mediator\MediatorDemo.cs" />
+    <Compile Include="Mediator\PlayerColleague.cs" />
+    <Compile Include="Mediator\WorldColleague.cs" />
     <Compile Include="Observer\IObserver.cs" />
     <Compile Include="Observer\ISubject.cs" />
     <Compile Include="MainMenu.cs">
