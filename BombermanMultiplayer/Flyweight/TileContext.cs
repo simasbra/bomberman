@@ -1,3 +1,5 @@
+using System;
+using System.Drawing;
 using BombermanMultiplayer.Objects;
 
 namespace BombermanMultiplayer.Flyweight

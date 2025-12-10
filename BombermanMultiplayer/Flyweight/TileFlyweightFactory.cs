@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace BombermanMultiplayer.Flyweight
 {
     public static class TileFlyweightFactory
