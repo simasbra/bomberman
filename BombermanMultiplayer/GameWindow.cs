@@ -19,13 +19,15 @@ namespace BombermanMultiplayer
         private GameState gameState;
         private SaveGameDataObserver saveGameObserver;
 		private CommandParser _commandParser = new CommandParser();
+		private ConsoleCommandHandler _consoleHandler;
 		private BufferedGraphics bufferG = null;
         private Graphics gr;
         private Rectangle[] BonusSlot;
         public GameWindow()
         {
             InitializeComponent();
-            this.pbGame.ClientSize = new Size(528, 528);
+
+			this.pbGame.ClientSize = new Size(528, 528);
 
             _renderingFacade = new RenderingFacade();
 
@@ -56,10 +58,14 @@ namespace BombermanMultiplayer
 
             this.game.LogicTimer.Start();
             this.refreshGraphics.Start();
-        }
+			this.ActiveControl = null;
+
+			_consoleHandler = new ConsoleCommandHandler(this.game);
+			_consoleHandler.Start();
+		}
 
 
-        public void Draw()
+		public void Draw()
         {
 
             _renderingFacade.DrawGameScene(gr, game);
@@ -71,8 +77,17 @@ namespace BombermanMultiplayer
 
         }
 
+		protected override void OnFormClosing(FormClosingEventArgs e)
+		{
+			if (_consoleHandler != null)
+			{
+				_consoleHandler.Stop();
+			}
 
-        private void Game_KeyDown(object sender, KeyEventArgs e)
+			base.OnFormClosing(e);
+		}
+
+		private void Game_KeyDown(object sender, KeyEventArgs e)
         {
 			if (txtCommand.Focused)
 			{
@@ -281,6 +296,11 @@ namespace BombermanMultiplayer
 			}
 
 			txtCommand.Focus();
+		}
+
+		private void pbGame_Click(object sender, EventArgs e)
+		{
+			this.ActiveControl = null;
 		}
 	}
 }

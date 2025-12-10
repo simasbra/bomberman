@@ -55,10 +55,12 @@
             this.pbGame.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbGame.TabIndex = 0;
             this.pbGame.TabStop = false;
-            // 
-            // refreshGraphics
-            // 
-            this.refreshGraphics.Interval = 50;
+			this.pbGame.Click += new System.EventHandler(this.pbGame_Click);
+
+			// 
+			// refreshGraphics
+			// 
+			this.refreshGraphics.Interval = 50;
             this.refreshGraphics.Tick += new System.EventHandler(this.refreshGraphics_Tick);
             // 
             // tlsMenu
@@ -136,6 +138,7 @@
 			this.txtCommand.Size = new System.Drawing.Size(300, 22);
 			this.txtCommand.TabIndex = 3;
 			this.txtCommand.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtCommand_KeyDown);
+			this.txtCommand.TabStop = false;
 			// 
 			// btnExecute
 			// 
