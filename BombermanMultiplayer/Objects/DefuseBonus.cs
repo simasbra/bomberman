@@ -1,9 +1,11 @@
+using System;
+
 namespace BombermanMultiplayer.Objects
 {
     /// <summary>
     /// Represents a defuse bonus that allows players to defuse or disarm bombs
     /// </summary>
-    public class DefuseBonus : Bonus
+    public sealed class DefuseBonus : Bonus
     {
         /// <summary>
         /// Gets or sets the duration of the defuse bonus effect in milliseconds
@@ -23,6 +25,18 @@ namespace BombermanMultiplayer.Objects
             : base(x, y, frameNumber, frameWidth, frameHeight, BonusType.Desamorce)
         {
             this.Duration = duration;
+        }
+
+        public override int GetDuration()
+        {
+            return this.Duration;
+        }
+
+        protected override void ApplyEffect(Player player)
+        {
+            // Enable defuse ability — typically done via strategy pattern (already supported)
+            // Here we just register the ability (actual deactivation logic is in Player.Deactivate)
+            // The presence in BonusSlot[] is enough to enable Deactivate() check
         }
     }
 }

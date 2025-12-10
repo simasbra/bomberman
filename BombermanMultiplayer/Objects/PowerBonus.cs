@@ -3,7 +3,7 @@ namespace BombermanMultiplayer.Objects
     /// <summary>
     /// Represents a power bonus that enhances bomb damage capabilities
     /// </summary>
-    public class PowerBonus : Bonus
+    public sealed class PowerBonus : Bonus
     {
         /// <summary>
         /// Gets or sets the amount of damage increase for the player's bombs
@@ -23,10 +23,16 @@ namespace BombermanMultiplayer.Objects
         /// <param name="frameNumber">The frame number for sprite animation</param>
         /// <param name="frameWidth">The width of the bonus sprite frame</param>
         /// <param name="frameHeight">The height of the bonus sprite frame</param>
-        /// <param name="duration">The duration of the power effect in milliseconds</param>
         /// <param name="damageIncrease">The amount to increase player's bomb damage</param>
         /// <param name="opponentDamageDecrease">The amount to decrease opponent's bomb damage</param>
-        public PowerBonus(int x, int y, int frameNumber, int frameWidth, int frameHeight, int damageIncrease, int opponentDamageDecrease)
+        public PowerBonus(
+            int x,
+            int y,
+            int frameNumber,
+            int frameWidth,
+            int frameHeight,
+            int damageIncrease,
+            int opponentDamageDecrease)
             : base(x, y, frameNumber, frameWidth, frameHeight, BonusType.PowerBomb)
         {
             this.DamageIncrease = damageIncrease;
@@ -36,6 +42,13 @@ namespace BombermanMultiplayer.Objects
         public override string GetDescription()
         {
             return $"PowerBonus (Damage Increase: {DamageIncrease})";
+        }
+
+        protected override void ApplyEffect(Player player)
+        {
+            // Example: increase bomb power — actual implementation may use strategy or modify bomb factory
+            // For now, we just upgrade arsenal if not already
+            player.UpgradeArsenal();
         }
     }
 }

@@ -5,7 +5,7 @@ namespace BombermanMultiplayer.Objects
     /// <summary>
     /// Represents a speed bonus that temporarily increases player movement speed
     /// </summary>
-    public class SpeedBonus : Bonus
+    public sealed class SpeedBonus : Bonus
     {
         /// <summary>
         /// Gets or sets the multiplier applied to the player's movement speed
@@ -47,6 +47,18 @@ namespace BombermanMultiplayer.Objects
         public override string GetDescription()
         {
             return $"SpeedBonus (x{SpeedMultiplier}, {Duration}ms)";
+        }
+
+        protected override void ApplyEffect(Player player)
+        {
+            // Apply speed boost via strategy or direct field — here we assume strategy is set elsewhere
+            // Or directly modify if no strategy system is active yet
+            player.Vitesse = (byte)(player.Vitesse * SpeedMultiplier);
+        }
+
+        protected override bool ShouldPlaySpecialEffect()
+        {
+            return true; // Speed bonus has a cool whoosh effect!
         }
     }
 }

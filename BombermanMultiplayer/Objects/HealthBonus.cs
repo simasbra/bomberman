@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BombermanMultiplayer.Objects
 {
     /// <summary>
     /// Represents a health bonus that provides armor or additional lives to the player
     /// </summary>
-    public class HealthBonus : Bonus
+    public sealed class HealthBonus : Bonus
     {
         /// <summary>
         /// Gets or sets the duration of the health bonus effect in milliseconds
@@ -36,6 +32,27 @@ namespace BombermanMultiplayer.Objects
         {
             this.Duration = duration;
             this.HealthIncrease = healthIncrease;
+        }
+
+        public override int GetDuration()
+        {
+            return this.Duration;
+        }
+
+        protected override void ApplyEffect(Player player)
+        {
+            player.Lifes += (byte)HealthIncrease;
+        }
+
+        // Optional hook in action: only apply armor if player is not already at max lives
+        protected override bool CanApply(Player player)
+        {
+            return player.Lifes < 5; // Example limit — prevents infinite stacking
+        }
+
+        protected override bool ShouldPlaySpecialEffect()
+        {
+            return true; // Shield clang sound + glow
         }
     }
 }
