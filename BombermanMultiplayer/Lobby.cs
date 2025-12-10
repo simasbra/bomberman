@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BombermanMultiplayer.Facade;
+using BombermanMultiplayer.Factory;
 
 namespace BombermanMultiplayer
 {
@@ -322,55 +323,86 @@ namespace BombermanMultiplayer
 
                                         //Bonus
                                         case 10:
-                                            game.world.MapGrid[i, j].BonusHere =
-                                                new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
-                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.PowerBomb);
+                                            game.world.MapGrid[i, j].BonusHere = 
+                                                new PowerBonusFactory().CreateBonus(
+                                                    game.world.MapGrid[i, j].Source.X,
+                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    1,
+                                                    game.world.MapGrid[i, j].Source.Width,
+                                                    game.world.MapGrid[i, j].Source.Height);
                                             game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
                                         case 11:
-                                            game.world.MapGrid[i, j].BonusHere =
-                                                new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
-                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.SpeedBoost);
+                                            game.world.MapGrid[i, j].BonusHere = 
+                                                new SpeedBonusFactory().CreateBonus(
+                                                    game.world.MapGrid[i, j].Source.X,
+                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    1,
+                                                    game.world.MapGrid[i, j].Source.Width,
+                                                    game.world.MapGrid[i, j].Source.Height);
                                             game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
                                         case 12:
-                                            game.world.MapGrid[i, j].BonusHere =
-                                                new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
-                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Desamorce);
+                                            game.world.MapGrid[i, j].BonusHere = 
+                                                new DefuseBonusFactory().CreateBonus(
+                                                    game.world.MapGrid[i, j].Source.X,
+                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    1,
+                                                    game.world.MapGrid[i, j].Source.Width,
+                                                    game.world.MapGrid[i, j].Source.Height);
                                             game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
                                         case 13:
-                                            game.world.MapGrid[i, j].BonusHere =
-                                                new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
-                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Armor);
+                                            game.world.MapGrid[i, j].BonusHere = 
+                                                new HealthBonusFactory().CreateBonus(
+                                                    game.world.MapGrid[i, j].Source.X,
+                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    1,
+                                                    game.world.MapGrid[i, j].Source.Width,
+                                                    game.world.MapGrid[i, j].Source.Height);
                                             game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
-
                                         case 30:
-                                            game.world.MapGrid[i, j].BonusHere =
-                                                new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
-                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.PowerBomb);
+                                            game.world.MapGrid[i, j].BonusHere = 
+                                                new PowerBonusFactory().CreateBonus(
+                                                    game.world.MapGrid[i, j].Source.X,
+                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    1,
+                                                    game.world.MapGrid[i, j].Source.Width,
+                                                    game.world.MapGrid[i, j].Source.Height);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
                                             break;
                                         case 31:
-                                            game.world.MapGrid[i, j].BonusHere =
-                                                new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
-                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.SpeedBoost);
+                                            game.world.MapGrid[i, j].BonusHere = 
+                                                new SpeedBonusFactory().CreateBonus(
+                                                    game.world.MapGrid[i, j].Source.X,
+                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    1,
+                                                    game.world.MapGrid[i, j].Source.Width,
+                                                    game.world.MapGrid[i, j].Source.Height);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
                                             break;
                                         case 32:
-                                            game.world.MapGrid[i, j].BonusHere =
-                                                new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
-                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Desamorce);
+                                            game.world.MapGrid[i, j].BonusHere = 
+                                                new DefuseBonusFactory().CreateBonus(
+                                                    game.world.MapGrid[i, j].Source.X,
+                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    1,
+                                                    game.world.MapGrid[i, j].Source.Width,
+                                                    game.world.MapGrid[i, j].Source.Height);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
                                             break;
                                         case 33:
-                                            game.world.MapGrid[i, j].BonusHere =
-                                                new Objects.Bonus(game.world.MapGrid[i, j].Source.X, game.world.MapGrid[i, j].Source.Y, 1,
-                                                game.world.MapGrid[i, j].Source.Width, game.world.MapGrid[i, j].Source.Height, Objects.BonusType.Armor);
+                                            game.world.MapGrid[i, j].BonusHere = 
+                                                new HealthBonusFactory().CreateBonus(
+                                                    game.world.MapGrid[i, j].Source.X,
+                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    1,
+                                                    game.world.MapGrid[i, j].Source.Width,
+                                                    game.world.MapGrid[i, j].Source.Height);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
                                             break;

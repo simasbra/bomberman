@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BombermanMultiplayer.Objects
 {
     /// <summary>
     /// Represents a health bonus that provides armor or additional lives to the player
     /// </summary>
-    public class HealthBonus : Bonus
+    public sealed class HealthBonus : Bonus
     {
         /// <summary>
         /// Gets or sets the duration of the health bonus effect in milliseconds
@@ -36,6 +32,43 @@ namespace BombermanMultiplayer.Objects
         {
             this.Duration = duration;
             this.HealthIncrease = healthIncrease;
+        }
+
+        /// <summary>
+        /// Returns the duration of the health bonus effect in milliseconds.
+        /// </summary>
+        /// <returns>The duration in milliseconds</returns>
+        public override int GetDuration()
+        {
+            return this.Duration;
+        }
+
+        /// <summary>
+        /// Applies the effect of a health bonus to a player.
+        /// </summary>
+        /// <param name="player">The player who will receive the bonus effect.</param>
+        protected override void ApplyEffect(Player player)
+        {
+            player.Lifes += (byte)HealthIncrease;
+        }
+
+        /// <summary>
+        /// Determines whether the health bonus can be applied to a player.
+        /// </summary>
+        /// <param name="player">The player attempting to apply the bonus.</param>
+        /// <returns>True if the bonus can be applied; otherwise, false.</returns>
+        protected override bool CanApply(Player player)
+        {
+            return player.Lifes < 5; // Example limit — prevents infinite stacking
+        }
+
+        /// <summary>
+        /// Determines whether a special effect should be played when applying the bonus to a player.
+        /// </summary>
+        /// <returns>True if the special effect should be played; otherwise, false.</returns>
+        protected override bool ShouldPlaySpecialEffect()
+        {
+            return true; // Shield clang sound + glow
         }
     }
 }

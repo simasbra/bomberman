@@ -88,9 +88,7 @@
     <Compile Include="Objects\ClassicBomb.cs" />
     <Compile Include="AbstractFactory\ClassicExplosiveFactory.cs" />
     <Compile Include="AbstractFactory\ExplosiveFactory.cs" />
-    <Compile Include="Objects\ClassicExplosiveFactory.cs" />
     <Compile Include="Objects\DefuseBonus.cs" />
-    <Compile Include="Objects\ExplosiveFactory.cs" />
     <Compile Include="Objects\Grenade.cs" />
     <Compile Include="Objects\HealthBonus.cs" />
     <Compile Include="Objects\ICloneable.cs" />
