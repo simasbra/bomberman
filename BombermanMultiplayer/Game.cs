@@ -1,4 +1,12 @@
-﻿using System;
+﻿using BombermanMultiplayer.Builder;
+using BombermanMultiplayer.Commands;
+using BombermanMultiplayer.Commands.Interface;
+using BombermanMultiplayer.Factory;
+using BombermanMultiplayer.Objects;
+using BombermanMultiplayer.State;
+using BombermanMultiplayer.Strategy;
+using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -7,13 +15,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
-using BombermanMultiplayer.Builder;
-using BombermanMultiplayer.Commands;
-using BombermanMultiplayer.Commands.Interface;
-using BombermanMultiplayer.Factory;
-using BombermanMultiplayer.Objects;
-using BombermanMultiplayer.Strategy;
-using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
 
 namespace BombermanMultiplayer
 {
@@ -43,9 +44,11 @@ namespace BombermanMultiplayer
         // Observer pattern - GameState for notifications
         private GameState gameState;
         private bool[] previousDeathStates = new bool[4]; // Track previous death states to detect changes
+		private IGameState _currentState;
+		public IGameState CurrentState => _currentState;
 
-        //ctor when picture box size is determined
-        public Game(int hebergeurWidth, int hebergeurHeight)
+		//ctor when picture box size is determined
+		public Game(int hebergeurWidth, int hebergeurHeight)
         {
             this.world = new World(hebergeurWidth, hebergeurHeight, tileWidth, tileHeight, 1);
 
@@ -102,7 +105,9 @@ namespace BombermanMultiplayer
             // Bottom-left corner
             world.MapGrid[rows - 2, 1].Walkable = true;
             world.MapGrid[rows - 2, 1].Destroyable = false;
-        }
+			_currentState = PlayingState.Instance;
+			_currentState.Enter(this);
+		}
 
         //ctor when loading a game
         public Game(int hebergeurWidth, int hebergeurHeight, SaveGameData save)
@@ -143,7 +148,9 @@ namespace BombermanMultiplayer
             {
                 previousDeathStates[i] = false;
             }
-        }
+			_currentState = PlayingState.Instance;
+			_currentState.Enter(this);
+		}
 
         /// <summary>
         /// Vykdyti komandą ir išsaugoti į istoriją
@@ -1073,5 +1080,29 @@ namespace BombermanMultiplayer
                 }
             }
         }
-    }
+
+		/// <summary>
+		/// Change the current game state (State Pattern)
+		/// </summary>
+		/// <param name="newState">The new state to transition to</param>
+		public void ChangeState(IGameState newState)
+		{
+			if (newState == null)
+				throw new ArgumentNullException(nameof(newState));
+
+			if (_currentState == newState)
+				return; // Jau esame šioje būsenoje
+
+			// Išeiname iš dabartinės būsenos
+			_currentState?.Exit(this);
+
+			Console.WriteLine($"[Game] State: {_currentState?.StateName ?? "None"} -> {newState.StateName}");
+
+			// Pakeičiame būseną
+			_currentState = newState;
+
+			// Įeiname į naują būseną
+			_currentState.Enter(this);
+		}
+	}
 }
