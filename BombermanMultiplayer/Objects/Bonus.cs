@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System;
 
 namespace BombermanMultiplayer.Objects
 {
@@ -112,24 +106,27 @@ namespace BombermanMultiplayer.Objects
         }
 
         /// <summary>
-        /// Primitive operation — must be implemented by concrete bonus types.
-        /// Applies the core gameplay effect (speed, power, armor, etc.).
+        /// Primitive operation — concrete bonus types should override this to define their core effect.
+        /// Default implementation does nothing to support existing decorators and subclasses safely.
         /// </summary>
         /// <param name="player">The player receiving the effect</param>
-        protected abstract void ApplyEffect(Player player);
+        protected virtual void ApplyEffect(Player player)
+        {
+            // Default: do nothing
+            // This allows BonusDecorator and old Bonus subclasses to work without breaking
+        }
 
         /// <summary>
-        /// Primitive operation — must be implemented by concrete bonus types.
-        /// Plays a special visual or sound effect when the bonus is collected (e.g. sparkle, fanfare).
+        /// Plays a special visual or sound effect when the bonus is collected.
         /// Only called if ShouldPlaySpecialEffect() returns true.
         /// </summary>
         protected virtual void PlaySpecialEffect()
         {
-            // Default: do nothing (most bonuses are silent)
+            // Default: do nothing
         }
 
         /// <summary>
-        /// Finds a free bonus slot in the player and registers this bonus type + timer.
+        /// Final step: finds a free bonus slot in the player and registers this bonus type + timer.
         /// This logic is shared by all bonuses — no need to override.
         /// </summary>
         /// <param name="player">The player receiving the bonus</param>
@@ -140,11 +137,11 @@ namespace BombermanMultiplayer.Objects
                 if (player.BonusSlot[i] == BonusType.None)
                 {
                     player.BonusSlot[i] = this.Type;
-                    player.BonusTimer[i] = (short)(GetDuration() / 16);
+                    player.BonusTimer[i] = (short)(GetDuration() / 16); // ~60fps
                     return;
                 }
             }
-            // If no free slot, overwrite the oldest one
+            // Overwrite oldest if full
             player.BonusSlot[0] = this.Type;
             player.BonusTimer[0] = (short)(GetDuration() / 16);
         }

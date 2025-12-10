@@ -715,6 +715,8 @@ namespace BombermanMultiplayer
                             player.ActiveStrategies[i].Remove(player, i);
                             player.ActiveStrategies[i] = null;
                         }
+                        player.BonusSlot[i] = BonusType.None;     // clear slot
+                        player.BonusTimer[i] = 0;
                     }
                     else
                     {
@@ -730,56 +732,50 @@ namespace BombermanMultiplayer
 
             if (this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere != null)
             {
-                //If Player already have the bonus
-                if (player.BonusSlot[0] == this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Type ||
-                    player.BonusSlot[1] == this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Type)
+                Bonus bonusOnTile = this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere;
+
+                if (player.BonusSlot[0] == bonusOnTile.Type || player.BonusSlot[1] == bonusOnTile.Type)
                     return;
 
-                if (freeSlot != -1)
+                bonusOnTile.ApplyToPlayer(player);
+
+                IBonusEffectStrategy strategy = null;
+                switch (bonusOnTile.Type)
                 {
-                    var bonusType = this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Type;
-                    IBonusEffectStrategy strategy = null;
+                    case BonusType.PowerBomb:
+                        strategy = new PowerBombEffectStrategy();
+                        break;
+                    case BonusType.SpeedBoost:
+                        strategy = new SpeedBoostEffectStrategy();
+                        break;
+                    case BonusType.Desamorce:
+                        strategy = new DefuseBombEffectStrategy();
+                        break;
+                    case BonusType.Armor:
+                        strategy = new ArmorEffectStrategy();
+                        break;
+                }
 
-                    switch (bonusType)
+                if (strategy != null)
+                {
+                    int usedSlot = -1;
+                    for (int i = 0; i < player.BonusSlot.Length; i++)
                     {
-                        case BonusType.PowerBomb:
-                            strategy = new PowerBombEffectStrategy();
-                            break;
-                        case BonusType.SpeedBoost:
-                            strategy = new SpeedBoostEffectStrategy();
-                            break;
-                        case BonusType.Desamorce:
-                            strategy = new DefuseBombEffectStrategy();
-                            break;
-                        case BonusType.Armor:
-                            strategy = new ArmorEffectStrategy();
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if (strategy != null)
-                    {
-                        strategy.Apply(player, freeSlot, this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere);
-                        player.ActiveStrategies[freeSlot] = strategy;
-
-                        // Use the appropriate factory to create the bonus
-                        BonusFactory factory = GetBonusFactory(bonusType);
-                        if (factory != null)
+                        if (player.BonusSlot[i] == bonusOnTile.Type)
                         {
-                            Bonus newBonus = factory.CreateBonus(
-                                this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].Source.X,
-                                this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].Source.Y,
-                                0, // Assuming frameNumber is not used in this context
-                                this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Source.Width,
-                                this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere.Source.Height
-                            );
-                            this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere = newBonus;
+                            usedSlot = i;
+                            break;
                         }
                     }
 
-                    this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere = null;
+                    if (usedSlot != -1)
+                    {
+                        strategy.Apply(player, usedSlot, bonusOnTile);
+                        player.ActiveStrategies[usedSlot] = strategy;
+                    }
                 }
+
+                this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere = null;
             }
         }
 
