@@ -74,6 +74,13 @@
     <Compile Include="Factory\HealthBonusFactory.cs" />
     <Compile Include="Factory\PowerBonusFactory.cs" />
     <Compile Include="Factory\SpeedBonusFactory.cs" />
+    <Compile Include="Interpreter\CommandParser.cs" />
+    <Compile Include="Interpreter\ConsoleCommandHandler.cs" />
+    <Compile Include="Interpreter\DirectionExpression.cs" />
+    <Compile Include="Interpreter\GameCommandContext.cs" />
+    <Compile Include="Interpreter\IExpression.cs" />
+    <Compile Include="Interpreter\MoveCommandExpression.cs" />
+    <Compile Include="Interpreter\PlayerExpression.cs" />
     <Compile Include="Observer\IObserver.cs" />
     <Compile Include="Observer\ISubject.cs" />
     <Compile Include="MainMenu.cs">
