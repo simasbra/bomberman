@@ -8,37 +8,42 @@ using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Media;
 using System.Diagnostics;
+using BombermanMultiplayer.Iterator;
 
 namespace BombermanMultiplayer
 {
     [Serializable]
-    public class World 
+    public class World
     {
         public Tile[,] MapGrid;
+
         [NonSerialized]
         private Image Background_;
 
+        /// <summary>
+        /// Returns an iterator for traversing all tiles in the map grid
+        /// </summary>
+        /// <returns>Tile iterator over MapGrid</returns>
+        public IGameIterator<Tile> GetTileIterator()
+        {
+            return new TileIterator(MapGrid);
+        }
 
         public Image Background
         {
-            get
-            {
-                return Background_;
-            }
+            get { return Background_; }
 
-            set
-            {
-                Background_ = value;
-            }
+            set { Background_ = value; }
         }
 
 
         public void Draw(Graphics gr)
         {
             if (Background != null)
-             {
-                gr.DrawImage(Background, gr.VisibleClipBounds.X, gr.VisibleClipBounds.Y, gr.VisibleClipBounds.Width, gr.VisibleClipBounds.Height);
-             }
+            {
+                gr.DrawImage(Background, gr.VisibleClipBounds.X, gr.VisibleClipBounds.Y, gr.VisibleClipBounds.Width,
+                    gr.VisibleClipBounds.Height);
+            }
 
             for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
             {
@@ -47,14 +52,13 @@ namespace BombermanMultiplayer
                     MapGrid[i, j].Draw(gr);
                 }
             }
-
         }
 
         public void loadBackground(Image background)
         {
-            this.Background = background;
+            Background = background;
         }
-        
+
         public void loadSpriteTile(Image spriteDestroyableTile, Image spriteUndestroyableTile)
         {
             for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
@@ -71,7 +75,6 @@ namespace BombermanMultiplayer
                     }
                 }
             }
-
         }
 
         public void refreshTileSprites()
@@ -84,6 +87,7 @@ namespace BombermanMultiplayer
                     {
                         MapGrid[i, j].UnloadSprite();
                     }
+
                     if (MapGrid[i, j].Fire)
                     {
                         MapGrid[i, j].LoadSprite(Properties.Resources.Fire);
@@ -92,12 +96,9 @@ namespace BombermanMultiplayer
                     {
                         MapGrid[i, j].UnloadSprite();
                     }
-
                 }
             }
-
         }
-
 
         public World(int hebergeurWidth, int hebergeurHeight, int TILE_WIDTH, int TILE_HEIGHT, int totalFrameTile)
         {
@@ -106,19 +107,31 @@ namespace BombermanMultiplayer
 
         public World(int hebergeurWidth, int hebergeurHeight, Tile[,] map)
         {
-            this.MapGrid = map;
+            MapGrid = map;
         }
 
         public World()
         {
-
         }
 
-        public void CreateWorldGrid(int hebergeurWidth, int hebergeurHeight, int TILE_WIDTH, int TILE_HEIGHT, int totalFrameTile)
+        /// <summary>
+        /// Creates a grid of tiles for the world based on specified dimensions and tile properties.
+        /// </summary>
+        /// <param name="hebergeurWidth">The width of the world in pixels.</param>
+        /// <param name="hebergeurHeight">The height of the world in pixels.</param>
+        /// <param name="tileWidth">The width of a single tile in pixels.</param>
+        /// <param name="tileHeight">The height of a single tile in pixels.</param>
+        /// <param name="totalFrameTile">The total number of frames for tile animations.</param>
+        public void CreateWorldGrid(
+            int hebergeurWidth,
+            int hebergeurHeight,
+            int tileWidth,
+            int tileHeight,
+            int totalFrameTile)
         {
             Random r = new Random();
             int rand = 0;
-            MapGrid = new Tile[hebergeurWidth / TILE_WIDTH, hebergeurHeight / TILE_HEIGHT];
+            MapGrid = new Tile[hebergeurWidth / tileWidth, hebergeurHeight / tileHeight];
 
             int rows = MapGrid.GetLength(0);
             int cols = MapGrid.GetLength(1);
@@ -130,20 +143,32 @@ namespace BombermanMultiplayer
                     rand = r.Next(0, 10);
 
                     if (j == 0 || j == cols - 1 || i == 0 || i == rows - 1)
-                        MapGrid[i, j] = new Tile(j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, false, false);
+                    {
+                        MapGrid[i, j] = new Tile(j * tileWidth, i * tileHeight, totalFrameTile, tileWidth, tileHeight, false, false);
+                    }
                     else
                     {
                         if (i % 2 == 0 && j % 2 == 0)
-                            MapGrid[i, j] = new Tile(j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, false, false);
+                        {
+                            MapGrid[i, j] = new Tile(j * tileWidth, i * tileHeight, totalFrameTile, tileWidth, tileHeight, false, false);
+                        }
                         else
                         {
-                            if (((i == 1 && (j == 1 || j == 2)) || (i == 2 && j == 1)
-                                || (i == rows - 3 && j == cols - 2) || (i == rows - 2 && (j == cols - 2 || j == cols - 3))))
-                                MapGrid[i, j] = new Tile(j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, true, false);
+                            if ((i == 1 && (j == 1 || j == 2))
+                                || (i == 2 && j == 1)
+                                || (i == rows - 3 && j == cols - 2)
+                                || (i == rows - 2 && (j == cols - 2 || j == cols - 3)))
+                            {
+                                MapGrid[i, j] = new Tile(j * tileWidth, i * tileHeight, totalFrameTile, tileWidth, tileHeight, true, false);
+                            }
                             else if (rand >= 1)
-                                MapGrid[i, j] = new Tile(j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, false, true);
+                            {
+                                MapGrid[i, j] = new Tile(j * tileWidth, i * tileHeight, totalFrameTile, tileWidth, tileHeight, false, true);
+                            }
                             else
-                                MapGrid[i, j] = new Tile(j * TILE_WIDTH, i * TILE_HEIGHT, totalFrameTile, TILE_WIDTH, TILE_HEIGHT, true, false);
+                            {
+                                MapGrid[i, j] = new Tile(j * tileWidth, i * tileHeight, totalFrameTile, tileWidth, tileHeight, true, false);
+                            }
                         }
                     }
                 }
@@ -151,30 +176,37 @@ namespace BombermanMultiplayer
 
             // Ensure all four corners and their adjacent tiles are walkable and not destroyable
             // Top-left
-            MapGrid[1, 1].Walkable = true; MapGrid[1, 1].Destroyable = false;
-            MapGrid[1, 2].Walkable = true; MapGrid[1, 2].Destroyable = false;
-            MapGrid[2, 1].Walkable = true; MapGrid[2, 1].Destroyable = false;
+            MapGrid[1, 1].Walkable = true;
+            MapGrid[1, 1].Destroyable = false;
+            MapGrid[1, 2].Walkable = true;
+            MapGrid[1, 2].Destroyable = false;
+            MapGrid[2, 1].Walkable = true;
+            MapGrid[2, 1].Destroyable = false;
 
             // Top-right
-            MapGrid[1, cols - 2].Walkable = true; MapGrid[1, cols - 2].Destroyable = false;
-            MapGrid[1, cols - 3].Walkable = true; MapGrid[1, cols - 3].Destroyable = false;
-            MapGrid[2, cols - 2].Walkable = true; MapGrid[2, cols - 2].Destroyable = false;
+            MapGrid[1, cols - 2].Walkable = true;
+            MapGrid[1, cols - 2].Destroyable = false;
+            MapGrid[1, cols - 3].Walkable = true;
+            MapGrid[1, cols - 3].Destroyable = false;
+            MapGrid[2, cols - 2].Walkable = true;
+            MapGrid[2, cols - 2].Destroyable = false;
 
             // Bottom-left
-            MapGrid[rows - 2, 1].Walkable = true; MapGrid[rows - 2, 1].Destroyable = false;
-            MapGrid[rows - 2, 2].Walkable = true; MapGrid[rows - 2, 2].Destroyable = false;
-            MapGrid[rows - 3, 1].Walkable = true; MapGrid[rows - 3, 1].Destroyable = false;
+            MapGrid[rows - 2, 1].Walkable = true;
+            MapGrid[rows - 2, 1].Destroyable = false;
+            MapGrid[rows - 2, 2].Walkable = true;
+            MapGrid[rows - 2, 2].Destroyable = false;
+            MapGrid[rows - 3, 1].Walkable = true;
+            MapGrid[rows - 3, 1].Destroyable = false;
 
             // Bottom-right
-            MapGrid[rows - 2, cols - 2].Walkable = true; MapGrid[rows - 2, cols - 2].Destroyable = false;
-            MapGrid[rows - 2, cols - 3].Walkable = true; MapGrid[rows - 2, cols - 3].Destroyable = false;
-            MapGrid[rows - 3, cols - 2].Walkable = true; MapGrid[rows - 3, cols - 2].Destroyable = false;
+            MapGrid[rows - 2, cols - 2].Walkable = true;
+            MapGrid[rows - 2, cols - 2].Destroyable = false;
+            MapGrid[rows - 2, cols - 3].Walkable = true;
+            MapGrid[rows - 2, cols - 3].Destroyable = false;
+            MapGrid[rows - 3, cols - 2].Walkable = true;
+            MapGrid[rows - 3, cols - 2].Destroyable = false;
         }
-
-
-
-
-
 
     }
 }
