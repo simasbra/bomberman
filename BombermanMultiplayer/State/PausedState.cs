@@ -11,6 +11,12 @@ namespace BombermanMultiplayer.State
             game.LogicTimer.Stop();
         }
 
+        public void Exit(Game game)
+        {
+            // Resume when leaving paused state
+            game.Paused = false;
+        }
+
         public void HandleInput(Keys key, Game game)
         {
             if (key == Keys.Escape)
@@ -27,6 +33,12 @@ namespace BombermanMultiplayer.State
         public void Update(Game game)
         {
             // No game logic while paused
+        }
+
+        public void TogglePause(Game game)
+        {
+            // Paused state → Running state
+            game.SetState(new RunningState());
         }
     }
 }

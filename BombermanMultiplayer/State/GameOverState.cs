@@ -12,12 +12,17 @@ namespace BombermanMultiplayer.State
             game.LogicTimer.Stop();
         }
 
+        public void Exit(Game game)
+        {
+            game.Over = false;
+        }
+
         public void HandleInput(Keys key, Game game)
         {
-            // Press R to restart the game
+            // Press R to restart the game - transition to countdown state
             if (key == Keys.R)
             {
-                game.RestartGame();
+                game.SetState(new CountdownState(3000));
             }
         }
 
@@ -28,6 +33,11 @@ namespace BombermanMultiplayer.State
         public void Update(Game game)
         {
             // No ticking when game is over
+        }
+
+        public void TogglePause(Game game)
+        {
+            // GameOver cannot be paused - do nothing
         }
     }
 }
