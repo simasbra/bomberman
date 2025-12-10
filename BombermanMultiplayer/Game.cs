@@ -38,7 +38,7 @@ namespace BombermanMultiplayer
         /// Returns an iterator for the collection of bombs in the game.
         /// </summary>
         /// <returns>An instance of <see cref="BombIterator"/>, which allows iteration over the list of bombs.</returns>
-        public IGameIterator<Bomb> GetBombIterator()
+        public IIterator<Bomb> GetBombIterator()
         {
             return new BombIterator(BombsOnTheMap);
         }
@@ -47,7 +47,7 @@ namespace BombermanMultiplayer
         /// Returns an iterator for the collection of players in the game.
         /// </summary>
         /// <returns>An instance of <see cref="PlayerIterator"/>, which allows iteration over the list of players.</returns>
-        public IGameIterator<Player> GetPlayerIterator()
+        public IIterator<Player> GetPlayerIterator()
         {
             return new PlayerIterator(players);   
         }
@@ -624,7 +624,7 @@ namespace BombermanMultiplayer
         //Manage interactions between worlds and objects
         private void InteractionLogic()
         {
-            IGameIterator<Tile> tileIterator = world.GetTileIterator();
+            IIterator<Tile> tileIterator = world.GetTileIterator();
             int row = 0;
             int column = 0;
 
@@ -671,7 +671,7 @@ namespace BombermanMultiplayer
 
         private void BombsLogic()
         {
-            IGameIterator<Bomb> bombIterator = GetBombIterator();
+            IIterator<Bomb> bombIterator = GetBombIterator();
 
             while (bombIterator.HasNext())
             {
@@ -836,7 +836,7 @@ namespace BombermanMultiplayer
         /// <returns>Returns nothing as it is a method that performs operations without returning a value.</returns>
         private void PlayersLogic()
         {
-            IGameIterator<Player> playerIterator = GetPlayerIterator();
+            IIterator<Player> playerIterator = GetPlayerIterator();
             while (playerIterator.HasNext())
             {
                 Player player = playerIterator.Next();
@@ -852,7 +852,7 @@ namespace BombermanMultiplayer
                 if (player.Orientation != Player.MovementDirection.NONE)
                 {
                     bool canMove = true;
-                    IGameIterator<Player> otherIterator = GetPlayerIterator();
+                    IIterator<Player> otherIterator = GetPlayerIterator();
                     while (otherIterator.HasNext())
                     {
                         Player other = otherIterator.Next();

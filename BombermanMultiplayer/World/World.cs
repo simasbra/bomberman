@@ -24,7 +24,7 @@ namespace BombermanMultiplayer
         /// Returns an iterator for traversing all tiles in the map grid
         /// </summary>
         /// <returns>Tile iterator over MapGrid</returns>
-        public IGameIterator<Tile> GetTileIterator()
+        public IIterator<Tile> GetTileIterator()
         {
             return new TileIterator(MapGrid);
         }
@@ -207,6 +207,5 @@ namespace BombermanMultiplayer
             MapGrid[rows - 3, cols - 2].Walkable = true;
             MapGrid[rows - 3, cols - 2].Destroyable = false;
         }
-
     }
 }
