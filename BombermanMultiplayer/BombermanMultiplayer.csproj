@@ -78,6 +78,20 @@
     <Compile Include="Iterator\IIterator.cs" />
     <Compile Include="Iterator\PlayerIterator.cs" />
     <Compile Include="Iterator\TileIterator.cs" />
+    <Compile Include="Interpreter\CommandParser.cs" />
+    <Compile Include="Interpreter\ConsoleCommandHandler.cs" />
+    <Compile Include="Interpreter\DirectionExpression.cs" />
+    <Compile Include="Interpreter\GameCommandContext.cs" />
+    <Compile Include="Interpreter\IExpression.cs" />
+    <Compile Include="Interpreter\MoveCommandExpression.cs" />
+    <Compile Include="Interpreter\PlayerExpression.cs" />
+    <Compile Include="Mediator\BombColleague.cs" />
+    <Compile Include="Mediator\GameMediator.cs" />
+    <Compile Include="Mediator\IColleague.cs" />
+    <Compile Include="Mediator\IGameMediator.cs" />
+    <Compile Include="Mediator\MediatorDemo.cs" />
+    <Compile Include="Mediator\PlayerColleague.cs" />
+    <Compile Include="Mediator\WorldColleague.cs" />
     <Compile Include="Observer\IObserver.cs" />
     <Compile Include="Observer\ISubject.cs" />
     <Compile Include="MainMenu.cs">
@@ -127,6 +141,11 @@
     <Compile Include="Client.cs" />
     <Compile Include="SaveGameDataObserver.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="State\GameOverState.cs" />
+    <Compile Include="State\IGameState.cs" />
+    <Compile Include="State\PausedState.cs" />
+    <Compile Include="State\PlayingState.cs" />
+    <Compile Include="State\WaitingState.cs" />
     <Compile Include="Strategy\ArmorEffectStrategy.cs" />
     <Compile Include="Strategy\DefuseBombEffectStrategy.cs" />
     <Compile Include="Strategy\Interface\IBonusEffectStrategy.cs" />
@@ -224,6 +243,7 @@
     <Content Include="Sprites\Grenade.png" />
     <Content Include="Sprites\mine.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

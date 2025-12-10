@@ -1,4 +1,12 @@
-﻿using System;
+﻿using BombermanMultiplayer.Builder;
+using BombermanMultiplayer.Commands;
+using BombermanMultiplayer.Commands.Interface;
+using BombermanMultiplayer.Factory;
+using BombermanMultiplayer.Objects;
+using BombermanMultiplayer.State;
+using BombermanMultiplayer.Strategy;
+using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -7,14 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
-using BombermanMultiplayer.Builder;
-using BombermanMultiplayer.Commands;
-using BombermanMultiplayer.Commands.Interface;
-using BombermanMultiplayer.Factory;
 using BombermanMultiplayer.Iterator;
-using BombermanMultiplayer.Objects;
-using BombermanMultiplayer.Strategy;
-using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
 
 namespace BombermanMultiplayer
 {
@@ -62,6 +63,8 @@ namespace BombermanMultiplayer
         // Observer pattern - GameState for notifications
         private GameState gameState;
         private bool[] previousDeathStates = new bool[4]; // Track previous death states to detect changes
+        private IGameState _currentState;
+        public IGameState CurrentState => _currentState;
 
         //ctor when picture box size is determined
         public Game(int hebergeurWidth, int hebergeurHeight)
@@ -121,6 +124,8 @@ namespace BombermanMultiplayer
             // Bottom-left corner
             world.MapGrid[rows - 2, 1].Walkable = true;
             world.MapGrid[rows - 2, 1].Destroyable = false;
+            _currentState = PlayingState.Instance;
+            _currentState.Enter(this);
         }
 
         //ctor when loading a game
@@ -162,6 +167,8 @@ namespace BombermanMultiplayer
             {
                 previousDeathStates[i] = false;
             }
+            _currentState = PlayingState.Instance;
+            _currentState.Enter(this);
         }
 
         /// <summary>
@@ -899,99 +906,99 @@ namespace BombermanMultiplayer
             switch (direction)
             {
                 case Player.MovementDirection.UP:
-                    {
-                        //UP
-                        //Temporary version of player collision box with expected position after deplacement
-                        Rectangle rect = new Rectangle(movingPlayer.Source.X, movingPlayer.Source.Y - movingPlayer.Vitesse, movingPlayer.Source.Width, movingPlayer.Source.Height);
+                {
+                    //UP
+                    //Temporary version of player collision box with expected position after deplacement
+                    Rectangle rect = new Rectangle(movingPlayer.Source.X, movingPlayer.Source.Y - movingPlayer.Vitesse, movingPlayer.Source.Width, movingPlayer.Source.Height);
 
-                        if (!map[lig - 1, col - 1].Walkable || map[lig - 1, col - 1].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig - 1, col - 1].Source))
-                                return false;
-                        }
-                        if (!map[lig - 1, col].Walkable || map[lig - 1, col].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig - 1, col].Source))
-                                return false;
-                        }
-                        if (!map[lig - 1, col + 1].Walkable || map[lig - 1, col + 1].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig - 1, col + 1].Source))
-                                return false;
-                        }
-                        if (CheckCollisionRectangle(rect, player2.Source))
+                    if (!map[lig - 1, col - 1].Walkable || map[lig - 1, col - 1].Occupied)
+                    {
+                        if (CheckCollisionRectangle(rect, map[lig - 1, col - 1].Source))
                             return false;
                     }
+                    if (!map[lig - 1, col].Walkable || map[lig - 1, col].Occupied)
+                    {
+                        if (CheckCollisionRectangle(rect, map[lig - 1, col].Source))
+                            return false;
+                    }
+                    if (!map[lig - 1, col + 1].Walkable || map[lig - 1, col + 1].Occupied)
+                    {
+                        if (CheckCollisionRectangle(rect, map[lig - 1, col + 1].Source))
+                            return false;
+                    }
+                    if (CheckCollisionRectangle(rect, player2.Source))
+                        return false;
+                }
                     break;
                 case Player.MovementDirection.DOWN:
-                    {
-                        //DOWN
-                        Rectangle rect = new Rectangle(movingPlayer.Source.X, movingPlayer.Source.Y + movingPlayer.Vitesse, movingPlayer.Source.Width, movingPlayer.Source.Height);
+                {
+                    //DOWN
+                    Rectangle rect = new Rectangle(movingPlayer.Source.X, movingPlayer.Source.Y + movingPlayer.Vitesse, movingPlayer.Source.Width, movingPlayer.Source.Height);
 
-                        if (!map[lig + 1, col - 1].Walkable || map[lig + 1, col - 1].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig + 1, col - 1].Source))
-                                return false;
-                        }
-                        if (!map[lig + 1, col].Walkable || map[lig + 1, col].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig + 1, col].Source))
-                                return false;
-                        }
-                        if (!map[lig + 1, col + 1].Walkable || map[lig + 1, col + 1].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig + 1, col + 1].Source))
-                                return false;
-                        }
-                        if (CheckCollisionRectangle(rect, player2.Source))
+                    if (!map[lig + 1, col - 1].Walkable || map[lig + 1, col - 1].Occupied)
+                    {
+                        if (CheckCollisionRectangle(rect, map[lig + 1, col - 1].Source))
                             return false;
                     }
+                    if (!map[lig + 1, col].Walkable || map[lig + 1, col].Occupied)
+                    {
+                        if (CheckCollisionRectangle(rect, map[lig + 1, col].Source))
+                            return false;
+                    }
+                    if (!map[lig + 1, col + 1].Walkable || map[lig + 1, col + 1].Occupied)
+                    {
+                        if (CheckCollisionRectangle(rect, map[lig + 1, col + 1].Source))
+                            return false;
+                    }
+                    if (CheckCollisionRectangle(rect, player2.Source))
+                        return false;
+                }
                     break;
                 case Player.MovementDirection.LEFT:
+                {
+                    //LEFT
+                    Rectangle rect = new Rectangle(movingPlayer.Source.X - movingPlayer.Vitesse, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
+                    if (!map[lig - 1, col - 1].Walkable || map[lig - 1, col - 1].Occupied)
                     {
-                        //LEFT
-                        Rectangle rect = new Rectangle(movingPlayer.Source.X - movingPlayer.Vitesse, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
-                        if (!map[lig - 1, col - 1].Walkable || map[lig - 1, col - 1].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig - 1, col - 1].Source))
-                                return false;
-                        }
-                        if (!map[lig, col - 1].Walkable || map[lig, col - 1].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig, col - 1].Source))
-                                return false;
-                        }
-                        if (!map[lig + 1, col - 1].Walkable || map[lig + 1, col - 1].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig + 1, col - 1].Source))
-                                return false;
-                        }
-                        if (CheckCollisionRectangle(rect, player2.Source))
+                        if (CheckCollisionRectangle(rect, map[lig - 1, col - 1].Source))
                             return false;
                     }
+                    if (!map[lig, col - 1].Walkable || map[lig, col - 1].Occupied)
+                    {
+                        if (CheckCollisionRectangle(rect, map[lig, col - 1].Source))
+                            return false;
+                    }
+                    if (!map[lig + 1, col - 1].Walkable || map[lig + 1, col - 1].Occupied)
+                    {
+                        if (CheckCollisionRectangle(rect, map[lig + 1, col - 1].Source))
+                            return false;
+                    }
+                    if (CheckCollisionRectangle(rect, player2.Source))
+                        return false;
+                }
                     break;
                 case Player.MovementDirection.RIGHT:
+                {
+                    Rectangle rect = new Rectangle(movingPlayer.Source.X + movingPlayer.Vitesse, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
+                    //RIGHT
+                    if (!map[lig - 1, col + 1].Walkable || map[lig - 1, col + 1].Occupied)
                     {
-                        Rectangle rect = new Rectangle(movingPlayer.Source.X + movingPlayer.Vitesse, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
-                        //RIGHT
-                        if (!map[lig - 1, col + 1].Walkable || map[lig - 1, col + 1].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig - 1, col + 1].Source))
-                                return false;
-                        }
-                        if (!map[lig, col + 1].Walkable || map[lig, col + 1].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig, col + 1].Source))
-                                return false;
-                        }
-                        if (!map[lig + 1, col + 1].Walkable || map[lig + 1, col + 1].Occupied)
-                        {
-                            if (CheckCollisionRectangle(rect, map[lig + 1, col + 1].Source))
-                                return false;
-                        }
-                        if (CheckCollisionRectangle(rect, player2.Source))
+                        if (CheckCollisionRectangle(rect, map[lig - 1, col + 1].Source))
                             return false;
                     }
+                    if (!map[lig, col + 1].Walkable || map[lig, col + 1].Occupied)
+                    {
+                        if (CheckCollisionRectangle(rect, map[lig, col + 1].Source))
+                            return false;
+                    }
+                    if (!map[lig + 1, col + 1].Walkable || map[lig + 1, col + 1].Occupied)
+                    {
+                        if (CheckCollisionRectangle(rect, map[lig + 1, col + 1].Source))
+                            return false;
+                    }
+                    if (CheckCollisionRectangle(rect, player2.Source))
+                        return false;
+                }
                     break;
                 default:
                     break;
@@ -1120,6 +1127,30 @@ namespace BombermanMultiplayer
                     Paused = true;
                 }
             }
+        }
+
+        /// <summary>
+        /// Change the current game state (State Pattern)
+        /// </summary>
+        /// <param name="newState">The new state to transition to</param>
+        public void ChangeState(IGameState newState)
+        {
+            if (newState == null)
+                throw new ArgumentNullException(nameof(newState));
+
+            if (_currentState == newState)
+                return; // Jau esame šioje būsenoje
+
+            // Išeiname iš dabartinės būsenos
+            _currentState?.Exit(this);
+
+            Console.WriteLine($"[Game] State: {_currentState?.StateName ?? "None"} -> {newState.StateName}");
+
+            // Pakeičiame būseną
+            _currentState = newState;
+
+            // Įeiname į naują būseną
+            _currentState.Enter(this);
         }
     }
 }
