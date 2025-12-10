@@ -127,16 +127,48 @@
             this.chkAutoSave.CheckedChanged += new System.EventHandler(this.chkAutoSave_CheckedChanged);
             this.chkAutoSave.Click += new System.EventHandler(this.chkAutoSave_Click);
             this.chkAutoSave.KeyDown += new System.Windows.Forms.KeyEventHandler(this.chkAutoSave_KeyDown);
-            //
-            // GameWindow
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+			// 
+			// txtCommand
+			// 
+			this.txtCommand = new System.Windows.Forms.TextBox();
+			this.txtCommand.Location = new System.Drawing.Point(12, 56);
+			this.txtCommand.Name = "txtCommand";
+			this.txtCommand.Size = new System.Drawing.Size(300, 22);
+			this.txtCommand.TabIndex = 3;
+			this.txtCommand.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtCommand_KeyDown);
+			// 
+			// btnExecute
+			// 
+			this.btnExecute = new System.Windows.Forms.Button();
+			this.btnExecute.Location = new System.Drawing.Point(318, 54);
+			this.btnExecute.Name = "btnExecute";
+			this.btnExecute.Size = new System.Drawing.Size(75, 26);
+			this.btnExecute.TabIndex = 4;
+			this.btnExecute.Text = "Execute";
+			this.btnExecute.UseVisualStyleBackColor = true;
+			this.btnExecute.Click += new System.EventHandler(this.btnExecute_Click);
+			// 
+			// lblResult
+			// 
+			this.lblResult = new System.Windows.Forms.Label();
+			this.lblResult.Location = new System.Drawing.Point(399, 58);
+			this.lblResult.Name = "lblResult";
+			this.lblResult.Size = new System.Drawing.Size(400, 20);
+			this.lblResult.TabIndex = 5;
+			this.lblResult.Text = "";
+			//
+			// GameWindow
+			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(882, 853);
             this.Controls.Add(this.chkAutoSave);
             this.Controls.Add(this.tlsMenu);
             this.Controls.Add(this.pbGame);
-            this.MinimumSize = new System.Drawing.Size(600, 600);
+			this.Controls.Add(this.lblResult);
+			this.Controls.Add(this.btnExecute);
+			this.Controls.Add(this.txtCommand);
+			this.MinimumSize = new System.Drawing.Size(600, 600);
             this.Name = "GameWindow";
             this.KeyPreview = true;
             this.Text = "Form1";
@@ -146,14 +178,20 @@
             ((System.ComponentModel.ISupportInitialize)(this.pbGame)).EndInit();
             this.tlsMenu.ResumeLayout(false);
             this.tlsMenu.PerformLayout();
+
+
+
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
-        #endregion
+		#endregion
 
-        private System.Windows.Forms.PictureBox pbGame;
+		private System.Windows.Forms.TextBox txtCommand;
+		private System.Windows.Forms.Button btnExecute;
+		private System.Windows.Forms.Label lblResult;
+		private System.Windows.Forms.PictureBox pbGame;
         private System.Windows.Forms.Timer refreshGraphics;
         private System.Windows.Forms.ToolStrip tlsMenu;
         private System.Windows.Forms.ToolStripDropDownButton tsDropDownFile;

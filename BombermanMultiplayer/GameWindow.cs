@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BombermanMultiplayer.Facade;
+using BombermanMultiplayer.Interpreter;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,7 +9,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using BombermanMultiplayer.Facade;
 
 namespace BombermanMultiplayer
 {
@@ -17,8 +18,8 @@ namespace BombermanMultiplayer
         private RenderingFacade _renderingFacade;
         private GameState gameState;
         private SaveGameDataObserver saveGameObserver;
-
-        private BufferedGraphics bufferG = null;
+		private CommandParser _commandParser = new CommandParser();
+		private BufferedGraphics bufferG = null;
         private Graphics gr;
         private Rectangle[] BonusSlot;
         public GameWindow()
@@ -217,5 +218,59 @@ namespace BombermanMultiplayer
                 this.Focus();
             }
         }
-    }
+
+		private void txtCommand_KeyDown(object sender, KeyEventArgs e)
+		{
+			// Kai paspaudžia Enter - vykdome komandą
+			if (e.KeyCode == Keys.Enter)
+			{
+				ExecuteCommand();
+				e.Handled = true;
+				e.SuppressKeyPress = true; // Kad nepypsėtų
+			}
+		}
+
+		private void btnExecute_Click(object sender, EventArgs e)
+		{
+			ExecuteCommand();
+		}
+
+		private void ExecuteCommand()
+		{
+			string input = txtCommand.Text;
+
+			if (string.IsNullOrWhiteSpace(input))
+			{
+				lblResult.Text = "Įvesk komandą, pvz: move player1 up";
+				return;
+			}
+
+			// Parsuojame komandą į Expression
+			IExpression expression = _commandParser.Parse(input);
+
+			if (expression == null)
+			{
+				lblResult.Text = "Nežinoma komanda. Naudok: move player1/2/3/4 up/down/left/right";
+				return;
+			}
+
+			// Sukuriame kontekstą su žaidimu
+			var context = new GameCommandContext(this.game);
+
+			// Interpretuojame (vykdome) komandą
+			expression.Interpret(context);
+
+			// Rodome rezultatą
+			lblResult.Text = context.Message;
+			lblResult.ForeColor = context.Success ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+
+			// Išvalome TextBox
+			if (context.Success)
+			{
+				txtCommand.Clear();
+			}
+
+			txtCommand.Focus();
+		}
+	}
 }
