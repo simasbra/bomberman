@@ -18,7 +18,10 @@ namespace BombermanMultiplayer.State
 
 		public void Enter(Game game)
 		{
-			Console.WriteLine("[PlayingState] Entered - Game is active!");
+			if (Console.OpenStandardOutput(1, 1) != Stream.Null)
+                        {
+				Console.WriteLine("[PlayingState] Entered - Game is active!");
+			}
 			game.LogicTimer.Start();
 			game.Paused = false;
 			game.Over = false;
