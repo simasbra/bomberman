@@ -74,8 +74,13 @@ namespace BombermanMultiplayer
 
         private void Game_KeyDown(object sender, KeyEventArgs e)
         {
-            // Handle Escape key explicitly to ensure it works even when controls have focus
-            if (e.KeyCode == Keys.Escape)
+			if (txtCommand.Focused)
+			{
+				return;
+			}
+
+			// Handle Escape key explicitly to ensure it works even when controls have focus
+			if (e.KeyCode == Keys.Escape)
             {
                 e.Handled = true;
                 game.Game_KeyDown(e.KeyCode);
@@ -87,7 +92,12 @@ namespace BombermanMultiplayer
 
         private void Game_KeyUp(object sender, KeyEventArgs e)
         {
-            game.Game_KeyUp(e.KeyCode);
+			if (txtCommand.Focused)
+			{
+				return;
+			}
+
+			game.Game_KeyUp(e.KeyCode);
         }
 
 
