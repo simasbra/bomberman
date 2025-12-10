@@ -13,6 +13,7 @@ using BombermanMultiplayer.Strategy;
 using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
 using BombermanMultiplayer.State;
 using BombermanMultiplayer.ChainOfResponsibility;
+using BombermanMultiplayer.Memento;
 
 namespace BombermanMultiplayer
 {
@@ -45,6 +46,9 @@ namespace BombermanMultiplayer
         
         // Chain of Responsibility - Pure validation chain (validates only, doesn't execute)
         private ValidationHandler _validationChain;
+        
+        // Memento pattern - Checkpoint system for undo/redo
+        private GameCaretaker _caretaker = new GameCaretaker();
         
         private const int tileWidth = 48;
         private const int tileHeight = 48;
@@ -83,15 +87,20 @@ namespace BombermanMultiplayer
         {
             var playerState = new PlayerStateValidator();
             var movement = new MovementValidator();
-            var resource = new ResourceValidator();
             var tile = new TileValidator();
+            var resource = new ResourceValidator();
             var cooldown = new CooldownValidator(100);
 
-            // Build the validation chain - gameplay logic only
+            // Build the validation chain in logical order:
+            // 1. PlayerState (is player alive?)
+            // 2. Movement (can move to this tile?)
+            // 3. Tile (is tile free?)
+            // 4. Resource (has resources for action?)
+            // 5. Cooldown (cooldown ready?)
             playerState
                 .SetNext(movement)
-                .SetNext(resource)
                 .SetNext(tile)
+                .SetNext(resource)
                 .SetNext(cooldown);
 
             _validationChain = playerState;
@@ -437,6 +446,24 @@ namespace BombermanMultiplayer
             {
                 Pause();
                 return;
+            }
+
+            // Memento pattern - Checkpoint/Undo/Redo hotkeys
+            // F5 = Save checkpoint, F6 = Undo, F7 = Redo
+            else if (key == Keys.F5)
+            {
+                SaveCheckpoint();
+                return; // Don't execute as command
+            }
+            else if (key == Keys.F6)
+            {
+                Undo();
+                return; // Don't execute as command
+            }
+            else if (key == Keys.F7)
+            {
+                Redo();
+                return; // Don't execute as command
             }
 
             // Vykdyti komandą jei buvo sukurta
@@ -1030,5 +1057,90 @@ namespace BombermanMultiplayer
             // Each state decides if it can be paused (RunningState yes, others no)
             _currentState?.TogglePause(this);
         }
+
+        #region Memento Pattern - Checkpoint System
+
+        public GameMemento CreateMemento()
+        {
+            return new GameMemento(
+                players,
+                world.MapGrid,
+                BombsOnTheMap,
+                MinesOnTheMap,
+                GrenadesOnTheMap,
+                Winner,
+                GamesPlayed,
+                CurrentStateName
+            );
+        }
+
+        public void RestoreFromMemento(GameMemento memento)
+        {
+            if (memento == null)
+                throw new ArgumentNullException(nameof(memento));
+
+            memento.RestoreTo(this);
+            RaiseRestartRequested();
+        }
+
+        public void SaveCheckpoint()
+        {
+            var memento = CreateMemento();
+            _caretaker.SaveCheckpoint(memento);
+            Console.WriteLine($"[Memento]  Checkpoint saved: {memento.Description}");
+            Console.WriteLine($"[Memento]   P1=[{players[0].CasePosition[0]},{players[0].CasePosition[1]}] P2=[{players[1].CasePosition[0]},{players[1].CasePosition[1]}] P3=[{players[2].CasePosition[0]},{players[2].CasePosition[1]}] P4=[{players[3].CasePosition[0]},{players[3].CasePosition[1]}]");
+        }
+
+        public bool Undo()
+        {
+            if (!_caretaker.CanUndo)
+            {
+                Console.WriteLine("[Memento] No undo history");
+                return false;
+            }
+
+            var currentMemento = CreateMemento();
+            Console.WriteLine($"[Memento] Current: P1=[{players[0].CasePosition[0]},{players[0].CasePosition[1]}] P2=[{players[1].CasePosition[0]},{players[1].CasePosition[1]}] P3=[{players[2].CasePosition[0]},{players[2].CasePosition[1]}] P4=[{players[3].CasePosition[0]},{players[3].CasePosition[1]}]");
+            
+            var previousMemento = _caretaker.Undo(currentMemento);
+            
+            if (previousMemento != null)
+            {
+                RestoreFromMemento(previousMemento);
+                Console.WriteLine($"[Memento]  Undo to: {previousMemento.Description}");
+                Console.WriteLine($"[Memento]   After: P1=[{players[0].CasePosition[0]},{players[0].CasePosition[1]}] P2=[{players[1].CasePosition[0]},{players[1].CasePosition[1]}] P3=[{players[2].CasePosition[0]},{players[2].CasePosition[1]}] P4=[{players[3].CasePosition[0]},{players[3].CasePosition[1]}]");
+                return true;
+            }
+            
+            return false;
+        }
+
+        public bool Redo()
+        {
+            if (!_caretaker.CanRedo)
+            {
+                Console.WriteLine("[Memento] No redo history");
+                return false;
+            }
+
+            var currentMemento = CreateMemento();
+            var nextMemento = _caretaker.Redo(currentMemento);
+            
+            if (nextMemento != null)
+            {
+                RestoreFromMemento(nextMemento);
+                Console.WriteLine($"[Memento] Redo: {nextMemento.Description}");
+                return true;
+            }
+            
+            return false;
+        }
+
+        public bool CanUndo => _caretaker.CanUndo;
+        public bool CanRedo => _caretaker.CanRedo;
+        public List<string> GetCheckpointHistory() => _caretaker.GetCheckpointList();
+        public void ClearCheckpoints() => _caretaker.Clear();
+
+        #endregion
     }
 }

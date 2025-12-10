@@ -79,6 +79,8 @@
     <Compile Include="Factory\HealthBonusFactory.cs" />
     <Compile Include="Factory\PowerBonusFactory.cs" />
     <Compile Include="Factory\SpeedBonusFactory.cs" />
+    <Compile Include="Memento\GameMemento.cs" />
+    <Compile Include="Memento\GameCaretaker.cs" />
     <Compile Include="State\CountdownState.cs" />
     <Compile Include="State\GameOverState.cs" />
     <Compile Include="State\IGameState.cs" />
