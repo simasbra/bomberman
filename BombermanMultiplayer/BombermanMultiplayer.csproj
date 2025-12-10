@@ -137,6 +137,11 @@
     <Compile Include="Client.cs" />
     <Compile Include="SaveGameDataObserver.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="State\GameOverState.cs" />
+    <Compile Include="State\IGameState.cs" />
+    <Compile Include="State\PausedState.cs" />
+    <Compile Include="State\PlayingState.cs" />
+    <Compile Include="State\WaitingState.cs" />
     <Compile Include="Strategy\ArmorEffectStrategy.cs" />
     <Compile Include="Strategy\DefuseBombEffectStrategy.cs" />
     <Compile Include="Strategy\Interface\IBonusEffectStrategy.cs" />
