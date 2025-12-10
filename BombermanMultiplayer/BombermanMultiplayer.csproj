@@ -76,7 +76,6 @@
     <Compile Include="State\CountdownState.cs" />
     <Compile Include="State\GameOverState.cs" />
     <Compile Include="State\IGameState.cs" />
-    <Compile Include="State\LobbyState.cs" />
     <Compile Include="State\PausedState.cs" />
     <Compile Include="State\RunningState.cs" />
     <Compile Include="Observer\IObserver.cs" />
