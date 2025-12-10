@@ -19,6 +19,12 @@ namespace BombermanMultiplayer
 
         [NonSerialized]
         private Image Background_;
+        [NonSerialized]
+        private static Tile SharedFloor;
+        [NonSerialized]
+        private static Tile SharedWall;
+        [NonSerialized]
+        private static Tile SharedDestructible; 
 
         /// <summary>
         /// Returns an iterator for traversing all tiles in the map grid
@@ -116,6 +122,8 @@ namespace BombermanMultiplayer
 
         /// <summary>
         /// Creates a grid of tiles for the world based on specified dimensions and tile properties.
+        /// Uses Flyweight pattern to share identical tile objects (floor, wall, destructible) 
+        /// and dramatically reduce memory usage while preserving all existing functionality.
         /// </summary>
         /// <param name="hebergeurWidth">The width of the world in pixels.</param>
         /// <param name="hebergeurHeight">The height of the world in pixels.</param>
@@ -132,45 +140,61 @@ namespace BombermanMultiplayer
             Random r = new Random();
             int rand = 0;
             MapGrid = new Tile[hebergeurWidth / tileWidth, hebergeurHeight / tileHeight];
-
             int rows = MapGrid.GetLength(0);
             int cols = MapGrid.GetLength(1);
+
+            SharedFloor = new Tile(0, 0, totalFrameTile, tileWidth, tileHeight, walkable: true,  destroyable: false);
+            SharedWall = new Tile(0, 0, totalFrameTile, tileWidth, tileHeight, walkable: false, destroyable: false);
+            SharedDestructible = new Tile(0, 0, totalFrameTile, tileWidth, tileHeight, walkable: false, destroyable: true);
 
             for (int i = 0; i < rows; i++) // Row
             {
                 for (int j = 0; j < cols; j++) // Column
                 {
-                    rand = r.Next(0, 10);
+                    int x = j * tileWidth;
+                    int y = i * tileHeight;
+
+                    Tile tileToUse;
 
                     if (j == 0 || j == cols - 1 || i == 0 || i == rows - 1)
                     {
-                        MapGrid[i, j] = new Tile(j * tileWidth, i * tileHeight, totalFrameTile, tileWidth, tileHeight, false, false);
+                        tileToUse = SharedWall;
+                    }
+                    else if (i % 2 == 0 && j % 2 == 0)
+                    {
+                        tileToUse = SharedWall;
                     }
                     else
                     {
-                        if (i % 2 == 0 && j % 2 == 0)
+                        bool isPlayerSpawn = 
+                            (i == 1 && (j == 1 || j == 2)) ||
+                            (i == 2 && j == 1) ||
+                            (i == rows - 3 && j == cols - 2) ||
+                            (i == rows - 2 && (j == cols - 2 || j == cols - 3));
+
+                        if (isPlayerSpawn)
                         {
-                            MapGrid[i, j] = new Tile(j * tileWidth, i * tileHeight, totalFrameTile, tileWidth, tileHeight, false, false);
+                            tileToUse = SharedFloor;
                         }
                         else
                         {
-                            if ((i == 1 && (j == 1 || j == 2))
-                                || (i == 2 && j == 1)
-                                || (i == rows - 3 && j == cols - 2)
-                                || (i == rows - 2 && (j == cols - 2 || j == cols - 3)))
+                            rand = r.Next(0, 10);
+                            if (rand >= 1)
                             {
-                                MapGrid[i, j] = new Tile(j * tileWidth, i * tileHeight, totalFrameTile, tileWidth, tileHeight, true, false);
-                            }
-                            else if (rand >= 1)
-                            {
-                                MapGrid[i, j] = new Tile(j * tileWidth, i * tileHeight, totalFrameTile, tileWidth, tileHeight, false, true);
+                                tileToUse = SharedDestructible;
                             }
                             else
                             {
-                                MapGrid[i, j] = new Tile(j * tileWidth, i * tileHeight, totalFrameTile, tileWidth, tileHeight, true, false);
+                                tileToUse = SharedFloor;
                             }
                         }
                     }
+
+                    Tile instance = (Tile)tileToUse.DeepClone();
+                    instance.Source = new Rectangle(x, y, tileWidth, tileHeight);
+                    instance.CasePosition = new int[] { i, j };
+
+                    MapGrid[i, j] = instance;
                 }
             }
 

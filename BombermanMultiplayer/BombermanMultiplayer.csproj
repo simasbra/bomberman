@@ -74,6 +74,8 @@
     <Compile Include="Factory\HealthBonusFactory.cs" />
     <Compile Include="Factory\PowerBonusFactory.cs" />
     <Compile Include="Factory\SpeedBonusFactory.cs" />
+    <Compile Include="Flyweight\TileContext.cs" />
+    <Compile Include="Flyweight\TileFlyweightFactory.cs" />
     <Compile Include="Iterator\BombIterator.cs" />
     <Compile Include="Iterator\IIterator.cs" />
     <Compile Include="Iterator\PlayerIterator.cs" />
@@ -243,7 +245,6 @@
     <Content Include="Sprites\Grenade.png" />
     <Content Include="Sprites\mine.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

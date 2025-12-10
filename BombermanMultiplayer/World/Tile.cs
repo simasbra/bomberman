@@ -29,12 +29,6 @@ namespace BombermanMultiplayer
 
         public int FireTime = 500; 
 
-        #region Accessors
-
-
-        #endregion
-
-
         public Tile(int x_, int y_, int totalFrame_, int frameWidth_, int frameHeigt_,  bool walkable, bool destroyable)
             : base(x_, y_, totalFrame_, frameWidth_, frameHeigt_)
         {
@@ -51,23 +45,19 @@ namespace BombermanMultiplayer
             // Use factories instead of direct instantiation
             if (num == 0)
             {
-                baseBonus = new PowerBonusFactory().CreateBonus(
-                    this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height);
+                baseBonus = new PowerBonusFactory().CreateBonus(Source.X, Source.Y, 1, Source.Width, Source.Height);
             }
             else if (num == 1)
             {
-                baseBonus = new SpeedBonusFactory().CreateBonus(
-                    this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height);
+                baseBonus = new SpeedBonusFactory().CreateBonus(Source.X, Source.Y, 1, Source.Width, Source.Height);
             }
             else if (num == 2)
             {
-                baseBonus = new DefuseBonusFactory().CreateBonus(
-                    this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height);
+                baseBonus = new DefuseBonusFactory().CreateBonus(Source.X, Source.Y, 1, Source.Width, Source.Height);
             }
             else if (num == 3)
             {
-                baseBonus = new HealthBonusFactory().CreateBonus(
-                    this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height);
+                baseBonus = new HealthBonusFactory().CreateBonus(Source.X, Source.Y, 1, Source.Width, Source.Height);
             }
 
             if (baseBonus != null)
@@ -77,48 +67,49 @@ namespace BombermanMultiplayer
                 if (decoratorChance < 50)
                 {
                     // 50% - plain bonus
-                    this.BonusHere = baseBonus;
+                    BonusHere = baseBonus;
                 }
                 else if (decoratorChance < 80)
                 {
                     // 30% - one decorator
-                    this.BonusHere = new MultiplierDecorator(baseBonus, 1.5);
+                    BonusHere = new MultiplierDecorator(baseBonus, 1.5);
                 }
                 else if (decoratorChance < 95)
                 {
                     // 15% - two decorators
                     Bonus decorated = new MultiplierDecorator(baseBonus, 2.0);
-                    this.BonusHere = new DurationDecorator(decorated, 3000);
+                    BonusHere = new DurationDecorator(decorated, 3000);
                 }
                 else
                 {
                     // 5% - three decorators (golden!)
                     Bonus decorated = new MultiplierDecorator(baseBonus, 2.5);
                     decorated = new DurationDecorator(decorated, 5000);
-                    this.BonusHere = new GlowEffectDecorator(decorated, "Golden", 90);
+                    BonusHere = new GlowEffectDecorator(decorated, "Golden", 90);
                 }
 
                 // Load correct sprite based on original type
                 switch (num)
                 {
                     case 0:
-                        this.BonusHere.LoadSprite(Properties.Resources.SuperBomb);
+                        BonusHere.LoadSprite(Properties.Resources.SuperBomb);
                         break;
                     case 1:
-                        this.BonusHere.LoadSprite(Properties.Resources.SpeedUp);
+                        BonusHere.LoadSprite(Properties.Resources.SpeedUp);
                         break;
                     case 2:
-                        this.BonusHere.LoadSprite(Properties.Resources.Deactivate);
+                        BonusHere.LoadSprite(Properties.Resources.Deactivate);
                         break;
                     case 3:
-                        this.BonusHere.LoadSprite(Properties.Resources.Armor);
+                        BonusHere.LoadSprite(Properties.Resources.Armor);
                         break;
                 }
 
-                this.BonusHere.CheckCasePosition(this.Source.Width, this.Source.Height);
-                System.Diagnostics.Debug.WriteLine($"Spawned bonus: {this.BonusHere.GetDescription()}");
+                BonusHere.CheckCasePosition(Source.Width, Source.Height);
+                System.Diagnostics.Debug.WriteLine($"Spawned bonus: {BonusHere.GetDescription()}");
             }
         }
+
         //public void SpawnBonus()
         //{
         //    Random r = new Random((int)DateTime.Now.Ticks);
@@ -207,21 +198,15 @@ namespace BombermanMultiplayer
 
         public new void Draw(Graphics gr)
         {
-            if (this.Sprite != null)
+            if (Sprite != null)
             {
-                gr.DrawImage(this.Sprite, Source, frameindex * Source.Width, 0, Source.Width, Source.Height, GraphicsUnit.Pixel);
-                gr.DrawRectangle(Pens.Red, this.Source);
-               
+                gr.DrawImage(Sprite, Source, frameindex * Source.Width, 0, Source.Width, Source.Height, GraphicsUnit.Pixel);
+                gr.DrawRectangle(Pens.Red, Source);
             }
             if (BonusHere != null)
             {
-                this.BonusHere.Draw(gr);
-
+                BonusHere.Draw(gr);
             }
         }
-
     }
-
-    
-
 }
