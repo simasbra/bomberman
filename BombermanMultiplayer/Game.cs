@@ -46,7 +46,7 @@ namespace BombermanMultiplayer
 
         // Observer pattern - GameState for notifications
         private GameState gameState;
-        private bool[] previousDeathStates = new bool[4]; // Track previous death states to detect changes
+        public bool[] previousDeathStates = new bool[4]; // Track previous death states to detect changes
 
         // Event for restart notification (so UI can reload sprites)
         public event Action OnRestartRequested;
