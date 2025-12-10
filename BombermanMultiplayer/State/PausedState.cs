@@ -1,64 +1,44 @@
-﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace BombermanMultiplayer.State
 {
-	/// <summary>
-	/// State Pattern - Concrete State: Paused
-	/// </summary>
-	public sealed class PausedState : IGameState
-	{
-		private static readonly PausedState _instance = new PausedState();
-		public static PausedState Instance => _instance;
+    public class PausedState : IGameState
+    {
+        public void Enter(Game game)
+        {
+            game.Paused = true;
+            game.LogicTimer.Stop();
+        }
 
-		private PausedState() { }
+        public void Exit(Game game)
+        {
+            // Resume when leaving paused state
+            game.Paused = false;
+        }
 
-		public string StateName => "Paused";
+        public void HandleInput(Keys key, Game game)
+        {
+            if (key == Keys.Escape)
+            {
+                game.SetState(new RunningState());
+            }
+        }
 
-		public void Enter(Game game)
-		{
-			Console.WriteLine("[PausedState] Entered - Game paused");
-			game.LogicTimer.Stop();
-			game.Paused = true;
-		}
+        public void HandleKeyUp(Keys key, Game game)
+        {
+            // No movement while paused
+        }
 
-		public void Exit(Game game)
-		{
-			Console.WriteLine("[PausedState] Exiting...");
-			game.Paused = false;
-		}
+        public void Update(Game game)
+        {
+            // No game logic while paused
+        }
 
-		public void HandleInput(Keys key, Game game)
-		{
-			switch (key)
-			{
-				case Keys.Escape:
-				case Keys.P:
-					game.ChangeState(PlayingState.Instance);
-					break;
-				case Keys.F5:
-					game.SaveGame("quicksave.bmb");
-					break;
-				case Keys.F9:
-					game.LoadGame("quicksave.bmb");
-					break;
-			}
-		}
-
-		public void HandleKeyUp(Keys key, Game game)
-		{
-			// No key up handling while paused
-		}
-
-		public void Update(Game game)
-		{
-			// No updates while paused
-		}
-
-		public void TogglePause(Game game)
-		{
-			// Resume game
-			game.ChangeState(PlayingState.Instance);
-		}
-	}
+        public void TogglePause(Game game)
+        {
+            // Paused state → Running state
+            game.SetState(new RunningState());
+        }
+    }
 }

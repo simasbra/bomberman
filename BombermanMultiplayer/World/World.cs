@@ -207,5 +207,27 @@ namespace BombermanMultiplayer
             MapGrid[rows - 3, cols - 2].Walkable = true;
             MapGrid[rows - 3, cols - 2].Destroyable = false;
         }
+
+        /// <summary>
+        /// Regenerate the map with new random destructible blocks
+        /// Note: Sprites must be reloaded after this by calling loadSpriteTile()
+        /// </summary>
+        public void RegenerateMap()
+        {
+            if (MapGrid == null || MapGrid.Length == 0)
+                return;
+
+            int rows = MapGrid.GetLength(0);
+            int cols = MapGrid.GetLength(1);
+            int tileWidth = MapGrid[0, 0].Source.Width;
+            int tileHeight = MapGrid[0, 0].Source.Height;
+
+            // Regenerate the grid with new random destructible blocks
+            CreateWorldGrid(cols * tileWidth, rows * tileHeight, tileWidth, tileHeight, 1);
+        }
+
+
+
+
     }
 }

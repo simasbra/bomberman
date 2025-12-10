@@ -20,6 +20,7 @@ namespace BombermanMultiplayer.Commands
 
         public DateTime Timestamp => _timestamp;
         public byte PlayerNumber => _player.PlayerNumero;
+        public Player.MovementDirection Direction => _direction;
 
         public MovePlayerCommand(Player player, Player.MovementDirection direction, Bitmap sprite = null)
         {

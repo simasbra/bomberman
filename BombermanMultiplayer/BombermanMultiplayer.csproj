@@ -56,6 +56,12 @@
     <Compile Include="Builder\RedPlayerBuilder.cs" />
     <Compile Include="Builder\BluePlayerBuilder.cs" />
     <Compile Include="Builder\Director.cs" />
+    <Compile Include="ChainOfResponsibility\ValidationHandler.cs" />
+    <Compile Include="ChainOfResponsibility\PlayerStateValidator.cs" />
+    <Compile Include="ChainOfResponsibility\MovementValidator.cs" />
+    <Compile Include="ChainOfResponsibility\ResourceValidator.cs" />
+    <Compile Include="ChainOfResponsibility\TileValidator.cs" />
+    <Compile Include="ChainOfResponsibility\CooldownValidator.cs" />
     <Compile Include="Commands\DropBombCommand.cs" />
     <Compile Include="Commands\DropGrenadeCommand.cs" />
     <Compile Include="Commands\DropMineCommand.cs" />
@@ -74,6 +80,13 @@
     <Compile Include="Factory\HealthBonusFactory.cs" />
     <Compile Include="Factory\PowerBonusFactory.cs" />
     <Compile Include="Factory\SpeedBonusFactory.cs" />
+    <Compile Include="Memento\GameMemento.cs" />
+    <Compile Include="Memento\GameCaretaker.cs" />
+    <Compile Include="State\CountdownState.cs" />
+    <Compile Include="State\GameOverState.cs" />
+    <Compile Include="State\IGameState.cs" />
+    <Compile Include="State\PausedState.cs" />
+    <Compile Include="State\RunningState.cs" />
     <Compile Include="Iterator\BombIterator.cs" />
     <Compile Include="Iterator\IIterator.cs" />
     <Compile Include="Iterator\PlayerIterator.cs" />
