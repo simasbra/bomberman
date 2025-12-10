@@ -52,10 +52,19 @@ namespace BombermanMultiplayer
         public event Action OnRestartRequested;
 
         /// <summary>
-        /// Change game state and call Enter hook.
+        /// Raise the OnRestartRequested event - called by states when game restarts.
+        /// </summary>
+        public void RaiseRestartRequested()
+        {
+            OnRestartRequested?.Invoke();
+        }
+
+        /// <summary>
+        /// Change game state - calls Exit() on old state, then Enter() on new state.
         /// </summary>
         public void SetState(IGameState newState)
         {
+            _currentState?.Exit(this);
             _currentState = newState;
             _currentState?.Enter(this);
         }
@@ -1087,18 +1096,9 @@ namespace BombermanMultiplayer
 
         public void Pause()
         {
-            //If the game is already over, no need for pause
-            if (!Over)
-            {
-                if (_currentState is PausedState)
-                {
-                    SetState(new RunningState());
-                }
-                else
-                {
-                    SetState(new PausedState());
-                }
-            }
+            // Delegate pause toggle to current state
+            // Each state decides if it can be paused (RunningState yes, others no)
+            _currentState?.TogglePause(this);
         }
     }
 }
