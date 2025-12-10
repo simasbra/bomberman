@@ -10,6 +10,7 @@ using System.Drawing.Drawing2D;
 using System.Media;
 using System.Text;
 using System.Windows.Forms;
+using BombermanMultiplayer.Factory;
 
 namespace BombermanMultiplayer
 {
@@ -47,70 +48,74 @@ namespace BombermanMultiplayer
             int num = r.Next(0, 4);
             Bonus baseBonus = null;
 
+            // Use factories instead of direct instantiation
             if (num == 0)
             {
-                baseBonus = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.PowerBomb);
+                baseBonus = new PowerBonusFactory().CreateBonus(
+                    this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height);
             }
             else if (num == 1)
             {
-                baseBonus = new SpeedBonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, speedMultiplier: 1.5, duration: 5000);
+                baseBonus = new SpeedBonusFactory().CreateBonus(
+                    this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height);
             }
             else if (num == 2)
             {
-                baseBonus = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.Desamorce);
+                baseBonus = new DefuseBonusFactory().CreateBonus(
+                    this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height);
             }
             else if (num == 3)
             {
-                baseBonus = new Bonus(this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height, BonusType.Armor);
+                baseBonus = new HealthBonusFactory().CreateBonus(
+                    this.Source.X, this.Source.Y, 1, this.Source.Width, this.Source.Height);
             }
 
             if (baseBonus != null)
             {
-                // TEST
-                //Bonus decorated = new MultiplierDecorator(baseBonus, 2.5);
-                //decorated = new DurationDecorator(decorated, 5000);
-                //this.BonusHere = new GlowEffectDecorator(decorated, "Golden", 90);
-
-                //System.Diagnostics.Debug.WriteLine($"TESTING: Created fully decorated bonus: {this.BonusHere.GetDescription()}");
-                // TEST
-                // PROD
+                // PROD: Random decorator application (unchanged logic)
                 int decoratorChance = r.Next(0, 100);
-
                 if (decoratorChance < 50)
                 {
-                    // 50% - paprastas bonus be dekoratorių
+                    // 50% - plain bonus
                     this.BonusHere = baseBonus;
                 }
                 else if (decoratorChance < 80)
                 {
-                    // 30% - bonus su 1 dekoratoriumi
+                    // 30% - one decorator
                     this.BonusHere = new MultiplierDecorator(baseBonus, 1.5);
                 }
                 else if (decoratorChance < 95)
                 {
-                    // 15% - bonus su 2 dekoratoriais
+                    // 15% - two decorators
                     Bonus decorated = new MultiplierDecorator(baseBonus, 2.0);
                     this.BonusHere = new DurationDecorator(decorated, 3000);
                 }
                 else
                 {
-                    // 5% - bonus su 3 dekoratoriais
+                    // 5% - three decorators (golden!)
                     Bonus decorated = new MultiplierDecorator(baseBonus, 2.5);
                     decorated = new DurationDecorator(decorated, 5000);
                     this.BonusHere = new GlowEffectDecorator(decorated, "Golden", 90);
                 }
-                // PROD
-                if (num == 0)
-                    this.BonusHere.LoadSprite(Properties.Resources.SuperBomb);
-                else if (num == 1)
-                    this.BonusHere.LoadSprite(Properties.Resources.SpeedUp);
-                else if (num == 2)
-                    this.BonusHere.LoadSprite(Properties.Resources.Deactivate);
-                else if (num == 3)
-                    this.BonusHere.LoadSprite(Properties.Resources.Armor);
+
+                // Load correct sprite based on original type
+                switch (num)
+                {
+                    case 0:
+                        this.BonusHere.LoadSprite(Properties.Resources.SuperBomb);
+                        break;
+                    case 1:
+                        this.BonusHere.LoadSprite(Properties.Resources.SpeedUp);
+                        break;
+                    case 2:
+                        this.BonusHere.LoadSprite(Properties.Resources.Deactivate);
+                        break;
+                    case 3:
+                        this.BonusHere.LoadSprite(Properties.Resources.Armor);
+                        break;
+                }
 
                 this.BonusHere.CheckCasePosition(this.Source.Width, this.Source.Height);
-
                 System.Diagnostics.Debug.WriteLine($"Spawned bonus: {this.BonusHere.GetDescription()}");
             }
         }
