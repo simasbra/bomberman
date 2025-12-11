@@ -1,14 +1,19 @@
 // filepath: BombermanMultiplayer/Objects/Mine.cs
 using System;
+using System.Drawing;
+using BombermanMultiplayer.Composite;
+using BombermanMultiplayer.Visitor;
 
 namespace BombermanMultiplayer
 {
     /// <summary>
     /// Base class for mine explosives
     /// Mines activate when player steps on them
+    /// Implements IExplosive for Composite pattern
+    /// Implements IVisitable for Visitor pattern
     /// </summary>
     [Serializable]
-    public abstract class Mine : GameObject, IDisposable
+    public abstract class Mine : GameObject, IDisposable, IExplosive, IVisitable
     {
         public int ActivationTime { get; set; } = 1000;
         public bool IsActivated { get; set; } = false;
@@ -195,6 +200,74 @@ namespace BombermanMultiplayer
             Sprite = null;
             GC.SuppressFinalize(this);
         }
+
+        #region IExplosive Implementation (Composite Pattern)
+
+        /// <summary>
+        /// Updates the mine's state (IExplosive interface)
+        /// </summary>
+        /// <param name="elapsedTime">Time elapsed since last update</param>
+        /// <param name="mapGrid">The game map grid</param>
+        /// <param name="players">Array of players</param>
+        public void Update(int elapsedTime, Tile[,] mapGrid, Player[] players)
+        {
+            if (players != null)
+            {
+                CheckProximity(players);
+            }
+            UpdateFrame(elapsedTime);
+            TimingExplosion(elapsedTime);
+        }
+
+        /// <summary>
+        /// Triggers the explosion (IExplosive interface)
+        /// </summary>
+        /// <param name="mapGrid">The game map grid</param>
+        /// <param name="players">Array of players</param>
+        public void Explode(Tile[,] mapGrid, Player[] players)
+        {
+            if (Exploding && mapGrid != null && players != null)
+            {
+                Explosion(mapGrid, players);
+            }
+        }
+
+        /// <summary>
+        /// Checks if the mine is exploding (IExplosive interface)
+        /// </summary>
+        /// <returns>True if exploding</returns>
+        bool IExplosive.IsExploding()
+        {
+            return Exploding;
+        }
+
+        /// <summary>
+        /// Gets the position of the mine (IExplosive interface)
+        /// </summary>
+        /// <returns>Point representing the position</returns>
+        public Point GetPosition()
+        {
+            if (CasePosition != null && CasePosition.Length >= 2)
+            {
+                return new Point(CasePosition[1], CasePosition[0]);
+            }
+            return new Point(0, 0);
+        }
+
+        #endregion
+
+        #region IVisitable Implementation (Visitor Pattern)
+
+        /// <summary>
+        /// Accepts a visitor (Visitor pattern)
+        /// </summary>
+        /// <param name="visitor">The visitor to accept</param>
+        public void Accept(IGameObjectVisitor visitor)
+        {
+            visitor?.VisitMine(this);
+        }
+
+        #endregion
     }
 
     [Serializable]

@@ -61,7 +61,6 @@
     <Compile Include="Commands\DropMineCommand.cs" />
     <Compile Include="Commands\Interface\ICommand.cs" />
     <Compile Include="Commands\MovePlayerCommand.cs" />
-    <Compile Include="Composite\ExplosiveAdapter.cs" />
     <Compile Include="Composite\ExplosiveGroup.cs" />
     <Compile Include="Composite\IExplosive.cs" />
     <Compile Include="Decoratorrr\BonusDecorator.cs" />

@@ -12,11 +12,12 @@ using System.Collections;
 using BombermanMultiplayer.Objects;
 using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
 using BombermanMultiplayer.Strategy;
+using BombermanMultiplayer.Visitor;
 
 namespace BombermanMultiplayer
 {
     [Serializable]
-    public class Player : GameObject
+    public class Player : GameObject, IVisitable
     {
         public byte PlayerNumero;
         public string Name = "Player";
@@ -514,6 +515,19 @@ namespace BombermanMultiplayer
                 return new ArmorEffectStrategy();
 
             return null;
+        }
+
+        #endregion
+
+        #region IVisitable Implementation (Visitor Pattern)
+
+        /// <summary>
+        /// Accepts a visitor (Visitor pattern)
+        /// </summary>
+        /// <param name="visitor">The visitor to accept</param>
+        public void Accept(IGameObjectVisitor visitor)
+        {
+            visitor?.VisitPlayer(this);
         }
 
         #endregion

@@ -8,15 +8,19 @@ using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Media;
 using System.Diagnostics;
+using BombermanMultiplayer.Composite;
+using BombermanMultiplayer.Visitor;
 
 namespace BombermanMultiplayer
 {
     /// <summary>
     /// Abstract base class for all bomb types
     /// Part of Abstract Factory pattern for creating explosive families
+    /// Implements IExplosive for Composite pattern
+    /// Implements IVisitable for Visitor pattern
     /// </summary>
     [Serializable]
-    public abstract class Bomb : GameObject, IDisposable
+    public abstract class Bomb : GameObject, IDisposable, IExplosive, IVisitable
     {
 
         private int _DetonationTime = 2000;
@@ -81,6 +85,70 @@ namespace BombermanMultiplayer
             }
             DetonationTime -= elsapedTime;
         }
+
+        #region IExplosive Implementation (Composite Pattern)
+
+        /// <summary>
+        /// Updates the bomb's state (IExplosive interface)
+        /// </summary>
+        /// <param name="elapsedTime">Time elapsed since last update</param>
+        /// <param name="mapGrid">The game map grid</param>
+        /// <param name="players">Array of players</param>
+        public void Update(int elapsedTime, Tile[,] mapGrid, Player[] players)
+        {
+            UpdateFrame(elapsedTime);
+            TimingExplosion(elapsedTime);
+        }
+
+        /// <summary>
+        /// Triggers the explosion (IExplosive interface)
+        /// </summary>
+        /// <param name="mapGrid">The game map grid</param>
+        /// <param name="players">Array of players</param>
+        public void Explode(Tile[,] mapGrid, Player[] players)
+        {
+            if (Exploding && mapGrid != null && players != null)
+            {
+                Explosion(mapGrid, players);
+            }
+        }
+
+        /// <summary>
+        /// Checks if the bomb is exploding (IExplosive interface)
+        /// </summary>
+        /// <returns>True if exploding</returns>
+        bool IExplosive.IsExploding()
+        {
+            return Exploding;
+        }
+
+        /// <summary>
+        /// Gets the position of the bomb (IExplosive interface)
+        /// </summary>
+        /// <returns>Point representing the position</returns>
+        public Point GetPosition()
+        {
+            if (CasePosition != null && CasePosition.Length >= 2)
+            {
+                return new Point(CasePosition[1], CasePosition[0]);
+            }
+            return new Point(0, 0);
+        }
+
+        #endregion
+
+        #region IVisitable Implementation (Visitor Pattern)
+
+        /// <summary>
+        /// Accepts a visitor (Visitor pattern)
+        /// </summary>
+        /// <param name="visitor">The visitor to accept</param>
+        public void Accept(IGameObjectVisitor visitor)
+        {
+            visitor?.VisitBomb(this);
+        }
+
+        #endregion
 
         public void Explosion(Tile[,] MapGrid, Player[] players)
         {

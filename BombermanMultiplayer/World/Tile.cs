@@ -1,5 +1,6 @@
 ﻿using BombermanMultiplayer.Decoratorrr;
 using BombermanMultiplayer.Objects;
+using BombermanMultiplayer.Visitor;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,7 +16,7 @@ using BombermanMultiplayer.Factory;
 namespace BombermanMultiplayer
 {
     [Serializable]
-    public class Tile : GameObject
+    public class Tile : GameObject, IVisitable
     {
         public bool Walkable = false;
         public bool Destroyable = false;
@@ -208,5 +209,18 @@ namespace BombermanMultiplayer
                 BonusHere.Draw(gr);
             }
         }
+
+        #region IVisitable Implementation (Visitor Pattern)
+
+        /// <summary>
+        /// Accepts a visitor (Visitor pattern)
+        /// </summary>
+        /// <param name="visitor">The visitor to accept</param>
+        public void Accept(IGameObjectVisitor visitor)
+        {
+            visitor?.VisitTile(this);
+        }
+
+        #endregion
     }
 }

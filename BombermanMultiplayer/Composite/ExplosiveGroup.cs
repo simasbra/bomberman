@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using BombermanMultiplayer.Objects;
 
 namespace BombermanMultiplayer.Composite
 {
@@ -76,14 +77,16 @@ namespace BombermanMultiplayer.Composite
         /// Updates all explosives in the group
         /// </summary>
         /// <param name="elapsedTime">Time elapsed since last update in milliseconds</param>
-        public void Update(int elapsedTime)
+        /// <param name="mapGrid">The game map grid</param>
+        /// <param name="players">Array of players in the game</param>
+        public void Update(int elapsedTime, Tile[,] mapGrid, Player[] players)
         {
             // Update all explosives in the group
             for (int i = explosives.Count - 1; i >= 0; i--)
             {
                 if (explosives[i] != null)
                 {
-                    explosives[i].Update(elapsedTime);
+                    explosives[i].Update(elapsedTime, mapGrid, players);
                 }
             }
         }
@@ -91,13 +94,15 @@ namespace BombermanMultiplayer.Composite
         /// <summary>
         /// Triggers explosion for all explosives in the group
         /// </summary>
-        public void Explode()
+        /// <param name="mapGrid">The game map grid</param>
+        /// <param name="players">Array of players in the game</param>
+        public void Explode(Tile[,] mapGrid, Player[] players)
         {
             foreach (var explosive in explosives)
             {
                 if (explosive != null)
                 {
-                    explosive.Explode();
+                    explosive.Explode(mapGrid, players);
                 }
             }
         }

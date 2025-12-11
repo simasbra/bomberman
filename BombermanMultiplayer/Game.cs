@@ -6,6 +6,8 @@ using BombermanMultiplayer.Objects;
 using BombermanMultiplayer.State;
 using BombermanMultiplayer.Strategy;
 using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
+using BombermanMultiplayer.Visitor;
+using BombermanMultiplayer.Composite;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -34,6 +36,12 @@ namespace BombermanMultiplayer
         public List<Bomb> BombsOnTheMap;
         public List<Mine> MinesOnTheMap;
         public List<Grenade> GrenadesOnTheMap;
+
+        // Visitor Pattern - UpdateVisitor for unified game object updates
+        private UpdateVisitor updateVisitor;
+
+        // Composite Pattern - Explosive groups
+        private List<ExplosiveGroup> explosiveGroups;
 
         /// <summary>
         /// Returns an iterator for the collection of bombs in the game.
@@ -109,6 +117,12 @@ namespace BombermanMultiplayer
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
 
+            // Initialize Visitor Pattern
+            this.updateVisitor = new UpdateVisitor((int)LogicTimer.Interval, this.world, this.players);
+
+            // Initialize Composite Pattern
+            this.explosiveGroups = new List<ExplosiveGroup>();
+
             // Initialize death state tracking
             for (int i = 0; i < 4; i++)
             {
@@ -144,6 +158,12 @@ namespace BombermanMultiplayer
             this.LogicTimer = new System.Timers.Timer(40);
             this.LogicTimer.Elapsed += LogicTimer_Elapsed;
 
+            // Initialize Visitor Pattern
+            this.updateVisitor = new UpdateVisitor((int)LogicTimer.Interval, this.world, this.players);
+
+            // Initialize Composite Pattern
+            this.explosiveGroups = new List<ExplosiveGroup>();
+
             // Initialize death state tracking
             for (int i = 0; i < 4; i++)
             {
@@ -167,9 +187,15 @@ namespace BombermanMultiplayer
             {
                 previousDeathStates[i] = false;
             }
-            _currentState = PlayingState.Instance;
-            _currentState.Enter(this);
-        }
+			_currentState = PlayingState.Instance;
+			_currentState.Enter(this);
+
+            // Initialize Visitor Pattern
+            this.updateVisitor = new UpdateVisitor((int)LogicTimer.Interval, this.world, this.players);
+
+            // Initialize Composite Pattern
+            this.explosiveGroups = new List<ExplosiveGroup>();
+		}
 
         /// <summary>
         /// Vykdyti komandą ir išsaugoti į istoriją
@@ -1014,15 +1040,104 @@ namespace BombermanMultiplayer
                 previousDeathStates[i] = players[i].Dead;
             }
 
+            // Update Visitor Pattern - unified update logic
+            updateVisitor.SetElapsedTime((int)LogicTimer.Interval);
+
             InteractionLogic();
             PlayersLogic();
-            BombsLogic();
-            MinesLogic();
-            GrenadesLogic();
+            
+            // Use Visitor Pattern for updating explosives (can replace BombsLogic, MinesLogic, GrenadesLogic)
+            UpdateExplosivesWithVisitor();
+            
+            // Keep old methods for backward compatibility, but Visitor pattern is now available
+            // BombsLogic();
+            // MinesLogic();
+            // GrenadesLogic();
+            
             GameOver();
 
             // Check if any player just died (after all logic processing)
             CheckForPlayerDeath();
+        }
+
+        /// <summary>
+        /// Updates all explosives using Visitor Pattern
+        /// </summary>
+        private void UpdateExplosivesWithVisitor()
+        {
+            // Update bombs using visitor
+            IIterator<Bomb> bombIterator = GetBombIterator();
+            List<Bomb> bombsToRemove = new List<Bomb>();
+            while (bombIterator.HasNext())
+            {
+                Bomb bomb = bombIterator.Next();
+                bomb.Accept(updateVisitor);
+                if (bomb.Exploding)
+                {
+                    bombsToRemove.Add(bomb);
+                }
+            }
+            foreach (var bomb in bombsToRemove)
+            {
+                BombsOnTheMap.Remove(bomb);
+            }
+
+            // Update mines using visitor
+            List<Mine> minesToRemove = new List<Mine>();
+            foreach (var mine in MinesOnTheMap)
+            {
+                mine.Accept(updateVisitor);
+                if (mine.Exploding)
+                {
+                    minesToRemove.Add(mine);
+                }
+            }
+            foreach (var mine in minesToRemove)
+            {
+                MinesOnTheMap.Remove(mine);
+            }
+
+            // Update grenades using visitor
+            List<Grenade> grenadesToRemove = new List<Grenade>();
+            foreach (var grenade in GrenadesOnTheMap)
+            {
+                grenade.Accept(updateVisitor);
+                if (grenade.Exploding)
+                {
+                    grenadesToRemove.Add(grenade);
+                }
+            }
+            foreach (var grenade in grenadesToRemove)
+            {
+                GrenadesOnTheMap.Remove(grenade);
+            }
+
+            // Update explosive groups (Composite Pattern)
+            foreach (var group in explosiveGroups)
+            {
+                group.Update((int)LogicTimer.Interval, world.MapGrid, players);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new explosive group (Composite Pattern)
+        /// </summary>
+        /// <param name="name">Name of the group</param>
+        /// <returns>The created ExplosiveGroup</returns>
+        public ExplosiveGroup CreateExplosiveGroup(string name)
+        {
+            var group = new ExplosiveGroup(name);
+            explosiveGroups.Add(group);
+            return group;
+        }
+
+        /// <summary>
+        /// Gets all explosive groups (Composite Pattern)
+        /// </summary>
+        /// <returns>List of explosive groups</returns>
+        public List<ExplosiveGroup> GetExplosiveGroups()
+        {
+            return new List<ExplosiveGroup>(explosiveGroups);
         }
 
         /// <summary>

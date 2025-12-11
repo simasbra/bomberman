@@ -1,4 +1,5 @@
 using System.Drawing;
+using BombermanMultiplayer.Objects;
 
 namespace BombermanMultiplayer.Composite
 {
@@ -12,12 +13,16 @@ namespace BombermanMultiplayer.Composite
         /// Updates the explosive's state
         /// </summary>
         /// <param name="elapsedTime">Time elapsed since last update in milliseconds</param>
-        void Update(int elapsedTime);
+        /// <param name="mapGrid">The game map grid</param>
+        /// <param name="players">Array of players in the game</param>
+        void Update(int elapsedTime, Tile[,] mapGrid, Player[] players);
 
         /// <summary>
         /// Triggers the explosion
         /// </summary>
-        void Explode();
+        /// <param name="mapGrid">The game map grid</param>
+        /// <param name="players">Array of players in the game</param>
+        void Explode(Tile[,] mapGrid, Player[] players);
 
         /// <summary>
         /// Checks if the explosive is currently exploding

@@ -104,9 +104,38 @@ namespace BombermanMultiplayer
             this._Source.Y = y;
         }
 
+        // Proxy Pattern - can use IImageLoader for sprite loading
+        private Proxy.IImageLoader imageLoader;
+
+        /// <summary>
+        /// Gets or sets the image loader (Proxy Pattern)
+        /// </summary>
+        public Proxy.IImageLoader ImageLoader
+        {
+            get { return imageLoader; }
+            set { imageLoader = value; }
+        }
+
         public void LoadSprite(Image sprite)
         {
             this.Sprite = sprite;
+        }
+
+        /// <summary>
+        /// Loads sprite using Proxy Pattern (if imageLoader is set)
+        /// </summary>
+        /// <param name="imagePath">Path to the image file</param>
+        public void LoadSpriteWithProxy(string imagePath)
+        {
+            if (imageLoader != null)
+            {
+                this.Sprite = imageLoader.LoadImage(imagePath);
+            }
+            else
+            {
+                // Fallback to direct loading if proxy not set
+                // Note: This is a simplified example - actual implementation would need proper image loading
+            }
         }
 
         public void UnloadSprite()
