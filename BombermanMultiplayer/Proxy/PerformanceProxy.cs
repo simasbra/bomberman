@@ -123,19 +123,18 @@ namespace BombermanMultiplayer.Proxy
         public string GetPerformanceReport()
         {
             StringBuilder report = new StringBuilder();
-            report.AppendLine("=== Image Loader Performance Report ===");
-            report.AppendLine($"Total Accesses: {accessCount}");
-            report.AppendLine($"Total Load Operations: {loadTimes.Count}");
+            report.AppendLine($"Total accesses: {accessCount}");
+            report.AppendLine($"Total load operations: {loadTimes.Count}");
             
             if (loadTimes.Count > 0)
             {
-                report.AppendLine($"Average Load Time: {GetAverageLoadTime().TotalMilliseconds:F2} ms");
-                report.AppendLine($"Min Load Time: {loadTimes.Min().TotalMilliseconds:F2} ms");
-                report.AppendLine($"Max Load Time: {loadTimes.Max().TotalMilliseconds:F2} ms");
+                report.AppendLine($"Average load time: {GetAverageLoadTime().TotalMilliseconds:F2} ms");
+                report.AppendLine($"Min load time: {loadTimes.Min().TotalMilliseconds:F2} ms");
+                report.AppendLine($"Max load time: {loadTimes.Max().TotalMilliseconds:F2} ms");
             }
             
-            report.AppendLine($"Total Memory Usage: {totalMemoryUsage / 1024.0:F2} KB");
-            report.AppendLine($"Average Memory per Load: {(loadTimes.Count > 0 ? (totalMemoryUsage / loadTimes.Count) / 1024.0 : 0):F2} KB");
+            report.AppendLine($"Total memory usage: {totalMemoryUsage / 1024.0:F2} KB");
+            report.AppendLine($"Average memory per load: {(loadTimes.Count > 0 ? (totalMemoryUsage / loadTimes.Count) / 1024.0 : 0):F2} KB");
             
             return report.ToString();
         }
