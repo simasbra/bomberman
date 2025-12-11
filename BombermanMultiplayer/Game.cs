@@ -39,6 +39,8 @@ namespace BombermanMultiplayer
 
         // Visitor Pattern - UpdateVisitor for unified game object updates
         private UpdateVisitor updateVisitor;
+        private StatisticsVisitor statisticsVisitor;
+        private SaveGameVisitor saveGameVisitor;
 
         // Composite Pattern - Explosive groups
         private List<ExplosiveGroup> explosiveGroups;
@@ -122,6 +124,8 @@ namespace BombermanMultiplayer
 
             // Initialize Visitor Pattern
             this.updateVisitor = new UpdateVisitor((int)LogicTimer.Interval, this.world, this.players);
+            this.statisticsVisitor = new Visitor.StatisticsVisitor();
+            this.saveGameVisitor = new Visitor.SaveGameVisitor();
 
             // Initialize Composite Pattern
             this.explosiveGroups = new List<ExplosiveGroup>();
@@ -166,6 +170,8 @@ namespace BombermanMultiplayer
 
             // Initialize Visitor Pattern
             this.updateVisitor = new UpdateVisitor((int)LogicTimer.Interval, this.world, this.players);
+            this.statisticsVisitor = new Visitor.StatisticsVisitor();
+            this.saveGameVisitor = new Visitor.SaveGameVisitor();
 
             // Initialize Composite Pattern
             this.explosiveGroups = new List<ExplosiveGroup>();
@@ -201,6 +207,8 @@ namespace BombermanMultiplayer
 
             // Initialize Visitor Pattern
             this.updateVisitor = new UpdateVisitor((int)LogicTimer.Interval, this.world, this.players);
+            this.statisticsVisitor = new Visitor.StatisticsVisitor();
+            this.saveGameVisitor = new Visitor.SaveGameVisitor();
 
             // Initialize Composite Pattern
             this.explosiveGroups = new List<ExplosiveGroup>();
@@ -214,8 +222,47 @@ namespace BombermanMultiplayer
         /// </summary>
         private void ExecuteCommand(ICommand command)
         {
+            // Track counts before execution to detect new objects
+            int bombsCountBefore = BombsOnTheMap.Count;
+            int minesCountBefore = MinesOnTheMap.Count;
+            int grenadesCountBefore = GrenadesOnTheMap.Count;
+
             command.Execute();
             CommandHistory.Add(command);
+
+            // Record statistics for newly created objects
+            if (statisticsVisitor != null)
+            {
+                // Check if a new bomb was added
+                if (BombsOnTheMap.Count > bombsCountBefore)
+                {
+                    var newBomb = BombsOnTheMap[BombsOnTheMap.Count - 1];
+                    if (newBomb != null)
+                    {
+                        newBomb.Accept(statisticsVisitor);
+                    }
+                }
+
+                // Check if a new mine was added
+                if (MinesOnTheMap.Count > minesCountBefore)
+                {
+                    var newMine = MinesOnTheMap[MinesOnTheMap.Count - 1];
+                    if (newMine != null)
+                    {
+                        newMine.Accept(statisticsVisitor);
+                    }
+                }
+
+                // Check if a new grenade was added
+                if (GrenadesOnTheMap.Count > grenadesCountBefore)
+                {
+                    var newGrenade = GrenadesOnTheMap[GrenadesOnTheMap.Count - 1];
+                    if (newGrenade != null)
+                    {
+                        newGrenade.Accept(statisticsVisitor);
+                    }
+                }
+            }
 
             // Riboti istorijos dydį (pvz. paskutiniai 1000 veiksmų)
             if (CommandHistory.Count > 1000)
@@ -525,6 +572,12 @@ namespace BombermanMultiplayer
                 // Ctrl+P - Show performance report (Proxy Pattern)
                 string report = GetPerformanceReport();
                 MessageBox.Show(report, "Performance Report", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            else if (key == Keys.G && (Control.ModifierKeys & Keys.Control) == Keys.Control)
+            {
+                string statistics = GetGameStatistics();
+                MessageBox.Show(statistics, "Game Statistics", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -1059,19 +1112,13 @@ namespace BombermanMultiplayer
                 previousDeathStates[i] = players[i].Dead;
             }
 
-            // Update Visitor Pattern - unified update logic
             updateVisitor.SetElapsedTime((int)LogicTimer.Interval);
+            updateVisitor.SetMapGrid(world.MapGrid);
+            updateVisitor.SetPlayers(players);
 
             InteractionLogic();
-            PlayersLogic();
-            
-            // Use Visitor Pattern for updating explosives (can replace BombsLogic, MinesLogic, GrenadesLogic)
+            UpdatePlayersWithVisitor();
             UpdateExplosivesWithVisitor();
-            
-            // Keep old methods for backward compatibility, but Visitor pattern is now available
-            // BombsLogic();
-            // MinesLogic();
-            // GrenadesLogic();
             
             GameOver();
 
@@ -1080,11 +1127,71 @@ namespace BombermanMultiplayer
         }
 
         /// <summary>
-        /// Updates all explosives using Visitor Pattern
+        /// Updates all players using visitor
+        /// </summary>
+        private void UpdatePlayersWithVisitor()
+        {
+            IIterator<Player> playerIterator = GetPlayerIterator();
+            while (playerIterator.HasNext())
+            {
+                Player player = playerIterator.Next();
+                if (player != null && !player.Dead)
+                {
+                    BonusLogic(player);
+                    player.Accept(updateVisitor);
+                }
+            }
+
+            // Second pass: Handle collision checking between players
+            playerIterator = GetPlayerIterator();
+            while (playerIterator.HasNext())
+            {
+                Player player = playerIterator.Next();
+                if (player != null && !player.Dead && player.Orientation != Player.MovementDirection.NONE)
+                {
+                    bool canMove = true;
+                    IIterator<Player> otherIterator = GetPlayerIterator();
+                    while (otherIterator.HasNext())
+                    {
+                        Player other = otherIterator.Next();
+                        if (player != other && other != null && !other.Dead)
+                        {
+                            if (!CheckCollisionPlayer(player, other, world.MapGrid, player.Orientation))
+                            {
+                                canMove = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!canMove)
+                    {
+                        // Reverse movement
+                        switch (player.Orientation)
+                        {
+                            case Player.MovementDirection.UP:
+                                player.Bouger(0, player.Vitesse);
+                                break;
+                            case Player.MovementDirection.DOWN:
+                                player.Bouger(0, -player.Vitesse);
+                                break;
+                            case Player.MovementDirection.LEFT:
+                                player.Bouger(player.Vitesse, 0);
+                                break;
+                            case Player.MovementDirection.RIGHT:
+                                player.Bouger(-player.Vitesse, 0);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates all explosives using visitor
         /// </summary>
         private void UpdateExplosivesWithVisitor()
         {
-            // Update bombs using visitor
             IIterator<Bomb> bombIterator = GetBombIterator();
             List<Bomb> bombsToRemove = new List<Bomb>();
             while (bombIterator.HasNext())
@@ -1101,7 +1208,6 @@ namespace BombermanMultiplayer
                 BombsOnTheMap.Remove(bomb);
             }
 
-            // Update mines using visitor
             List<Mine> minesToRemove = new List<Mine>();
             foreach (var mine in MinesOnTheMap)
             {
@@ -1116,7 +1222,6 @@ namespace BombermanMultiplayer
                 MinesOnTheMap.Remove(mine);
             }
 
-            // Update grenades using visitor
             List<Grenade> grenadesToRemove = new List<Grenade>();
             foreach (var grenade in GrenadesOnTheMap)
             {
@@ -1178,6 +1283,78 @@ namespace BombermanMultiplayer
         }
 
         /// <summary>
+        /// Gets game statistics
+        /// </summary>
+        /// <returns>Statistics report string</returns>
+        public string GetGameStatistics()
+        {
+            if (statisticsVisitor == null)
+            {
+                return "Statistics not available.";
+            }
+
+            statisticsVisitor.ResetCurrentState();
+            
+            foreach (var player in players)
+            {
+                if (player != null)
+                {
+                    player.Accept(statisticsVisitor);
+                }
+            }
+
+            // Visit all bombs
+            foreach (var bomb in BombsOnTheMap)
+            {
+                if (bomb != null)
+                {
+                    bomb.Accept(statisticsVisitor);
+                }
+            }
+
+            // Visit all mines (only new ones will be counted)
+            foreach (var mine in MinesOnTheMap)
+            {
+                if (mine != null)
+                {
+                    mine.Accept(statisticsVisitor);
+                }
+            }
+
+            // Visit all grenades (only new ones will be counted)
+            foreach (var grenade in GrenadesOnTheMap)
+            {
+                if (grenade != null)
+                {
+                    grenade.Accept(statisticsVisitor);
+                }
+            }
+
+            // Visit all tiles (only new destroyed tiles will be counted)
+            if (world != null && world.MapGrid != null)
+            {
+                for (int i = 0; i < world.MapGrid.GetLength(0); i++)
+                {
+                    for (int j = 0; j < world.MapGrid.GetLength(1); j++)
+                    {
+                        if (world.MapGrid[i, j] != null)
+                        {
+                            world.MapGrid[i, j].Accept(statisticsVisitor);
+                        }
+                    }
+                }
+            }
+
+            var stats = statisticsVisitor.GetStatistics();
+            return $"Game statistics:\n" +
+                   $"Players alive: {stats.PlayersAlive}\n" +
+                   $"Bombs placed: {stats.BombsPlaced}\n" +
+                   $"Mines placed: {stats.MinesPlaced}\n" +
+                   $"Grenades thrown: {stats.GrenadesThrown}\n" +
+                   $"Tiles destroyed: {stats.TilesDestroyed}";
+        }
+
+        /// <summary>
         /// Check if any player just died and trigger auto-save if so
         /// </summary>
         private void CheckForPlayerDeath()
@@ -1219,11 +1396,51 @@ namespace BombermanMultiplayer
 
         public void SaveGame(string fileName)
         {
+            saveGameVisitor.Reset();
+            saveGameVisitor.SetMapGrid(world.MapGrid);
+
+            foreach (var player in players)
+            {
+                if (player != null)
+                {
+                    player.Accept(saveGameVisitor);
+                }
+            }
+
+            // Visit all bombs
+            foreach (var bomb in BombsOnTheMap)
+            {
+                if (bomb != null)
+                {
+                    bomb.Accept(saveGameVisitor);
+                }
+            }
+
+            // Visit all mines
+            foreach (var mine in MinesOnTheMap)
+            {
+                if (mine != null)
+                {
+                    mine.Accept(saveGameVisitor);
+                }
+            }
+
+            // Visit all grenades
+            foreach (var grenade in GrenadesOnTheMap)
+            {
+                if (grenade != null)
+                {
+                    grenade.Accept(saveGameVisitor);
+                }
+            }
+
+            SaveGameData saveData = saveGameVisitor.GetSaveData();
+
             System.Runtime.Serialization.IFormatter formatter = new BinaryFormatter();
             System.IO.FileStream filestream = new System.IO.FileStream(fileName, System.IO.FileMode.Create);
             try
             {
-                formatter.Serialize(filestream, new SaveGameData(BombsOnTheMap, world.MapGrid, players));
+                formatter.Serialize(filestream, saveData);
             }
             catch (Exception ex)
             {

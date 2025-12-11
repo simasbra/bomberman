@@ -113,11 +113,21 @@ namespace BombermanMultiplayer
                 return;
             }
 
-            // Handle Ctrl+P for performance report
+            // Handle Ctrl+P for performance report (Proxy Pattern)
             if (e.KeyCode == Keys.P && (e.Control))
             {
                 e.Handled = true;
-                game.Game_KeyDown(e.KeyCode);
+                e.SuppressKeyPress = true;
+                MessageBox.Show(game.GetPerformanceReport(), "Performance Report", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // Handle Ctrl+G for game statistics (Visitor Pattern)
+            if (e.KeyCode == Keys.G && (e.Control))
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+                MessageBox.Show(game.GetGameStatistics(), "Game Statistics", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 

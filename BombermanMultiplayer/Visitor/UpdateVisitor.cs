@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using BombermanMultiplayer.Objects;
 
 namespace BombermanMultiplayer.Visitor
@@ -33,6 +34,27 @@ namespace BombermanMultiplayer.Visitor
         public void SetElapsedTime(int time)
         {
             this.elapsedTime = time;
+        }
+
+        /// <summary>
+        /// Sets the map grid for updates
+        /// </summary>
+        /// <param name="mapGrid">The map grid</param>
+        public void SetMapGrid(Tile[,] mapGrid)
+        {
+            if (world != null)
+            {
+                world.MapGrid = mapGrid;
+            }
+        }
+
+        /// <summary>
+        /// Sets the players array for updates
+        /// </summary>
+        /// <param name="players">Array of players</param>
+        public void SetPlayers(Player[] players)
+        {
+            this.players = players;
         }
 
         /// <summary>
