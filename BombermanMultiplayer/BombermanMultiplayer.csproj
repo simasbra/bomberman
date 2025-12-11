@@ -61,6 +61,9 @@
     <Compile Include="Commands\DropMineCommand.cs" />
     <Compile Include="Commands\Interface\ICommand.cs" />
     <Compile Include="Commands\MovePlayerCommand.cs" />
+    <Compile Include="Composite\ExplosiveAdapter.cs" />
+    <Compile Include="Composite\ExplosiveGroup.cs" />
+    <Compile Include="Composite\IExplosive.cs" />
     <Compile Include="Decoratorrr\BonusDecorator.cs" />
     <Compile Include="Decoratorrr\DurationDecorator.cs" />
     <Compile Include="Decoratorrr\GlowEffectDecorator.cs" />
@@ -118,6 +121,10 @@
     <Compile Include="Objects\PrototypeDemo.cs" />
     <Compile Include="Objects\RedPlayer.cs" />
     <Compile Include="Objects\SpeedBonus.cs" />
+    <Compile Include="Proxy\IImageLoader.cs" />
+    <Compile Include="Proxy\LazyImageProxy.cs" />
+    <Compile Include="Proxy\PerformanceProxy.cs" />
+    <Compile Include="Proxy\RealImageLoader.cs" />
     <Compile Include="SaveGameData.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameState.cs" />
@@ -153,6 +160,11 @@
     <Compile Include="Strategy\Interface\IBonusEffectStrategy.cs" />
     <Compile Include="Strategy\PowerBombEffectStrategy.cs" />
     <Compile Include="Strategy\SpeedBoostEffectStrategy.cs" />
+    <Compile Include="Visitor\IGameObjectVisitor.cs" />
+    <Compile Include="Visitor\IVisitable.cs" />
+    <Compile Include="Visitor\SaveGameVisitor.cs" />
+    <Compile Include="Visitor\StatisticsVisitor.cs" />
+    <Compile Include="Visitor\UpdateVisitor.cs" />
     <Compile Include="World\Tile.cs" />
     <Compile Include="World\World.cs" />
     <EmbeddedResource Include="GameWindow.resx">
