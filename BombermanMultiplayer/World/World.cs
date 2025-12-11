@@ -65,12 +65,16 @@ namespace BombermanMultiplayer
             Background = background;
         }
 
-        public void loadSpriteTile(Image spriteDestroyableTile, Image spriteUndestroyableTile)
+        public void loadSpriteTile(Image spriteDestroyableTile, Image spriteUndestroyableTile, Proxy.IImageLoader imageLoader = null)
         {
             for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
             {
                 for (int j = 0; j < MapGrid.GetLength(1); j++) //Colonne
                 {
+                    if (imageLoader != null)
+                    {
+                        MapGrid[i, j].ImageLoader = imageLoader;
+                    }
                     if (MapGrid[i, j].Destroyable)
                     {
                         MapGrid[i, j].LoadSprite(spriteDestroyableTile);

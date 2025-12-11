@@ -38,8 +38,19 @@ namespace BombermanMultiplayer
             saveGameObserver = new SaveGameDataObserver(gameState);
             game.SetGameState(gameState);
 
+            // Set PerformanceProxy on game objects for tracking (Proxy Pattern)
+            var perfProxy = game.GetPerformanceProxy();
+            
             game.world.loadBackground(Properties.Resources.World);
-            game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
+            game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible, perfProxy);
+
+            if (perfProxy != null)
+            {
+                foreach (var player in game.players)
+                {
+                    if (player != null) player.ImageLoader = perfProxy;
+                }
+            }
 
             // Inicializuojam visų žaidėjų pradines sprites
             if (game.players.Length > 0) game.players[0].LoadSprite(Properties.Resources.AT_DOWN);
@@ -96,6 +107,14 @@ namespace BombermanMultiplayer
 
 			// Handle Escape key explicitly to ensure it works even when controls have focus
 			if (e.KeyCode == Keys.Escape)
+            {
+                e.Handled = true;
+                game.Game_KeyDown(e.KeyCode);
+                return;
+            }
+
+            // Handle Ctrl+P for performance report
+            if (e.KeyCode == Keys.P && (e.Control))
             {
                 e.Handled = true;
                 game.Game_KeyDown(e.KeyCode);
@@ -179,8 +198,20 @@ namespace BombermanMultiplayer
                     try
                     {
                         game.LoadGame(dlg.FileName);
+                        
+                        // Set PerformanceProxy on game objects for tracking (Proxy Pattern)
+                        var perfProxy = game.GetPerformanceProxy();
+                        
                         game.world.loadBackground(Properties.Resources.World);
-                        game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
+                        game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible, perfProxy);
+
+                        if (perfProxy != null)
+                        {
+                            foreach (var player in game.players)
+                            {
+                                if (player != null) player.ImageLoader = perfProxy;
+                            }
+                        }
 
                         // Inicializuojam visų žaidėjų sprites po užkrovimo
                         if (game.players.Length > 0) game.players[0].LoadSprite(Properties.Resources.AT_DOWN);

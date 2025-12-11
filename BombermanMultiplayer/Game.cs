@@ -43,6 +43,9 @@ namespace BombermanMultiplayer
         // Composite Pattern - Explosive groups
         private List<ExplosiveGroup> explosiveGroups;
 
+        // Proxy Pattern - Performance monitoring for sprite loading
+        private Proxy.PerformanceProxy performanceProxy;
+
         /// <summary>
         /// Returns an iterator for the collection of bombs in the game.
         /// </summary>
@@ -123,6 +126,9 @@ namespace BombermanMultiplayer
             // Initialize Composite Pattern
             this.explosiveGroups = new List<ExplosiveGroup>();
 
+            // Initialize Proxy Pattern - Performance monitoring
+            this.performanceProxy = new Proxy.PerformanceProxy();
+
             // Initialize death state tracking
             for (int i = 0; i < 4; i++)
             {
@@ -164,6 +170,9 @@ namespace BombermanMultiplayer
             // Initialize Composite Pattern
             this.explosiveGroups = new List<ExplosiveGroup>();
 
+            // Initialize Proxy Pattern - Performance monitoring
+            this.performanceProxy = new Proxy.PerformanceProxy();
+
             // Initialize death state tracking
             for (int i = 0; i < 4; i++)
             {
@@ -195,6 +204,9 @@ namespace BombermanMultiplayer
 
             // Initialize Composite Pattern
             this.explosiveGroups = new List<ExplosiveGroup>();
+
+            // Initialize Proxy Pattern - Performance monitoring
+            this.performanceProxy = new Proxy.PerformanceProxy();
 		}
 
         /// <summary>
@@ -506,6 +518,13 @@ namespace BombermanMultiplayer
             else if (key == Keys.Escape)
             {
                 Pause();
+                return;
+            }
+            else if (key == Keys.P && (Control.ModifierKeys & Keys.Control) == Keys.Control)
+            {
+                // Ctrl+P - Show performance report (Proxy Pattern)
+                string report = GetPerformanceReport();
+                MessageBox.Show(report, "Performance Report", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -1138,6 +1157,24 @@ namespace BombermanMultiplayer
         public List<ExplosiveGroup> GetExplosiveGroups()
         {
             return new List<ExplosiveGroup>(explosiveGroups);
+        }
+
+        /// <summary>
+        /// Gets the performance proxy instance (Proxy Pattern)
+        /// </summary>
+        /// <returns>The PerformanceProxy instance</returns>
+        public Proxy.PerformanceProxy GetPerformanceProxy()
+        {
+            return performanceProxy;
+        }
+
+        /// <summary>
+        /// Gets the performance report (Proxy Pattern)
+        /// </summary>
+        /// <returns>Performance report string</returns>
+        public string GetPerformanceReport()
+        {
+            return performanceProxy?.GetPerformanceReport() ?? "Performance monitoring not available.";
         }
 
         /// <summary>

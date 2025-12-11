@@ -118,7 +118,23 @@ namespace BombermanMultiplayer
 
         public void LoadSprite(Image sprite)
         {
-            this.Sprite = sprite;
+            // Track sprite loading through proxy if available (Proxy Pattern)
+            if (ImageLoader != null && ImageLoader is Proxy.PerformanceProxy perfProxy && sprite != null)
+            {
+                // Measure load time for performance tracking
+                System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+
+                this.Sprite = sprite;
+
+                sw.Stop();
+
+                // Record the load operation - memory will be estimated from image dimensions
+                perfProxy.RecordLoadOperation(sw.Elapsed, sprite);
+            }
+            else
+            {
+                this.Sprite = sprite;
+            }
         }
 
         /// <summary>

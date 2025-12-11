@@ -16,12 +16,6 @@ namespace BombermanMultiplayer.Proxy
         private RealImageLoader realLoader;
         private List<TimeSpan> loadTimes;
         private long totalMemoryUsage;
-        private int accessCount;
-
-        /// <summary>
-        /// Gets the number of times the image has been accessed
-        /// </summary>
-        public int AccessCount => accessCount;
 
         /// <summary>
         /// Gets the total memory usage in bytes
@@ -36,7 +30,6 @@ namespace BombermanMultiplayer.Proxy
             this.realLoader = new RealImageLoader();
             this.loadTimes = new List<TimeSpan>();
             this.totalMemoryUsage = 0;
-            this.accessCount = 0;
         }
 
         /// <summary>
@@ -56,8 +49,12 @@ namespace BombermanMultiplayer.Proxy
 
             // Record metrics
             loadTimes.Add(stopwatch.Elapsed);
-            totalMemoryUsage += (memoryAfter - memoryBefore);
-            accessCount++;
+            // Estimate memory based on image size (more accurate than GC.GetTotalMemory)
+            if (image != null)
+            {
+                long imageMemory = EstimateImageMemory(image);
+                totalMemoryUsage += imageMemory;
+            }
 
             return image;
         }
@@ -68,27 +65,53 @@ namespace BombermanMultiplayer.Proxy
         /// <returns>True if image is loaded, false otherwise</returns>
         public bool IsImageLoaded()
         {
-            accessCount++;
             return realLoader.IsImageLoaded();
         }
 
         /// <summary>
-        /// Gets the currently loaded image and tracks access
+        /// Gets the currently loaded image
         /// </summary>
         /// <returns>Loaded Image object, or null if not loaded</returns>
         public Image GetImage()
         {
-            accessCount++;
-            return realLoader.GetImage();
+            return realLoader?.GetImage();
         }
 
         /// <summary>
-        /// Gets the size of the loaded image and tracks access
+        /// Manually records a load operation (for tracking sprite loading from Image objects)
+        /// </summary>
+        /// <param name="loadTime">Time taken to load</param>
+        /// <param name="image">The image that was loaded (for memory estimation)</param>
+        public void RecordLoadOperation(TimeSpan loadTime, Image image)
+        {
+            loadTimes.Add(loadTime);
+            if (image != null)
+            {
+                long imageMemory = EstimateImageMemory(image);
+                totalMemoryUsage += imageMemory;
+            }
+        }
+
+        /// <summary>
+        /// Estimates memory usage of an image based on its dimensions
+        /// </summary>
+        /// <param name="image">The image to estimate</param>
+        /// <returns>Estimated memory usage in bytes</returns>
+        private long EstimateImageMemory(Image image)
+        {
+            if (image == null) return 0;
+
+            // Estimate: width * height * bytes per pixel (typically 4 bytes for ARGB)
+            // This is more accurate than GC.GetTotalMemory for small allocations
+            return (long)image.Width * image.Height * 4;
+        }
+
+        /// <summary>
+        /// Gets the size of the loaded image
         /// </summary>
         /// <returns>Size of the image, or Size.Empty if not loaded</returns>
         public Size GetSize()
         {
-            accessCount++;
             return realLoader.GetSize();
         }
 
@@ -123,19 +146,35 @@ namespace BombermanMultiplayer.Proxy
         public string GetPerformanceReport()
         {
             StringBuilder report = new StringBuilder();
-            report.AppendLine($"Total accesses: {accessCount}");
             report.AppendLine($"Total load operations: {loadTimes.Count}");
-            
+
             if (loadTimes.Count > 0)
             {
-                report.AppendLine($"Average load time: {GetAverageLoadTime().TotalMilliseconds:F2} ms");
-                report.AppendLine($"Min load time: {loadTimes.Min().TotalMilliseconds:F2} ms");
-                report.AppendLine($"Max load time: {loadTimes.Max().TotalMilliseconds:F2} ms");
+                double avgMicroseconds = GetAverageLoadTime().TotalMilliseconds * 1000;
+                double minMicroseconds = loadTimes.Min().TotalMilliseconds * 1000;
+                double maxMicroseconds = loadTimes.Max().TotalMilliseconds * 1000;
+
+                // Show in microseconds for better precision with small values
+                report.AppendLine($"Average load time: {avgMicroseconds:F2} μs ({GetAverageLoadTime().TotalMilliseconds:F4} ms)");
+                report.AppendLine($"Min load time: {minMicroseconds:F2} μs ({loadTimes.Min().TotalMilliseconds:F4} ms)");
+                report.AppendLine($"Max load time: {maxMicroseconds:F2} μs ({loadTimes.Max().TotalMilliseconds:F4} ms)");
             }
-            
-            report.AppendLine($"Total memory usage: {totalMemoryUsage / 1024.0:F2} KB");
-            report.AppendLine($"Average memory per load: {(loadTimes.Count > 0 ? (totalMemoryUsage / loadTimes.Count) / 1024.0 : 0):F2} KB");
-            
+            else
+            {
+                report.AppendLine("No load operations recorded yet.");
+            }
+
+            // Show memory in MB
+            double totalMemoryMB = totalMemoryUsage / (1024.0 * 1024.0);
+            report.AppendLine($"Total memory usage: {totalMemoryMB:F4} MB ({totalMemoryUsage:N0} bytes)");
+
+            if (loadTimes.Count > 0)
+            {
+                long avgMemory = totalMemoryUsage / loadTimes.Count;
+                double avgMemoryMB = avgMemory / (1024.0 * 1024.0);
+                report.AppendLine($"Average memory per load: {avgMemoryMB:F4} MB ({avgMemory:N0} bytes)");
+            }
+
             return report.ToString();
         }
 
@@ -146,7 +185,6 @@ namespace BombermanMultiplayer.Proxy
         {
             loadTimes.Clear();
             totalMemoryUsage = 0;
-            accessCount = 0;
         }
     }
 }
