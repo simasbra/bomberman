@@ -121,7 +121,7 @@
     <Compile Include="Objects\RedPlayer.cs" />
     <Compile Include="Objects\SpeedBonus.cs" />
     <Compile Include="Proxy\IImageLoader.cs" />
-    <Compile Include="Proxy\LazyImageProxy.cs" />
+    <Compile Include="Proxy\CachedImageProxy.cs" />
     <Compile Include="Proxy\PerformanceProxy.cs" />
     <Compile Include="Proxy\RealImageLoader.cs" />
     <Compile Include="SaveGameData.cs" />
