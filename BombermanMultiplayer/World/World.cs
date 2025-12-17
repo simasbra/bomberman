@@ -16,13 +16,18 @@ namespace BombermanMultiplayer
     [Serializable]
     public class World
     {
-        public TileContext[,] TileContextGrid;
+        public Tile[,] MapGrid;
 
         [NonSerialized]
         private Image Background_;
 
         private int _tileWidth;
         private int _tileHeight;
+
+        public IIterator<Tile> GetTileIterator()
+        {
+            return new TileIterator(MapGrid);
+        }
 
         public Image Background
         {
@@ -31,10 +36,6 @@ namespace BombermanMultiplayer
             set { Background_ = value; }
         }
 
-        public IIterator<TileContext> GetTileIterator()
-        {
-            return new TileContextIterator(TileContextGrid);
-        }
 
         public void Draw(Graphics gr)
         {
@@ -44,11 +45,11 @@ namespace BombermanMultiplayer
                     gr.VisibleClipBounds.Height);
             }
 
-            for (int i = 0; i < TileContextGrid.GetLength(0); i++)
+            for (int i = 0; i < MapGrid.GetLength(0); i++)
             {
-                for (int j = 0; j < TileContextGrid.GetLength(1); j++)
+                for (int j = 0; j < MapGrid.GetLength(1); j++)
                 {
-                    TileContextGrid[i, j].Draw(gr, _tileWidth, _tileHeight);
+                    MapGrid[i, j].Draw(gr);
                 }
             }
         }
@@ -58,15 +59,42 @@ namespace BombermanMultiplayer
             Background = background;
         }
 
-        public void RefreshTileSprites()
+        public void LoadSpriteTile(Image spriteDestroyableTile, Image spriteUndestroyableTile)
         {
-            for (int i = 0; i < TileContextGrid.GetLength(0); i++)
+            for (int i = 0; i < MapGrid.GetLength(0); i++)
             {
-                for (int j = 0; j < TileContextGrid.GetLength(1); j++)
+                for (int j = 0; j < MapGrid.GetLength(1); j++)
                 {
-                    var ctx = TileContextGrid[i, j];
-                    if (ctx.Fire)
+                    if (MapGrid[i, j].Destroyable)
                     {
+                        MapGrid[i, j].LoadSprite(spriteDestroyableTile);
+                    }
+                    else if (!MapGrid[i, j].Walkable && !MapGrid[i, j].Destroyable)
+                    {
+                        MapGrid[i, j].LoadSprite(spriteUndestroyableTile);
+                    }
+                }
+            }
+        }
+
+        public void refreshTileSprites()
+        {
+            for (int i = 0; i < MapGrid.GetLength(0); i++)
+            {
+                for (int j = 0; j < MapGrid.GetLength(1); j++)
+                {
+                    if (MapGrid[i, j].Walkable && !MapGrid[i, j].Destroyable)
+                    {
+                        MapGrid[i, j].UnloadSprite();
+                    }
+
+                    if (MapGrid[i, j].Fire)
+                    {
+                        MapGrid[i, j].LoadSprite(Properties.Resources.Fire);
+                    }
+                    else if (MapGrid[i, j].Walkable && !MapGrid[i, j].Fire)
+                    {
+                        MapGrid[i, j].UnloadSprite();
                     }
                 }
             }
@@ -77,6 +105,11 @@ namespace BombermanMultiplayer
             _tileWidth = TILE_WIDTH;
             _tileHeight = TILE_HEIGHT;
             CreateWorldGrid(hebergeurWidth, hebergeurHeight, TILE_WIDTH, TILE_HEIGHT, totalFrameTile);
+        }
+
+        public World(int hebergeurWidth, int hebergeurHeight, Tile[,] map)
+        {
+            MapGrid = map;
         }
 
         public World()
@@ -107,9 +140,9 @@ namespace BombermanMultiplayer
 
             Random r = new Random();
             int rand = 0;
-            TileContextGrid = new TileContext[hebergeurWidth / tileWidth, hebergeurHeight / tileHeight];
-            int rows = TileContextGrid.GetLength(0);
-            int cols = TileContextGrid.GetLength(1);
+            MapGrid = new Tile[hebergeurWidth / tileWidth, hebergeurHeight / tileHeight];
+            int rows = MapGrid.GetLength(0);
+            int cols = MapGrid.GetLength(1);
 
             for (int i = 0; i < rows; i++)
             {
@@ -154,30 +187,54 @@ namespace BombermanMultiplayer
                         }
                     }
 
-                    TileContextGrid[i, j] = new TileContext(tileType, x, y, i, j);
+                    Tile sharedTile = TileFlyweightFactory.GetTile(tileType);
+                    MapGrid[i, j] = new Tile(x, y, totalFrameTile, tileWidth, tileHeight, sharedTile.Walkable,
+                        sharedTile.Destroyable);
+                    MapGrid[i, j].CasePosition = new int[] { i, j };
+
+                    if (tileType == TileType.Wall)
+                    {
+                        MapGrid[i, j].LoadSprite(Properties.Resources.BlockNonDestructible);
+                    }
+                    else if (tileType == TileType.Destructible)
+                    {
+                        MapGrid[i, j].LoadSprite(Properties.Resources.BlockDestructible);
+                    }
                 }
             }
 
             // Ensure all four corners and their adjacent tiles are walkable and not destroyable
             // Top-left
-            TileContextGrid[1, 1].ConvertToFloor();
-            TileContextGrid[1, 2].ConvertToFloor();
-            TileContextGrid[2, 1].ConvertToFloor();
+            MapGrid[1, 1].Walkable = true;
+            MapGrid[1, 1].Destroyable = false;
+            MapGrid[1, 2].Walkable = true;
+            MapGrid[1, 2].Destroyable = false;
+            MapGrid[2, 1].Walkable = true;
+            MapGrid[2, 1].Destroyable = false;
 
             // Top-right
-            TileContextGrid[1, cols - 2].ConvertToFloor();
-            TileContextGrid[1, cols - 3].ConvertToFloor();
-            TileContextGrid[2, cols - 2].ConvertToFloor();
+            MapGrid[1, cols - 2].Walkable = true;
+            MapGrid[1, cols - 2].Destroyable = false;
+            MapGrid[1, cols - 3].Walkable = true;
+            MapGrid[1, cols - 3].Destroyable = false;
+            MapGrid[2, cols - 2].Walkable = true;
+            MapGrid[2, cols - 2].Destroyable = false;
 
             // Bottom-left
-            TileContextGrid[rows - 2, 1].ConvertToFloor();
-            TileContextGrid[rows - 2, 2].ConvertToFloor();
-            TileContextGrid[rows - 3, 1].ConvertToFloor();
+            MapGrid[rows - 2, 1].Walkable = true;
+            MapGrid[rows - 2, 1].Destroyable = false;
+            MapGrid[rows - 2, 2].Walkable = true;
+            MapGrid[rows - 2, 2].Destroyable = false;
+            MapGrid[rows - 3, 1].Walkable = true;
+            MapGrid[rows - 3, 1].Destroyable = false;
 
             // Bottom-right
-            TileContextGrid[rows - 2, cols - 2].ConvertToFloor();
-            TileContextGrid[rows - 2, cols - 3].ConvertToFloor();
-            TileContextGrid[rows - 3, cols - 2].ConvertToFloor();
+            MapGrid[rows - 2, cols - 2].Walkable = true;
+            MapGrid[rows - 2, cols - 2].Destroyable = false;
+            MapGrid[rows - 2, cols - 3].Walkable = true;
+            MapGrid[rows - 2, cols - 3].Destroyable = false;
+            MapGrid[rows - 3, cols - 2].Walkable = true;
+            MapGrid[rows - 3, cols - 2].Destroyable = false;
         }
     }
 }
