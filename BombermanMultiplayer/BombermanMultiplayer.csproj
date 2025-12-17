@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Adapters\IPacketCommandAdapter.cs" />
     <Compile Include="Adapters\PacketCommandAdapter.cs" />
+    <Compile Include="Bridge\ExplosionPattern.cs" />
     <Compile Include="Builder\IBuilder.cs" />
     <Compile Include="Builder\RedPlayerBuilder.cs" />
     <Compile Include="Builder\BluePlayerBuilder.cs" />

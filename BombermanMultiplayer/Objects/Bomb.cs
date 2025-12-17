@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Media;
 using System.Diagnostics;
+using BombermanMultiplayer.Bridge;
 
 namespace BombermanMultiplayer
 {
@@ -25,6 +26,9 @@ namespace BombermanMultiplayer
 
         //Who drops the bomb, player 1 = 1, player 2 = 2
         public short Proprietary;
+
+        // Bridge pattern
+        protected ExplosionPattern explosionPattern;
 
         #region Accessors
 
@@ -60,6 +64,11 @@ namespace BombermanMultiplayer
   
 
         protected Bomb(int caseLigne, int caseCol, int totalFrames, int frameWidth, int frameHeight, int detonationTime, int TileWidth, int TileHeight, short proprietary)
+            : this(caseLigne, caseCol, totalFrames, frameWidth, frameHeight, detonationTime, TileWidth, TileHeight, proprietary, null)
+        {
+        }
+
+        protected Bomb(int caseLigne, int caseCol, int totalFrames, int frameWidth, int frameHeight, int detonationTime, int TileWidth, int TileHeight, short proprietary, ExplosionPattern pattern)
             : base(caseCol * TileWidth, caseLigne * TileHeight, totalFrames, frameWidth, frameHeight)
         {
             CasePosition = new int[2] { caseLigne, caseCol };
@@ -69,6 +78,25 @@ namespace BombermanMultiplayer
             this._DetonationTime = detonationTime;
 
             this._frameTime = DetonationTime / 8;
+
+            // Bridge pattern: Set explosion pattern (defaults to PlusPattern if null)
+            this.explosionPattern = pattern ?? new PlusPattern();
+        }
+
+        /// <summary>
+        /// Set the explosion pattern for this bomb
+        /// </summary>
+        public void SetExplosionPattern(ExplosionPattern pattern)
+        {
+            this.explosionPattern = pattern ?? new PlusPattern();
+        }
+
+        /// <summary>
+        /// Get the current explosion pattern
+        /// </summary>
+        public ExplosionPattern GetExplosionPattern()
+        {
+            return explosionPattern;
         }
 
 
@@ -84,9 +112,11 @@ namespace BombermanMultiplayer
 
         public void Explosion(Tile[,] MapGrid, Player[] players)
         {
-            int variablePosition = 0;
-
-            bool PropagationUP = true, PropagationDOWN = true, PropagationLEFT = true, PropagationRIGHT = true;
+            // Ensure explosion pattern is set (defaults to PlusPattern)
+            if (explosionPattern == null)
+            {
+                explosionPattern = new PlusPattern();
+            }
 
             // Grąžinti bombą savininkui ir patikrinti bonusą
             for (int i = 0; i < players.Length; i++)
@@ -112,108 +142,37 @@ namespace BombermanMultiplayer
                 }
             }
 
-            for (int i = 0; i < this.bombPower; i++)
+            // Bridge: use explosion pattern to determine affected tiles
+            List<int[]> affectedTiles = explosionPattern.GetAffectedTiles(MapGrid, this.CasePosition[0], this.CasePosition[1], this.bombPower);
+
+            // Apply explosion effects to affected tiles
+            foreach (int[] tilePos in affectedTiles)
             {
-                // UP
-                if (PropagationUP)
-                {
-                    if ((variablePosition = this.CasePosition[0] - i) >= 0)
-                    {
-                        if (variablePosition <= MapGrid.GetLength(0) - 1)
-                        {
-                            if (MapGrid[variablePosition, this.CasePosition[1]].Destroyable)
-                            {
-                                MapGrid[variablePosition, this.CasePosition[1]].Destroyable = false;
-                                MapGrid[variablePosition, this.CasePosition[1]].Walkable = true;
-                                MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
-                                MapGrid[variablePosition, this.CasePosition[1]].SpawnBonus();
-                            }
-                            else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && MapGrid[variablePosition, this.CasePosition[1]].Walkable)
-                            {
-                                MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
-                            }
-                            else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && !MapGrid[variablePosition, this.CasePosition[1]].Walkable)
-                            {
-                                PropagationUP = false;
-                            }
-                        }
-                    }
-                }
+                int row = tilePos[0];
+                int col = tilePos[1];
 
-                // DOWN
-                if (PropagationDOWN)
+                if (row >= 0 && row < MapGrid.GetLength(0) && col >= 0 && col < MapGrid.GetLength(1))
                 {
-                    if ((variablePosition = this.CasePosition[0] + i) < MapGrid.GetLength(0))
+                    if (MapGrid[row, col].Destroyable)
                     {
-                        if (variablePosition >= 0)
-                        {
-                            if (MapGrid[variablePosition, this.CasePosition[1]].Destroyable)
-                            {
-                                MapGrid[variablePosition, this.CasePosition[1]].Destroyable = false;
-                                MapGrid[variablePosition, this.CasePosition[1]].Walkable = true;
-                                MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
-                                MapGrid[variablePosition, this.CasePosition[1]].SpawnBonus();
-                            }
-                            else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && MapGrid[variablePosition, this.CasePosition[1]].Walkable)
-                            {
-                                MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
-                            }
-                            else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && !MapGrid[variablePosition, this.CasePosition[1]].Walkable)
-                            {
-                                PropagationDOWN = false;
-                            }
-                        }
+                        MapGrid[row, col].Destroyable = false;
+                        MapGrid[row, col].Walkable = true;
+                        MapGrid[row, col].Fire = true;
+                        MapGrid[row, col].SpawnBonus();
                     }
-                }
-
-                // LEFT
-                if (PropagationLEFT)
-                {
-                    if ((variablePosition = this.CasePosition[1] - i) >= 0)
+                    else if (!MapGrid[row, col].Destroyable && MapGrid[row, col].Walkable)
                     {
-                        if (variablePosition <= MapGrid.GetLength(1) - 1)
-                        {
-                            if (MapGrid[this.CasePosition[0], variablePosition].Destroyable)
-                            {
-                                MapGrid[this.CasePosition[0], variablePosition].Destroyable = false;
-                                MapGrid[this.CasePosition[0], variablePosition].Walkable = true;
-                                MapGrid[this.CasePosition[0], variablePosition].Fire = true;
-                                MapGrid[this.CasePosition[0], variablePosition].SpawnBonus();
-                            }
-                            else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && MapGrid[this.CasePosition[0], variablePosition].Walkable)
-                            {
-                                MapGrid[this.CasePosition[0], variablePosition].Fire = true;
-                            }
-                            else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && !MapGrid[this.CasePosition[0], variablePosition].Walkable)
-                            {
-                                PropagationLEFT = false;
-                            }
-                        }
+                        MapGrid[row, col].Fire = true;
                     }
-                }
 
-                // RIGHT
-                if (PropagationRIGHT)
-                {
-                    if ((variablePosition = this.CasePosition[1] + i) < MapGrid.GetLength(1))
+                    // Check if any players are on this tile
+                    for (int i = 0; i < players.Length; i++)
                     {
-                        if (variablePosition >= 0)
+                        if (row == players[i].CasePosition[0] && col == players[i].CasePosition[1]
+                            && players[i].BonusSlot[0] != Objects.BonusType.Armor && players[i].BonusSlot[1] != Objects.BonusType.Armor)
                         {
-                            if (MapGrid[this.CasePosition[0], variablePosition].Destroyable)
-                            {
-                                MapGrid[this.CasePosition[0], variablePosition].Destroyable = false;
-                                MapGrid[this.CasePosition[0], variablePosition].Walkable = true;
-                                MapGrid[this.CasePosition[0], variablePosition].Fire = true;
-                                MapGrid[this.CasePosition[0], variablePosition].SpawnBonus();
-                            }
-                            else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && MapGrid[this.CasePosition[0], variablePosition].Walkable)
-                            {
-                                MapGrid[this.CasePosition[0], variablePosition].Fire = true;
-                            }
-                            else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && !MapGrid[this.CasePosition[0], variablePosition].Walkable)
-                            {
-                                PropagationRIGHT = false;
-                            }
+                            players[i].Dead = true;
+                            players[i].LoadSprite(Properties.Resources.Blood);
                         }
                     }
                 }
