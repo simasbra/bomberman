@@ -1,16 +1,14 @@
 ﻿using BombermanMultiplayer.Commands.Interface;
+using BombermanMultiplayer.Flyweight;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BombermanMultiplayer.Commands
 {
     public class DropBombCommand : ICommand
     {
         private readonly Player _player;
-        private readonly Tile[,] _mapGrid;
+        private readonly TileContext[,] _mapGrid;
         private readonly List<Bomb> _bombsOnTheMap;
         private readonly Player _otherPlayer;
         private readonly DateTime _timestamp;
@@ -23,7 +21,7 @@ namespace BombermanMultiplayer.Commands
         public DateTime Timestamp => _timestamp;
         public byte PlayerNumber => _player.PlayerNumero;
 
-        public DropBombCommand(Player player, Tile[,] mapGrid, List<Bomb> bombsOnTheMap, Player otherPlayer)
+        public DropBombCommand(Player player, TileContext[,] mapGrid, List<Bomb> bombsOnTheMap, Player otherPlayer)
         {
             _player = player ?? throw new ArgumentNullException(nameof(player));
             _mapGrid = mapGrid ?? throw new ArgumentNullException(nameof(mapGrid));

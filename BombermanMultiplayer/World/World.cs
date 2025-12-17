@@ -1,36 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Drawing.Drawing2D;
-using System.Media;
-using System.Diagnostics;
 using BombermanMultiplayer.Iterator;
+using BombermanMultiplayer.Flyweight;
 
 namespace BombermanMultiplayer
 {
     [Serializable]
     public class World
     {
-        public Tile[,] MapGrid;
+        public TileContext[,] MapGrid;
 
         [NonSerialized]
         private Image Background_;
-        [NonSerialized]
-        private static Tile SharedFloor;
-        [NonSerialized]
-        private static Tile SharedWall;
-        [NonSerialized]
-        private static Tile SharedDestructible; 
 
         /// <summary>
         /// Returns an iterator for traversing all tiles in the map grid
         /// </summary>
         /// <returns>Tile iterator over MapGrid</returns>
-        public IIterator<Tile> GetTileIterator()
+        public IIterator<TileContext> GetTileIterator()
         {
             return new TileIterator(MapGrid);
         }
@@ -67,43 +54,36 @@ namespace BombermanMultiplayer
 
         public void loadSpriteTile(Image spriteDestroyableTile, Image spriteUndestroyableTile)
         {
-            for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
+            // First ensure flyweights are initialized/updated
+            int rows = MapGrid.GetLength(0);
+            int cols = MapGrid.GetLength(1);
+            int tileWidth = MapGrid[0, 0].IntrinsicTile_Source_Width;
+            int tileHeight = MapGrid[0, 0].IntrinsicTile_Source_Height;
+
+            // Re-initialize flyweights on the client to ensure sprites are loaded
+            TileFlyweightFactory.GetTile(TileType.Wall, 1, tileWidth, tileHeight).LoadSprite(spriteUndestroyableTile);
+            TileFlyweightFactory.GetTile(TileType.Destructible, 1, tileWidth, tileHeight).LoadSprite(spriteDestroyableTile);
+            TileFlyweightFactory.GetTile(TileType.Floor, 1, tileWidth, tileHeight).UnloadSprite();
+
+            // Re-bind IntrinsicTile to the local flyweight instances after serialization
+            for (int i = 0; i < rows; i++)
             {
-                for (int j = 0; j < MapGrid.GetLength(1); j++) //Colonne
+                for (int j = 0; j < cols; j++)
                 {
-                    if (MapGrid[i, j].Destroyable)
-                    {
-                        MapGrid[i, j].LoadSprite(spriteDestroyableTile);
-                    }
-                    else if (!MapGrid[i, j].Walkable && !MapGrid[i, j].Destroyable)
-                    {
-                        MapGrid[i, j].LoadSprite(spriteUndestroyableTile);
-                    }
+                    TileType type = TileType.Floor;
+                    if (!MapGrid[i, j].Walkable && !MapGrid[i, j].Destroyable) type = TileType.Wall;
+                    else if (MapGrid[i, j].Destroyable) type = TileType.Destructible;
+
+                    MapGrid[i, j].RebindIntrinsic(TileFlyweightFactory.GetTile(type, 1, tileWidth, tileHeight));
                 }
             }
         }
 
         public void refreshTileSprites()
         {
-            for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
-            {
-                for (int j = 0; j < MapGrid.GetLength(1); j++) //Colonne
-                {
-                    if (MapGrid[i, j].Walkable && !MapGrid[i, j].Destroyable)
-                    {
-                        MapGrid[i, j].UnloadSprite();
-                    }
-
-                    if (MapGrid[i, j].Fire)
-                    {
-                        MapGrid[i, j].LoadSprite(Properties.Resources.Fire);
-                    }
-                    else if (MapGrid[i, j].Walkable && !MapGrid[i, j].Fire)
-                    {
-                        MapGrid[i, j].UnloadSprite();
-                    }
-                }
-            }
+            // This method originally reloaded fire sprites.
+            // With TileContext.Draw handling Fire drawing, this might be less critical
+            // but we still want to keep the logic for any other sprite refreshes if needed.
         }
 
         public World(int hebergeurWidth, int hebergeurHeight, int TILE_WIDTH, int TILE_HEIGHT, int totalFrameTile)
@@ -111,7 +91,7 @@ namespace BombermanMultiplayer
             CreateWorldGrid(hebergeurWidth, hebergeurHeight, TILE_WIDTH, TILE_HEIGHT, totalFrameTile);
         }
 
-        public World(int hebergeurWidth, int hebergeurHeight, Tile[,] map)
+        public World(int hebergeurWidth, int hebergeurHeight, TileContext[,] map)
         {
             MapGrid = map;
         }
@@ -138,14 +118,9 @@ namespace BombermanMultiplayer
             int totalFrameTile)
         {
             Random r = new Random();
-            int rand = 0;
-            MapGrid = new Tile[hebergeurWidth / tileWidth, hebergeurHeight / tileHeight];
+            MapGrid = new TileContext[hebergeurWidth / tileWidth, hebergeurHeight / tileHeight];
             int rows = MapGrid.GetLength(0);
             int cols = MapGrid.GetLength(1);
-
-            SharedFloor = new Tile(0, 0, totalFrameTile, tileWidth, tileHeight, walkable: true,  destroyable: false);
-            SharedWall = new Tile(0, 0, totalFrameTile, tileWidth, tileHeight, walkable: false, destroyable: false);
-            SharedDestructible = new Tile(0, 0, totalFrameTile, tileWidth, tileHeight, walkable: false, destroyable: true);
 
             for (int i = 0; i < rows; i++) // Row
             {
@@ -154,15 +129,15 @@ namespace BombermanMultiplayer
                     int x = j * tileWidth;
                     int y = i * tileHeight;
 
-                    Tile tileToUse;
+                    TileType type;
 
                     if (j == 0 || j == cols - 1 || i == 0 || i == rows - 1)
                     {
-                        tileToUse = SharedWall;
+                        type = TileType.Wall;
                     }
                     else if (i % 2 == 0 && j % 2 == 0)
                     {
-                        tileToUse = SharedWall;
+                        type = TileType.Wall;
                     }
                     else
                     {
@@ -174,27 +149,24 @@ namespace BombermanMultiplayer
 
                         if (isPlayerSpawn)
                         {
-                            tileToUse = SharedFloor;
+                            type = TileType.Floor;
                         }
                         else
                         {
-                            rand = r.Next(0, 10);
+                            int rand = r.Next(0, 10);
                             if (rand >= 1)
                             {
-                                tileToUse = SharedDestructible;
+                                type = TileType.Destructible;
                             }
                             else
                             {
-                                tileToUse = SharedFloor;
+                                type = TileType.Floor;
                             }
                         }
                     }
 
-                    Tile instance = (Tile)tileToUse.DeepClone();
-                    instance.Source = new Rectangle(x, y, tileWidth, tileHeight);
-                    instance.CasePosition = new int[] { i, j };
-
-                    MapGrid[i, j] = instance;
+                    Tile sharedTile = TileFlyweightFactory.GetTile(type, totalFrameTile, tileWidth, tileHeight);
+                    MapGrid[i, j] = new TileContext(sharedTile, x, y);
                 }
             }
 

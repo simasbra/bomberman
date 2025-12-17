@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
 using BombermanMultiplayer.Iterator;
+using BombermanMultiplayer.Flyweight;
 
 namespace BombermanMultiplayer
 {
@@ -633,13 +634,13 @@ namespace BombermanMultiplayer
         //Manage interactions between worlds and objects
         private void InteractionLogic()
         {
-            IIterator<Tile> tileIterator = world.GetTileIterator();
+            IIterator<TileContext> tileIterator = world.GetTileIterator();
             int row = 0;
             int column = 0;
 
             while (tileIterator.HasNext())
             {
-                Tile currentTile = tileIterator.Next();
+                TileContext currentTile = tileIterator.Next();
 
                 if (tileIterator.HasNext())
                 {
@@ -896,7 +897,7 @@ namespace BombermanMultiplayer
 
         }
 
-        public bool CheckCollisionPlayer(Player movingPlayer, Player player2, Tile[,] map, Player.MovementDirection direction)
+        public bool CheckCollisionPlayer(Player movingPlayer, Player player2, TileContext[,] map, Player.MovementDirection direction)
         {
             int lig = movingPlayer.CasePosition[0];
             int col = movingPlayer.CasePosition[1];
@@ -912,17 +913,17 @@ namespace BombermanMultiplayer
 
                     if (!map[lig - 1, col - 1].Walkable || map[lig - 1, col - 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig - 1, col - 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig - 1, col - 1].X, map[lig - 1, col - 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig - 1, col].Walkable || map[lig - 1, col].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig - 1, col].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig - 1, col].X, map[lig - 1, col].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig - 1, col + 1].Walkable || map[lig - 1, col + 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig - 1, col + 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig - 1, col + 1].X, map[lig - 1, col + 1].Y, 48, 48)))
                             return false;
                     }
                     if (CheckCollisionRectangle(rect, player2.Source))
@@ -936,17 +937,17 @@ namespace BombermanMultiplayer
 
                     if (!map[lig + 1, col - 1].Walkable || map[lig + 1, col - 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig + 1, col - 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig + 1, col - 1].X, map[lig + 1, col - 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig + 1, col].Walkable || map[lig + 1, col].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig + 1, col].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig + 1, col].X, map[lig + 1, col].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig + 1, col + 1].Walkable || map[lig + 1, col + 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig + 1, col + 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig + 1, col + 1].X, map[lig + 1, col + 1].Y, 48, 48)))
                             return false;
                     }
                     if (CheckCollisionRectangle(rect, player2.Source))
@@ -959,17 +960,17 @@ namespace BombermanMultiplayer
                     Rectangle rect = new Rectangle(movingPlayer.Source.X - movingPlayer.Vitesse, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
                     if (!map[lig - 1, col - 1].Walkable || map[lig - 1, col - 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig - 1, col - 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig - 1, col - 1].X, map[lig - 1, col - 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig, col - 1].Walkable || map[lig, col - 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig, col - 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig, col - 1].X, map[lig, col - 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig + 1, col - 1].Walkable || map[lig + 1, col - 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig + 1, col - 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig + 1, col - 1].X, map[lig + 1, col - 1].Y, 48, 48)))
                             return false;
                     }
                     if (CheckCollisionRectangle(rect, player2.Source))
@@ -982,17 +983,17 @@ namespace BombermanMultiplayer
                     //RIGHT
                     if (!map[lig - 1, col + 1].Walkable || map[lig - 1, col + 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig - 1, col + 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig - 1, col + 1].X, map[lig - 1, col + 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig, col + 1].Walkable || map[lig, col + 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig, col + 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig, col + 1].X, map[lig, col + 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig + 1, col + 1].Walkable || map[lig + 1, col + 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig + 1, col + 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig + 1, col + 1].X, map[lig + 1, col + 1].Y, 48, 48)))
                             return false;
                     }
                     if (CheckCollisionRectangle(rect, player2.Source))

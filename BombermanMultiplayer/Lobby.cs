@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BombermanMultiplayer.Facade;
 using BombermanMultiplayer.Factory;
+using BombermanMultiplayer.Flyweight;
 
 namespace BombermanMultiplayer
 {
@@ -239,7 +240,7 @@ namespace BombermanMultiplayer
                             //Initialize the game
                             game = new Game(this.pbGame.Width, this.pbGame.Height);
                             players = game.players;
-                            game.world.MapGrid = RX_Packet.GetPayload<Tile[,]>();
+                            game.world.MapGrid = RX_Packet.GetPayload<TileContext[,]>();
                             LoadGameComponents();
                             GameRunning = true;
 
@@ -325,84 +326,92 @@ namespace BombermanMultiplayer
                                         case 10:
                                             game.world.MapGrid[i, j].BonusHere = 
                                                 new PowerBonusFactory().CreateBonus(
-                                                    game.world.MapGrid[i, j].Source.X,
-                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    game.world.MapGrid[i, j].X,
+                                                    game.world.MapGrid[i, j].Y,
                                                     1,
-                                                    game.world.MapGrid[i, j].Source.Width,
-                                                    game.world.MapGrid[i, j].Source.Height);
+                                                    this.pbGame.Width / game.world.MapGrid.GetLength(0),
+                                                    this.pbGame.Height / game.world.MapGrid.GetLength(1));
+                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.SuperBomb);
                                             game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
                                         case 11:
                                             game.world.MapGrid[i, j].BonusHere = 
                                                 new SpeedBonusFactory().CreateBonus(
-                                                    game.world.MapGrid[i, j].Source.X,
-                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    game.world.MapGrid[i, j].X,
+                                                    game.world.MapGrid[i, j].Y,
                                                     1,
-                                                    game.world.MapGrid[i, j].Source.Width,
-                                                    game.world.MapGrid[i, j].Source.Height);
+                                                    this.pbGame.Width / game.world.MapGrid.GetLength(0),
+                                                    this.pbGame.Height / game.world.MapGrid.GetLength(1));
+                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.SpeedUp);
                                             game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
                                         case 12:
                                             game.world.MapGrid[i, j].BonusHere = 
                                                 new DefuseBonusFactory().CreateBonus(
-                                                    game.world.MapGrid[i, j].Source.X,
-                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    game.world.MapGrid[i, j].X,
+                                                    game.world.MapGrid[i, j].Y,
                                                     1,
-                                                    game.world.MapGrid[i, j].Source.Width,
-                                                    game.world.MapGrid[i, j].Source.Height);
+                                                    this.pbGame.Width / game.world.MapGrid.GetLength(0),
+                                                    this.pbGame.Height / game.world.MapGrid.GetLength(1));
+                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.Deactivate);
                                             game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
                                         case 13:
                                             game.world.MapGrid[i, j].BonusHere = 
                                                 new HealthBonusFactory().CreateBonus(
-                                                    game.world.MapGrid[i, j].Source.X,
-                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    game.world.MapGrid[i, j].X,
+                                                    game.world.MapGrid[i, j].Y,
                                                     1,
-                                                    game.world.MapGrid[i, j].Source.Width,
-                                                    game.world.MapGrid[i, j].Source.Height);
+                                                    this.pbGame.Width / game.world.MapGrid.GetLength(0),
+                                                    this.pbGame.Height / game.world.MapGrid.GetLength(1));
+                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.Armor);
                                             game.world.MapGrid[i, j].Destroyable = game.world.MapGrid[i, j].Fire = false;
                                             break;
                                         case 30:
                                             game.world.MapGrid[i, j].BonusHere = 
                                                 new PowerBonusFactory().CreateBonus(
-                                                    game.world.MapGrid[i, j].Source.X,
-                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    game.world.MapGrid[i, j].X,
+                                                    game.world.MapGrid[i, j].Y,
                                                     1,
-                                                    game.world.MapGrid[i, j].Source.Width,
-                                                    game.world.MapGrid[i, j].Source.Height);
+                                                    this.pbGame.Width / game.world.MapGrid.GetLength(0),
+                                                    this.pbGame.Height / game.world.MapGrid.GetLength(1));
+                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.SuperBomb);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
                                             break;
                                         case 31:
                                             game.world.MapGrid[i, j].BonusHere = 
                                                 new SpeedBonusFactory().CreateBonus(
-                                                    game.world.MapGrid[i, j].Source.X,
-                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    game.world.MapGrid[i, j].X,
+                                                    game.world.MapGrid[i, j].Y,
                                                     1,
-                                                    game.world.MapGrid[i, j].Source.Width,
-                                                    game.world.MapGrid[i, j].Source.Height);
+                                                    this.pbGame.Width / game.world.MapGrid.GetLength(0),
+                                                    this.pbGame.Height / game.world.MapGrid.GetLength(1));
+                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.SpeedUp);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
                                             break;
                                         case 32:
                                             game.world.MapGrid[i, j].BonusHere = 
                                                 new DefuseBonusFactory().CreateBonus(
-                                                    game.world.MapGrid[i, j].Source.X,
-                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    game.world.MapGrid[i, j].X,
+                                                    game.world.MapGrid[i, j].Y,
                                                     1,
-                                                    game.world.MapGrid[i, j].Source.Width,
-                                                    game.world.MapGrid[i, j].Source.Height);
+                                                    this.pbGame.Width / game.world.MapGrid.GetLength(0),
+                                                    this.pbGame.Height / game.world.MapGrid.GetLength(1));
+                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.Deactivate);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
                                             break;
                                         case 33:
                                             game.world.MapGrid[i, j].BonusHere = 
                                                 new HealthBonusFactory().CreateBonus(
-                                                    game.world.MapGrid[i, j].Source.X,
-                                                    game.world.MapGrid[i, j].Source.Y,
+                                                    game.world.MapGrid[i, j].X,
+                                                    game.world.MapGrid[i, j].Y,
                                                     1,
-                                                    game.world.MapGrid[i, j].Source.Width,
-                                                    game.world.MapGrid[i, j].Source.Height);
+                                                    this.pbGame.Width / game.world.MapGrid.GetLength(0),
+                                                    this.pbGame.Height / game.world.MapGrid.GetLength(1));
+                                            game.world.MapGrid[i, j].BonusHere.LoadSprite(Properties.Resources.Armor);
                                             game.world.MapGrid[i, j].Walkable = game.world.MapGrid[i, j].Fire = true;
                                             game.world.MapGrid[i, j].Destroyable = false;
                                             break;

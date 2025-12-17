@@ -208,5 +208,23 @@ namespace BombermanMultiplayer
                 BonusHere.Draw(gr);
             }
         }
+
+        /// <summary>
+        /// Draws the tile at a specific location without modifying the internal Source rectangle.
+        /// Useful for Flyweight pattern where multiple contexts share the same Tile object.
+        /// </summary>
+        /// <param name="gr">Graphics object to draw on.</param>
+        /// <param name="x">X coordinate to draw at.</param>
+        /// <param name="y">Y coordinate to draw at.</param>
+        public void DrawAt(Graphics gr, int x, int y)
+        {
+            if (Sprite != null)
+            {
+                Rectangle destRect = new Rectangle(x, y, Source.Width, Source.Height);
+                gr.DrawImage(Sprite, destRect, frameindex * Source.Width, 0, Source.Width, Source.Height, GraphicsUnit.Pixel);
+                // Optionally draw debug rectangle if needed, but usually not for all tiles
+                // gr.DrawRectangle(Pens.Red, destRect);
+            }
+        }
     }
 }

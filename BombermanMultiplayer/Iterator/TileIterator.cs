@@ -1,23 +1,24 @@
 using System;
+using BombermanMultiplayer.Flyweight;
 
 namespace BombermanMultiplayer.Iterator
 {
     /// <summary>
-    /// Iterator for traversing the 2D Tile[,] grid in World.MapGrid
+    /// Iterator for traversing the 2D TileContext[,] grid in World.MapGrid
     /// </summary>
-    public class TileIterator : IIterator<Tile>
+    public class TileIterator : IIterator<TileContext>
     {
-        private readonly Tile[,] Grid;
+        private readonly TileContext[,] Grid;
         private int Row = 0;
         private int Column = -1;
         private readonly int MaxRows;
         private readonly int MaxColumns;
 
         /// <summary>
-        /// Iterator for traversing the 2D Tile[,] grid in World.MapGrid.
+        /// Iterator for traversing the 2D TileContext[,] grid in World.MapGrid.
         /// </summary>
         /// <param name="grid">2D tile grid</param>
-        public TileIterator(Tile[,] grid)
+        public TileIterator(TileContext[,] grid)
         {
             Grid = grid;
             MaxRows = grid.GetLength(0);
@@ -38,7 +39,7 @@ namespace BombermanMultiplayer.Iterator
         /// </summary>
         /// <returns>The next tile in the grid.</returns>
         /// <exception cref="InvalidOperationException">Thrown when there are no more tiles to iterate through.</exception>
-        public Tile Next()
+        public TileContext Next()
         {
             if (!HasNext())
             {
