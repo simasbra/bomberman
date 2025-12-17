@@ -14,7 +14,7 @@ namespace BombermanMultiplayer.Facade
         {
             if (gr == null || world == null) return;
 
-            world.refreshTileSprites();
+            world.RefreshTileSprites();
             world.Draw(gr);
         }
     }

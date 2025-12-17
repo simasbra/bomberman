@@ -694,6 +694,7 @@ namespace BombermanMultiplayer
                 }
             }
         }
+
         private void MinesLogic()
         {
             if (MinesOnTheMap == null || MinesOnTheMap.Count == 0)
@@ -744,10 +745,9 @@ namespace BombermanMultiplayer
 
         private void BonusLogic(Player player)
         {
-            int freeSlot = -1;
             for (int i = 0; i < player.BonusSlot.Length; i++)
             {
-                if (player.BonusSlot[i] != Objects.BonusType.None)
+                if (player.BonusSlot[i] != BonusType.None)
                 {
                     if (player.BonusTimer[i] <= 0)
                     {
@@ -756,7 +756,7 @@ namespace BombermanMultiplayer
                             player.ActiveStrategies[i].Remove(player, i);
                             player.ActiveStrategies[i] = null;
                         }
-                        player.BonusSlot[i] = BonusType.None;     // clear slot
+                        player.BonusSlot[i] = BonusType.None;
                         player.BonusTimer[i] = 0;
                     }
                     else
@@ -765,18 +765,16 @@ namespace BombermanMultiplayer
                         System.Diagnostics.Debug.WriteLine($"Player BonusTimer[{i}] = {player.BonusTimer[i]}ms");
                     }
                 }
-                else
-                {
-                    freeSlot = i;
-                }
             }
 
-            if (this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere != null)
+            if (world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere != null)
             {
-                Bonus bonusOnTile = this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere;
+                Bonus bonusOnTile = world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere;
 
                 if (player.BonusSlot[0] == bonusOnTile.Type || player.BonusSlot[1] == bonusOnTile.Type)
+                {
                     return;
+                }
 
                 bonusOnTile.ApplyToPlayer(player);
 
@@ -816,7 +814,7 @@ namespace BombermanMultiplayer
                     }
                 }
 
-                this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere = null;
+                world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere = null;
             }
         }
 

@@ -515,7 +515,7 @@ namespace BombermanMultiplayer
                 }
             }
 
-            game.world.loadBackground(Properties.Resources.World);
+            game.world.LoadBackground(Properties.Resources.World);
             game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
             players[0].LoadSprite(Properties.Resources.AT_DOWN);
             players[1].LoadSprite(Properties.Resources.T_UP);

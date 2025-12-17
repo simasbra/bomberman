@@ -9,31 +9,20 @@ using System.Drawing.Drawing2D;
 using System.Media;
 using System.Diagnostics;
 using BombermanMultiplayer.Iterator;
+using BombermanMultiplayer.Flyweight;
 
 namespace BombermanMultiplayer
 {
     [Serializable]
     public class World
     {
-        public Tile[,] MapGrid;
+        public TileContext[,] TileContextGrid;
 
         [NonSerialized]
         private Image Background_;
-        [NonSerialized]
-        private static Tile SharedFloor;
-        [NonSerialized]
-        private static Tile SharedWall;
-        [NonSerialized]
-        private static Tile SharedDestructible; 
 
-        /// <summary>
-        /// Returns an iterator for traversing all tiles in the map grid
-        /// </summary>
-        /// <returns>Tile iterator over MapGrid</returns>
-        public IIterator<Tile> GetTileIterator()
-        {
-            return new TileIterator(MapGrid);
-        }
+        private int _tileWidth;
+        private int _tileHeight;
 
         public Image Background
         {
@@ -42,6 +31,10 @@ namespace BombermanMultiplayer
             set { Background_ = value; }
         }
 
+        public IIterator<TileContext> GetTileIterator()
+        {
+            return new TileContextIterator(TileContextGrid);
+        }
 
         public void Draw(Graphics gr)
         {
@@ -51,56 +44,29 @@ namespace BombermanMultiplayer
                     gr.VisibleClipBounds.Height);
             }
 
-            for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
+            for (int i = 0; i < TileContextGrid.GetLength(0); i++)
             {
-                for (int j = 0; j < MapGrid.GetLength(1); j++) //Colonne
+                for (int j = 0; j < TileContextGrid.GetLength(1); j++)
                 {
-                    MapGrid[i, j].Draw(gr);
+                    TileContextGrid[i, j].Draw(gr, _tileWidth, _tileHeight);
                 }
             }
         }
 
-        public void loadBackground(Image background)
+        public void LoadBackground(Image background)
         {
             Background = background;
         }
 
-        public void loadSpriteTile(Image spriteDestroyableTile, Image spriteUndestroyableTile)
+        public void RefreshTileSprites()
         {
-            for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
+            for (int i = 0; i < TileContextGrid.GetLength(0); i++)
             {
-                for (int j = 0; j < MapGrid.GetLength(1); j++) //Colonne
+                for (int j = 0; j < TileContextGrid.GetLength(1); j++)
                 {
-                    if (MapGrid[i, j].Destroyable)
+                    var ctx = TileContextGrid[i, j];
+                    if (ctx.Fire)
                     {
-                        MapGrid[i, j].LoadSprite(spriteDestroyableTile);
-                    }
-                    else if (!MapGrid[i, j].Walkable && !MapGrid[i, j].Destroyable)
-                    {
-                        MapGrid[i, j].LoadSprite(spriteUndestroyableTile);
-                    }
-                }
-            }
-        }
-
-        public void refreshTileSprites()
-        {
-            for (int i = 0; i < MapGrid.GetLength(0); i++) //Ligne
-            {
-                for (int j = 0; j < MapGrid.GetLength(1); j++) //Colonne
-                {
-                    if (MapGrid[i, j].Walkable && !MapGrid[i, j].Destroyable)
-                    {
-                        MapGrid[i, j].UnloadSprite();
-                    }
-
-                    if (MapGrid[i, j].Fire)
-                    {
-                        MapGrid[i, j].LoadSprite(Properties.Resources.Fire);
-                    }
-                    else if (MapGrid[i, j].Walkable && !MapGrid[i, j].Fire)
-                    {
-                        MapGrid[i, j].UnloadSprite();
                     }
                 }
             }
@@ -108,12 +74,9 @@ namespace BombermanMultiplayer
 
         public World(int hebergeurWidth, int hebergeurHeight, int TILE_WIDTH, int TILE_HEIGHT, int totalFrameTile)
         {
+            _tileWidth = TILE_WIDTH;
+            _tileHeight = TILE_HEIGHT;
             CreateWorldGrid(hebergeurWidth, hebergeurHeight, TILE_WIDTH, TILE_HEIGHT, totalFrameTile);
-        }
-
-        public World(int hebergeurWidth, int hebergeurHeight, Tile[,] map)
-        {
-            MapGrid = map;
         }
 
         public World()
@@ -137,36 +100,37 @@ namespace BombermanMultiplayer
             int tileHeight,
             int totalFrameTile)
         {
+            _tileWidth = tileWidth;
+            _tileHeight = tileHeight;
+
+            TileFlyweightFactory.Instance.Initialize(tileWidth, tileHeight, totalFrameTile);
+
             Random r = new Random();
             int rand = 0;
-            MapGrid = new Tile[hebergeurWidth / tileWidth, hebergeurHeight / tileHeight];
-            int rows = MapGrid.GetLength(0);
-            int cols = MapGrid.GetLength(1);
+            TileContextGrid = new TileContext[hebergeurWidth / tileWidth, hebergeurHeight / tileHeight];
+            int rows = TileContextGrid.GetLength(0);
+            int cols = TileContextGrid.GetLength(1);
 
-            SharedFloor = new Tile(0, 0, totalFrameTile, tileWidth, tileHeight, walkable: true,  destroyable: false);
-            SharedWall = new Tile(0, 0, totalFrameTile, tileWidth, tileHeight, walkable: false, destroyable: false);
-            SharedDestructible = new Tile(0, 0, totalFrameTile, tileWidth, tileHeight, walkable: false, destroyable: true);
-
-            for (int i = 0; i < rows; i++) // Row
+            for (int i = 0; i < rows; i++)
             {
-                for (int j = 0; j < cols; j++) // Column
+                for (int j = 0; j < cols; j++)
                 {
                     int x = j * tileWidth;
                     int y = i * tileHeight;
 
-                    Tile tileToUse;
+                    TileType tileType;
 
                     if (j == 0 || j == cols - 1 || i == 0 || i == rows - 1)
                     {
-                        tileToUse = SharedWall;
+                        tileType = TileType.Wall;
                     }
                     else if (i % 2 == 0 && j % 2 == 0)
                     {
-                        tileToUse = SharedWall;
+                        tileType = TileType.Wall;
                     }
                     else
                     {
-                        bool isPlayerSpawn = 
+                        bool isPlayerSpawn =
                             (i == 1 && (j == 1 || j == 2)) ||
                             (i == 2 && j == 1) ||
                             (i == rows - 3 && j == cols - 2) ||
@@ -174,62 +138,46 @@ namespace BombermanMultiplayer
 
                         if (isPlayerSpawn)
                         {
-                            tileToUse = SharedFloor;
+                            tileType = TileType.Floor;
                         }
                         else
                         {
                             rand = r.Next(0, 10);
                             if (rand >= 1)
                             {
-                                tileToUse = SharedDestructible;
+                                tileType = TileType.Destructible;
                             }
                             else
                             {
-                                tileToUse = SharedFloor;
+                                tileType = TileType.Floor;
                             }
                         }
                     }
 
-                    Tile instance = (Tile)tileToUse.DeepClone();
-                    instance.Source = new Rectangle(x, y, tileWidth, tileHeight);
-                    instance.CasePosition = new int[] { i, j };
-
-                    MapGrid[i, j] = instance;
+                    TileContextGrid[i, j] = new TileContext(tileType, x, y, i, j);
                 }
             }
 
             // Ensure all four corners and their adjacent tiles are walkable and not destroyable
             // Top-left
-            MapGrid[1, 1].Walkable = true;
-            MapGrid[1, 1].Destroyable = false;
-            MapGrid[1, 2].Walkable = true;
-            MapGrid[1, 2].Destroyable = false;
-            MapGrid[2, 1].Walkable = true;
-            MapGrid[2, 1].Destroyable = false;
+            TileContextGrid[1, 1].ConvertToFloor();
+            TileContextGrid[1, 2].ConvertToFloor();
+            TileContextGrid[2, 1].ConvertToFloor();
 
             // Top-right
-            MapGrid[1, cols - 2].Walkable = true;
-            MapGrid[1, cols - 2].Destroyable = false;
-            MapGrid[1, cols - 3].Walkable = true;
-            MapGrid[1, cols - 3].Destroyable = false;
-            MapGrid[2, cols - 2].Walkable = true;
-            MapGrid[2, cols - 2].Destroyable = false;
+            TileContextGrid[1, cols - 2].ConvertToFloor();
+            TileContextGrid[1, cols - 3].ConvertToFloor();
+            TileContextGrid[2, cols - 2].ConvertToFloor();
 
             // Bottom-left
-            MapGrid[rows - 2, 1].Walkable = true;
-            MapGrid[rows - 2, 1].Destroyable = false;
-            MapGrid[rows - 2, 2].Walkable = true;
-            MapGrid[rows - 2, 2].Destroyable = false;
-            MapGrid[rows - 3, 1].Walkable = true;
-            MapGrid[rows - 3, 1].Destroyable = false;
+            TileContextGrid[rows - 2, 1].ConvertToFloor();
+            TileContextGrid[rows - 2, 2].ConvertToFloor();
+            TileContextGrid[rows - 3, 1].ConvertToFloor();
 
             // Bottom-right
-            MapGrid[rows - 2, cols - 2].Walkable = true;
-            MapGrid[rows - 2, cols - 2].Destroyable = false;
-            MapGrid[rows - 2, cols - 3].Walkable = true;
-            MapGrid[rows - 2, cols - 3].Destroyable = false;
-            MapGrid[rows - 3, cols - 2].Walkable = true;
-            MapGrid[rows - 3, cols - 2].Destroyable = false;
+            TileContextGrid[rows - 2, cols - 2].ConvertToFloor();
+            TileContextGrid[rows - 2, cols - 3].ConvertToFloor();
+            TileContextGrid[rows - 3, cols - 2].ConvertToFloor();
         }
     }
 }

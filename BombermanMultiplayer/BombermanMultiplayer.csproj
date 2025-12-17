@@ -79,7 +79,7 @@
     <Compile Include="Iterator\BombIterator.cs" />
     <Compile Include="Iterator\IIterator.cs" />
     <Compile Include="Iterator\PlayerIterator.cs" />
-    <Compile Include="Iterator\TileIterator.cs" />
+    <Compile Include="Iterator\TileContextIterator.cs" />
     <Compile Include="Interpreter\CommandParser.cs" />
     <Compile Include="Interpreter\ConsoleCommandHandler.cs" />
     <Compile Include="Interpreter\DirectionExpression.cs" />

@@ -38,7 +38,7 @@ namespace BombermanMultiplayer
             saveGameObserver = new SaveGameDataObserver(gameState);
             game.SetGameState(gameState);
 
-            game.world.loadBackground(Properties.Resources.World);
+            game.world.LoadBackground(Properties.Resources.World);
             game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
 
             // Inicializuojam visų žaidėjų pradines sprites
@@ -179,7 +179,7 @@ namespace BombermanMultiplayer
                     try
                     {
                         game.LoadGame(dlg.FileName);
-                        game.world.loadBackground(Properties.Resources.World);
+                        game.world.LoadBackground(Properties.Resources.World);
                         game.world.loadSpriteTile(Properties.Resources.BlockDestructible, Properties.Resources.BlockNonDestructible);
 
                         // Inicializuojam visų žaidėjų sprites po užkrovimo
