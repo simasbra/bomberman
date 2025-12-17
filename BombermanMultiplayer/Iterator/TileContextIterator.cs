@@ -41,7 +41,7 @@ namespace BombermanMultiplayer.Iterator
         /// <exception cref="InvalidOperationException">
         /// Thrown when there are no more tiles to iterate through.
         /// </exception>
-        public Tile Next()
+        public TileContext Next()
         {
             if (!HasNext())
             {
