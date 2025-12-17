@@ -12,6 +12,7 @@ using System.Collections;
 using BombermanMultiplayer.Objects;
 using BombermanMultiplayer.Strategy.Interface.BombermanMultiplayer.Objects;
 using BombermanMultiplayer.Strategy;
+using BombermanMultiplayer.Flyweight;
 
 namespace BombermanMultiplayer
 {
@@ -224,7 +225,7 @@ namespace BombermanMultiplayer
         {
             ExplosiveFactory = new ClassicExplosiveFactory();
         }
-        public void DropBomb(Tile[,] MapGrid, List<Bomb> BombsOnTheMap, Player otherplayer)
+        public void DropBomb(TileContext[,] MapGrid, List<Bomb> BombsOnTheMap, Player otherplayer)
         {
             if (this.BombNumb > 0 && !MapGrid[this.CasePosition[0], this.CasePosition[1]].Occupied)
             {
@@ -243,7 +244,7 @@ namespace BombermanMultiplayer
             }
         }
 
-        public void DropMine(Tile[,] MapGrid, List<Mine> MinesOnTheMap, Player otherPlayer)
+        public void DropMine(TileContext[,] MapGrid, List<Mine> MinesOnTheMap, Player otherPlayer)
         {
             if (this.Dead) return;
             
@@ -257,7 +258,7 @@ namespace BombermanMultiplayer
             }
         }
 
-        public void DropGrenade(Tile[,] MapGrid, List<Grenade> GrenadesOnTheMap, Player otherPlayer)
+        public void DropGrenade(TileContext[,] MapGrid, List<Grenade> GrenadesOnTheMap, Player otherPlayer)
         {
             if (this.Dead) return;
             if (GrenadesOnTheMap != null && GrenadesOnTheMap.Count >= 2) return;
@@ -319,7 +320,7 @@ namespace BombermanMultiplayer
         }
 
 
-        public void Respawn(Player p, Tile[,] MapGrid, int TileWidth, int TileHeight)
+        public void Respawn(Player p, TileContext[,] MapGrid, int TileWidth, int TileHeight)
         {
             if (this.Wait > 2)
             {
@@ -347,7 +348,7 @@ namespace BombermanMultiplayer
             }
         }
 
-        public void Deactivate(Tile[,] MapGrid, List<Bomb> bombsOnTheMap,  Player otherPlayer)
+        public void Deactivate(TileContext[,] MapGrid, List<Bomb> bombsOnTheMap,  Player otherPlayer)
         {
             Bomb toDesamorce = null;
 

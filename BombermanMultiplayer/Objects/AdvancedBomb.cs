@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using BombermanMultiplayer.Flyweight;
 
 namespace BombermanMultiplayer
 {
@@ -49,7 +50,7 @@ namespace BombermanMultiplayer
         /// Execute the explosion with scattering effect
         /// Enhanced explosion that spreads in irregular pattern with increased scatter radius
         /// </summary>
-        public void Execute(Tile[,] MapGrid, Player[] players)
+        public void Execute(TileContext[,] MapGrid, Player[] players)
         {
             if (!this.IsScattering)
             {
@@ -157,7 +158,7 @@ namespace BombermanMultiplayer
         /// <summary>
         /// Apply explosion effect to a specific tile
         /// </summary>
-        private void ApplyExplosionEffect(Tile[,] MapGrid, int row, int col, ref bool propagation)
+        private void ApplyExplosionEffect(TileContext[,] MapGrid, int row, int col, ref bool propagation)
         {
             if (MapGrid[row, col].Destroyable)
             {
@@ -165,6 +166,7 @@ namespace BombermanMultiplayer
                 MapGrid[row, col].Walkable = true;
                 MapGrid[row, col].Fire = true;
                 MapGrid[row, col].SpawnBonus();
+                MapGrid[row, col].RebindIntrinsic(TileFlyweightFactory.GetTile(TileType.Floor, 1, MapGrid[row, col].IntrinsicTile_Source_Width, MapGrid[row, col].IntrinsicTile_Source_Height));
             }
             else if (!MapGrid[row, col].Destroyable && MapGrid[row, col].Walkable)
             {
@@ -174,6 +176,9 @@ namespace BombermanMultiplayer
             {
                 propagation = false;
             }
+
+            // In Flyweight, we don't need to manually LoadSprite(Fire) anymore
+            // as TileContext.Draw handles it based on Fire property.
         }
     }
 }

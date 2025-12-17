@@ -1,4 +1,5 @@
 using BombermanMultiplayer.Commands.Interface;
+using BombermanMultiplayer.Flyweight;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace BombermanMultiplayer.Commands
     public class DropGrenadeCommand : ICommand
     {
         private readonly Player _player;
-        private readonly Tile[,] _mapGrid;
+        private readonly TileContext[,] _mapGrid;
         private readonly List<Grenade> _grenadesOnTheMap;
         private readonly Player _otherPlayer;
         private readonly DateTime _timestamp;
@@ -30,7 +31,7 @@ namespace BombermanMultiplayer.Commands
         /// <summary>
         /// Initialize drop grenade command
         /// </summary>
-        public DropGrenadeCommand(Player player, Tile[,] mapGrid, List<Grenade> grenadesOnTheMap, Player otherPlayer)
+        public DropGrenadeCommand(Player player, TileContext[,] mapGrid, List<Grenade> grenadesOnTheMap, Player otherPlayer)
         {
             _player = player ?? throw new ArgumentNullException(nameof(player));
             _mapGrid = mapGrid ?? throw new ArgumentNullException(nameof(mapGrid));

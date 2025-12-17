@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Media;
 using System.Diagnostics;
+using BombermanMultiplayer.Flyweight;
 
 namespace BombermanMultiplayer
 {
@@ -82,7 +83,7 @@ namespace BombermanMultiplayer
             DetonationTime -= elsapedTime;
         }
 
-        public void Explosion(Tile[,] MapGrid, Player[] players)
+        public virtual void Explosion(TileContext[,] MapGrid, Player[] players)
         {
             int variablePosition = 0;
 
@@ -127,6 +128,7 @@ namespace BombermanMultiplayer
                                 MapGrid[variablePosition, this.CasePosition[1]].Walkable = true;
                                 MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
                                 MapGrid[variablePosition, this.CasePosition[1]].SpawnBonus();
+                                MapGrid[variablePosition, this.CasePosition[1]].RebindIntrinsic(TileFlyweightFactory.GetTile(TileType.Floor, 1, MapGrid[variablePosition, this.CasePosition[1]].IntrinsicTile_Source_Width, MapGrid[variablePosition, this.CasePosition[1]].IntrinsicTile_Source_Height));
                             }
                             else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && MapGrid[variablePosition, this.CasePosition[1]].Walkable)
                             {
@@ -153,6 +155,7 @@ namespace BombermanMultiplayer
                                 MapGrid[variablePosition, this.CasePosition[1]].Walkable = true;
                                 MapGrid[variablePosition, this.CasePosition[1]].Fire = true;
                                 MapGrid[variablePosition, this.CasePosition[1]].SpawnBonus();
+                                MapGrid[variablePosition, this.CasePosition[1]].RebindIntrinsic(TileFlyweightFactory.GetTile(TileType.Floor, 1, MapGrid[variablePosition, this.CasePosition[1]].IntrinsicTile_Source_Width, MapGrid[variablePosition, this.CasePosition[1]].IntrinsicTile_Source_Height));
                             }
                             else if (!MapGrid[variablePosition, this.CasePosition[1]].Destroyable && MapGrid[variablePosition, this.CasePosition[1]].Walkable)
                             {
@@ -179,6 +182,7 @@ namespace BombermanMultiplayer
                                 MapGrid[this.CasePosition[0], variablePosition].Walkable = true;
                                 MapGrid[this.CasePosition[0], variablePosition].Fire = true;
                                 MapGrid[this.CasePosition[0], variablePosition].SpawnBonus();
+                                MapGrid[this.CasePosition[0], variablePosition].RebindIntrinsic(TileFlyweightFactory.GetTile(TileType.Floor, 1, MapGrid[this.CasePosition[0], variablePosition].IntrinsicTile_Source_Width, MapGrid[this.CasePosition[0], variablePosition].IntrinsicTile_Source_Height));
                             }
                             else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && MapGrid[this.CasePosition[0], variablePosition].Walkable)
                             {
@@ -205,6 +209,7 @@ namespace BombermanMultiplayer
                                 MapGrid[this.CasePosition[0], variablePosition].Walkable = true;
                                 MapGrid[this.CasePosition[0], variablePosition].Fire = true;
                                 MapGrid[this.CasePosition[0], variablePosition].SpawnBonus();
+                                MapGrid[this.CasePosition[0], variablePosition].RebindIntrinsic(TileFlyweightFactory.GetTile(TileType.Floor, 1, MapGrid[this.CasePosition[0], variablePosition].IntrinsicTile_Source_Width, MapGrid[this.CasePosition[0], variablePosition].IntrinsicTile_Source_Height));
                             }
                             else if (!MapGrid[this.CasePosition[0], variablePosition].Destroyable && MapGrid[this.CasePosition[0], variablePosition].Walkable)
                             {

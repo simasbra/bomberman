@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
 using BombermanMultiplayer.Iterator;
+using BombermanMultiplayer.Flyweight;
 
 namespace BombermanMultiplayer
 {
@@ -69,7 +70,7 @@ namespace BombermanMultiplayer
         //ctor when picture box size is determined
         public Game(int hebergeurWidth, int hebergeurHeight)
         {
-            this.world = new World(hebergeurWidth, hebergeurHeight, tileWidth, tileHeight, 1);
+            world = new World(hebergeurWidth, hebergeurHeight, tileWidth, tileHeight, 1);
 
             players = new Player[4];
             players[0] = new Player(1, 2, 33, 33, 1, 1, tileWidth, tileHeight, 80, 1);
@@ -103,11 +104,11 @@ namespace BombermanMultiplayer
             //     .SetSpawnPosition(world.MapGrid.GetLength(0) - 2, 1)
             //     .Build();
 
-            this.BombsOnTheMap = new List<Bomb>();
-            this.MinesOnTheMap = new List<Mine>();
-            this.GrenadesOnTheMap = new List<Grenade>();
-            this.LogicTimer = new System.Timers.Timer(40);
-            this.LogicTimer.Elapsed += LogicTimer_Elapsed;
+            BombsOnTheMap = new List<Bomb>();
+            MinesOnTheMap = new List<Mine>();
+            GrenadesOnTheMap = new List<Grenade>();
+            LogicTimer = new System.Timers.Timer(40);
+            LogicTimer.Elapsed += LogicTimer_Elapsed;
 
             // Initialize death state tracking
             for (int i = 0; i < 4; i++)
@@ -131,18 +132,20 @@ namespace BombermanMultiplayer
         //ctor when loading a game
         public Game(int hebergeurWidth, int hebergeurHeight, SaveGameData save)
         {
-            this.world = new World(hebergeurWidth, hebergeurHeight, save.MapGrid);
+            world = new World(hebergeurWidth, hebergeurHeight, save.MapGrid);
 
             // Inicializuojam žaidėjų masyvą iš save struktūros
-            this.players = new Player[4];
+            players = new Player[4];
             for (int i = 0; i < 4; i++)
-                this.players[i] = save.players[i];
+            {
+                players[i] = save.players[i];
+            }
 
-            this.BombsOnTheMap = save.bombsOnTheMap;
-            this.MinesOnTheMap = new List<Mine>();
-            this.GrenadesOnTheMap = new List<Grenade>();
-            this.LogicTimer = new System.Timers.Timer(40);
-            this.LogicTimer.Elapsed += LogicTimer_Elapsed;
+            BombsOnTheMap = save.bombsOnTheMap;
+            MinesOnTheMap = new List<Mine>();
+            GrenadesOnTheMap = new List<Grenade>();
+            LogicTimer = new System.Timers.Timer(40);
+            LogicTimer.Elapsed += LogicTimer_Elapsed;
 
             // Initialize death state tracking
             for (int i = 0; i < 4; i++)
@@ -154,13 +157,13 @@ namespace BombermanMultiplayer
         //default ctor
         public Game()
         {
-            this.world = new World();
-            this.players = new Player[4];
-            this.BombsOnTheMap = new List<Bomb>();
-            this.MinesOnTheMap = new List<Mine>();
-            this.GrenadesOnTheMap = new List<Grenade>();
-            this.LogicTimer = new System.Timers.Timer(40);
-            this.LogicTimer.Elapsed += LogicTimer_Elapsed;
+            world = new World();
+            players = new Player[4];
+            BombsOnTheMap = new List<Bomb>();
+            MinesOnTheMap = new List<Mine>();
+            GrenadesOnTheMap = new List<Grenade>();
+            LogicTimer = new System.Timers.Timer(40);
+            LogicTimer.Elapsed += LogicTimer_Elapsed;
 
             // Initialize death state tracking
             for (int i = 0; i < 4; i++)
@@ -536,7 +539,7 @@ namespace BombermanMultiplayer
                     command = new DropGrenadeCommand(sender, world.MapGrid, GrenadesOnTheMap, otherPlayer);
                     break;
                 case Keys.ControlKey:
-                    sender.Deactivate(this.world.MapGrid, BombsOnTheMap, otherPlayer);
+                    sender.Deactivate(world.MapGrid, BombsOnTheMap, otherPlayer);
                     break;
                 case Keys.Escape:
                     Pause();
@@ -619,8 +622,8 @@ namespace BombermanMultiplayer
 
             if (deadCount >= players.Length - 1)
             {
-                this.Over = true;
-                this.Paused = true;
+                Over = true;
+                Paused = true;
                 if (deadCount == players.Length)
                     Winner = 0; // Lygiosios
                 else
@@ -631,13 +634,13 @@ namespace BombermanMultiplayer
         //Manage interactions between worlds and objects
         private void InteractionLogic()
         {
-            IIterator<Tile> tileIterator = world.GetTileIterator();
+            IIterator<TileContext> tileIterator = world.GetTileIterator();
             int row = 0;
             int column = 0;
 
             while (tileIterator.HasNext())
             {
-                Tile currentTile = tileIterator.Next();
+                TileContext currentTile = tileIterator.Next();
 
                 if (tileIterator.HasNext())
                 {
@@ -655,8 +658,8 @@ namespace BombermanMultiplayer
                     {
                         if (players[i].CasePosition[0] == row
                             && players[i].CasePosition[1] == column
-                            && players[i].BonusSlot[0] != Objects.BonusType.Armor
-                            && players[i].BonusSlot[1] != Objects.BonusType.Armor)
+                            && players[i].BonusSlot[0] != BonusType.Armor
+                            && players[i].BonusSlot[1] != BonusType.Armor)
                         {
                             players[i].Dead = true;
                             players[i].LoadSprite(Properties.Resources.Blood);
@@ -744,10 +747,9 @@ namespace BombermanMultiplayer
 
         private void BonusLogic(Player player)
         {
-            int freeSlot = -1;
             for (int i = 0; i < player.BonusSlot.Length; i++)
             {
-                if (player.BonusSlot[i] != Objects.BonusType.None)
+                if (player.BonusSlot[i] != BonusType.None)
                 {
                     if (player.BonusTimer[i] <= 0)
                     {
@@ -756,7 +758,7 @@ namespace BombermanMultiplayer
                             player.ActiveStrategies[i].Remove(player, i);
                             player.ActiveStrategies[i] = null;
                         }
-                        player.BonusSlot[i] = BonusType.None;     // clear slot
+                        player.BonusSlot[i] = BonusType.None;
                         player.BonusTimer[i] = 0;
                     }
                     else
@@ -765,18 +767,16 @@ namespace BombermanMultiplayer
                         System.Diagnostics.Debug.WriteLine($"Player BonusTimer[{i}] = {player.BonusTimer[i]}ms");
                     }
                 }
-                else
-                {
-                    freeSlot = i;
-                }
             }
 
-            if (this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere != null)
+            if (world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere != null)
             {
-                Bonus bonusOnTile = this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere;
+                Bonus bonusOnTile = world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere;
 
                 if (player.BonusSlot[0] == bonusOnTile.Type || player.BonusSlot[1] == bonusOnTile.Type)
+                {
                     return;
+                }
 
                 bonusOnTile.ApplyToPlayer(player);
 
@@ -816,7 +816,7 @@ namespace BombermanMultiplayer
                     }
                 }
 
-                this.world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere = null;
+                world.MapGrid[player.CasePosition[0], player.CasePosition[1]].BonusHere = null;
             }
         }
 
@@ -897,7 +897,7 @@ namespace BombermanMultiplayer
 
         }
 
-        public bool CheckCollisionPlayer(Player movingPlayer, Player player2, Tile[,] map, Player.MovementDirection direction)
+        public bool CheckCollisionPlayer(Player movingPlayer, Player player2, TileContext[,] map, Player.MovementDirection direction)
         {
             int lig = movingPlayer.CasePosition[0];
             int col = movingPlayer.CasePosition[1];
@@ -913,17 +913,17 @@ namespace BombermanMultiplayer
 
                     if (!map[lig - 1, col - 1].Walkable || map[lig - 1, col - 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig - 1, col - 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig - 1, col - 1].X, map[lig - 1, col - 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig - 1, col].Walkable || map[lig - 1, col].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig - 1, col].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig - 1, col].X, map[lig - 1, col].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig - 1, col + 1].Walkable || map[lig - 1, col + 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig - 1, col + 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig - 1, col + 1].X, map[lig - 1, col + 1].Y, 48, 48)))
                             return false;
                     }
                     if (CheckCollisionRectangle(rect, player2.Source))
@@ -937,17 +937,17 @@ namespace BombermanMultiplayer
 
                     if (!map[lig + 1, col - 1].Walkable || map[lig + 1, col - 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig + 1, col - 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig + 1, col - 1].X, map[lig + 1, col - 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig + 1, col].Walkable || map[lig + 1, col].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig + 1, col].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig + 1, col].X, map[lig + 1, col].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig + 1, col + 1].Walkable || map[lig + 1, col + 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig + 1, col + 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig + 1, col + 1].X, map[lig + 1, col + 1].Y, 48, 48)))
                             return false;
                     }
                     if (CheckCollisionRectangle(rect, player2.Source))
@@ -960,17 +960,17 @@ namespace BombermanMultiplayer
                     Rectangle rect = new Rectangle(movingPlayer.Source.X - movingPlayer.Vitesse, movingPlayer.Source.Y, movingPlayer.Source.Width, movingPlayer.Source.Height);
                     if (!map[lig - 1, col - 1].Walkable || map[lig - 1, col - 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig - 1, col - 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig - 1, col - 1].X, map[lig - 1, col - 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig, col - 1].Walkable || map[lig, col - 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig, col - 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig, col - 1].X, map[lig, col - 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig + 1, col - 1].Walkable || map[lig + 1, col - 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig + 1, col - 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig + 1, col - 1].X, map[lig + 1, col - 1].Y, 48, 48)))
                             return false;
                     }
                     if (CheckCollisionRectangle(rect, player2.Source))
@@ -983,17 +983,17 @@ namespace BombermanMultiplayer
                     //RIGHT
                     if (!map[lig - 1, col + 1].Walkable || map[lig - 1, col + 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig - 1, col + 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig - 1, col + 1].X, map[lig - 1, col + 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig, col + 1].Walkable || map[lig, col + 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig, col + 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig, col + 1].X, map[lig, col + 1].Y, 48, 48)))
                             return false;
                     }
                     if (!map[lig + 1, col + 1].Walkable || map[lig + 1, col + 1].Occupied)
                     {
-                        if (CheckCollisionRectangle(rect, map[lig + 1, col + 1].Source))
+                        if (CheckCollisionRectangle(rect, new Rectangle(map[lig + 1, col + 1].X, map[lig + 1, col + 1].Y, 48, 48)))
                             return false;
                     }
                     if (CheckCollisionRectangle(rect, player2.Source))
@@ -1050,7 +1050,7 @@ namespace BombermanMultiplayer
         /// <param name="state">The GameState instance</param>
         public void SetGameState(GameState state)
         {
-            this.gameState = state;
+            gameState = state;
         }
 
         /// <summary>
@@ -1097,17 +1097,17 @@ namespace BombermanMultiplayer
                 MessageBox.Show("An error has occured : " + ex.Message);
                 return;
             }
-            this.BombsOnTheMap = save.bombsOnTheMap;
-            this.world.MapGrid = save.MapGrid;
-            this.players = save.players;
+            BombsOnTheMap = save.bombsOnTheMap;
+            world.MapGrid = save.MapGrid;
+            players = save.players;
 
-            this.Paused = true;
-            this.LogicTimer.Stop();
+            Paused = true;
+            LogicTimer.Stop();
 
-            if (this.Over)
+            if (Over)
             {
-                this.Over = false;
-                this.Winner = 0;
+                Over = false;
+                Winner = 0;
             }
         }
 
